@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'  // Changed from createClient import
 
 interface AuthContextType {
   user: User | null
@@ -16,13 +16,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
     // Get initial session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      setUser(session?.user ?? null)
+      
+      if (session?.user) {
+        setUser(session.user)
+      } else {
+        // No session exists, sign in anonymously
+        console.log('No session found, signing in anonymously...')
+        try {
+          const { data, error } = await supabase.auth.signInAnonymously()
+          if (error) throw error
+          setUser(data.user)
+          console.log('✅ Anonymous sign-in successful')
+        } catch (error) {
+          console.error('❌ Anonymous sign-in failed:', error)
+        }
+      }
+      
       setLoading(false)
     }
 
@@ -31,6 +45,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id)
         setUser(session?.user ?? null)
         setLoading(false)
       }
