@@ -6,6 +6,7 @@ import { X, Send, Trash2 } from 'lucide-react'
 import { Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChatHistory, saveChatHistory, deleteChatHistory } from '@/lib/chat-history'
+import { SkeletonMessage } from './Skeleton'
 
 interface Message {
   id: string
@@ -279,8 +280,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {isLoadingHistory ? (
-                <div className="text-center text-neutral-text-muted py-8">
-                  <p>Loading conversation...</p>
+                <div className="space-y-6">
+                  <SkeletonMessage isUser={false} />
+                  <SkeletonMessage isUser={true} />
+                  <SkeletonMessage isUser={false} />
                 </div>
               ) : messages.length === 0 ? (
                 <div className="text-center text-neutral-text-muted py-8">
