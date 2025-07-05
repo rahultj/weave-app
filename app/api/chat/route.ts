@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
+import { cookies } from 'next/headers'
+import { saveChatHistory } from '@/lib/chat-history'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY
@@ -13,6 +16,17 @@ export async function POST(request: NextRequest) {
     console.log('Request body:', body) // Debug log
     
     const { message, scrap, chatHistory } = body
+
+    // Get the authenticated user
+    const supabase = createRouteHandlerClient({ cookies })
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized', success: false },
+        { status: 401 }
+      )
+    }
 
     // Build context about the scrap
     const scrapContext = scrap.type === 'text' 
@@ -80,6 +94,20 @@ Assistant:`
       }
     } else {
       console.log('Claude API content is empty or not an array:', response.content);
+    }
+
+    // Save the updated chat history to the database
+    const updatedMessages = [
+      ...chatHistory,
+      { id: Date.now().toString(), content: message, sender: 'user', timestamp: new Date() },
+      { id: (Date.now() + 1).toString(), content: aiText, sender: 'ai', timestamp: new Date() }
+    ]
+    
+    try {
+      await saveChatHistory(scrap.id, user.id, updatedMessages)
+    } catch (error) {
+      console.error('Error saving chat history in API:', error)
+      // Don't fail the request if saving history fails
     }
 
     // Return the AI response

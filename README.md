@@ -1,4 +1,27 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Weave App
+
+A cultural discovery and conversation app built with Next.js, Supabase, and Claude AI.
+
+## Features
+
+- **Magic Link Authentication**: Secure, passwordless authentication using Supabase
+- **Persistent Chat History**: All conversations are saved and persist across sessions
+- **AI-Powered Conversations**: Chat with Claude AI about your cultural discoveries
+- **Scrap Management**: Save and organize quotes, thoughts, and images
+
+## Chat History Persistence
+
+The app automatically saves all chat conversations to the database, allowing users to:
+- Continue conversations across different sessions
+- Access their full chat history when they return
+- Clear conversations when needed
+- Maintain separate chat histories for each scrap
+
+### How it works:
+1. When a user opens a chat for a scrap, the app loads any existing conversation history
+2. Each new message is automatically saved to the database
+3. Chat history is tied to both the user and the specific scrap
+4. Users can clear conversations using the trash icon in the chat header
 
 ## Getting Started
 
