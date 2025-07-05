@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MoreVertical, Edit, Trash2 } from 'lucide-react' // Add MessageCircle
+import { MoreVertical, Edit, Trash2 } from 'lucide-react'
 import ChatModal from './ChatModal'
 import EditScrapModal from './EditScrapModal'
 import { Scrap, deleteScrap } from '@/lib/scraps'
@@ -51,7 +51,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
 
   if (!scrap) {
     return (
-      <div className="bg-neutral-bg-card rounded-xl p-4 shadow-sm border border-neutral-border max-w-sm w-full">
+      <div className="bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto">
         <p className="text-neutral-text-muted">Loading scrap...</p>
       </div>
     )
@@ -61,10 +61,10 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
     <>
       <motion.div
         whileHover={{ y: -2 }}
-        className="bg-neutral-bg-card rounded-xl p-4 shadow-sm border border-neutral-border max-w-sm w-full relative group"
+        className="bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group"
       >
         {/* Menu Button */}
-        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -115,26 +115,27 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
 
         {scrap.type === 'image' && scrap.image_url && (
           <div className="mb-4">
-            <Image
-              src={scrap.image_url}
-              alt={scrap.title || 'Scrap image'}
-              width={300}
-              height={400}
-              className="w-full h-80 object-cover rounded-lg"
-              unoptimized={true}
-            />
+            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg">
+              <Image
+                src={scrap.image_url}
+                alt={scrap.title || 'Scrap image'}
+                fill
+                className="object-cover"
+                unoptimized={true}
+              />
+            </div>
           </div>
         )}
 
         {scrap.title && (
-          <h3 className="text-lg font-semibold text-neutral-text-primary mb-2 pr-10">
+          <h3 className="text-lg font-semibold text-neutral-text-primary mb-3 pr-10 leading-tight">
             {scrap.title}
           </h3>
         )}
 
         {scrap.content && (
-          <p className={`text-neutral-text-primary mb-3 ${
-            scrap.type === 'text' ? 'italic text-base leading-relaxed' : 'text-sm'
+          <p className={`text-neutral-text-primary mb-4 ${
+            scrap.type === 'text' ? 'italic text-base leading-relaxed' : 'text-sm leading-relaxed'
           }`}>
             {scrap.type === 'text' ? `"${scrap.content}"` : scrap.content}
           </p>
@@ -146,18 +147,18 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
           </p>
         )}
 
-<div className="flex justify-between items-center">
-  <div className="text-xs text-neutral-text-muted">
-    {scrap.created_at ? new Date(scrap.created_at).toLocaleDateString() : 'Unknown date'}
-  </div>
-  <button
-    onClick={openChat}
-    className="w-8 h-8 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
-    aria-label="Explore this scrap"
-  >
-    <Rabbit size={16} className="text-white group-hover:scale-110 transition-transform" />
-  </button>
-</div>
+        <div className="flex justify-between items-center">
+          <div className="text-xs text-neutral-text-muted">
+            {scrap.created_at ? new Date(scrap.created_at).toLocaleDateString() : 'Unknown date'}
+          </div>
+          <button
+            onClick={openChat}
+            className="w-8 h-8 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
+            aria-label="Explore this scrap"
+          >
+            <Rabbit size={16} className="text-white group-hover:scale-110 transition-transform" />
+          </button>
+        </div>
       </motion.div>
 
       <ChatModal 
