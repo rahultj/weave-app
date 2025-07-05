@@ -2,12 +2,12 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 import { User } from '@supabase/supabase-js'
-import { supabase } from '@/lib/supabase'  // Changed from createClient import
+import { supabase } from '@/lib/supabase'
 
 interface AuthContextType {
   user: User | null
   loading: boolean
-  signInAnonymously: () => Promise<void>
+  signInWithMagicLink: (email: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
 }
 
@@ -21,22 +21,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      
-      if (session?.user) {
-        setUser(session.user)
-      } else {
-        // No session exists, sign in anonymously
-        console.log('No session found, signing in anonymously...')
-        try {
-          const { data, error } = await supabase.auth.signInAnonymously()
-          if (error) throw error
-          setUser(data.user)
-          console.log('✅ Anonymous sign-in successful')
-        } catch (error) {
-          console.error('❌ Anonymous sign-in failed:', error)
-        }
-      }
-      
+      setUser(session?.user ?? null)
       setLoading(false)
     }
 
@@ -45,7 +30,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id)
+        console.log('Auth event:', event)
         setUser(session?.user ?? null)
         setLoading(false)
       }
@@ -54,9 +39,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const signInAnonymously = async () => {
-    const { error } = await supabase.auth.signInAnonymously()
-    if (error) throw error
+  const signInWithMagicLink = async (email: string) => {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: window.location.origin
+      }
+    })
+    return { error }
   }
 
   const signOut = async () => {
@@ -65,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInAnonymously, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithMagicLink, signOut }}>
       {children}
     </AuthContext.Provider>
   )
