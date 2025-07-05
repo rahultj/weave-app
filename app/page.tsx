@@ -26,6 +26,10 @@ export default function HomePage() {
       }, scrapData.imageFile)
       
       console.log('✅ Successfully saved scrap!')
+      
+      // Force page refresh to show new scrap
+      window.location.reload()
+      
     } catch (error) {
       console.error('❌ Error saving scrap:', error)
     }
