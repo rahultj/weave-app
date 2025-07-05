@@ -121,6 +121,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
               width={300}
               height={400}
               className="w-full h-80 object-cover rounded-lg"
+              unoptimized={true}
             />
           </div>
         )}
