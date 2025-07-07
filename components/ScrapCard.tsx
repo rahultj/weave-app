@@ -1,159 +1,143 @@
 'use client'
 
-import { useState } from 'react'
-import Image from 'next/image'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Edit, Trash2, Rabbit } from 'lucide-react'
-import ChatModal from './ChatModal'
-import EditScrapModal from './EditScrapModal'
-import { Scrap, deleteScrap } from '@/lib/scraps'
-import { ReactNode } from 'react'
+import { Edit3, Trash2, MessageCircle } from 'lucide-react'
+import { Scrap } from '@/lib/scraps'
+import { useSwipe } from '@/lib/hooks/useSwipe'
 
 interface ScrapCardProps {
   scrap: Scrap
-  onUpdate: (updatedScrap: Scrap) => void
-  onDelete: (scrapId: string) => void
-  highlightedTitle?: ReactNode
-  highlightedContent?: ReactNode
-  highlightedSource?: ReactNode
-  highlightedTags?: ReactNode[]
+  onUpdate: (scrap: Scrap) => void
+  onDelete: (id: string) => void
+  highlightedTitle?: React.ReactNode
+  highlightedContent?: React.ReactNode
+  highlightedSource?: React.ReactNode
+  highlightedTags?: React.ReactNode[]
+  onChatClick?: () => void
 }
 
-export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle, highlightedContent, highlightedSource, highlightedTags }: ScrapCardProps) {
-  const [isChatOpen, setIsChatOpen] = useState(false)
-  const [isEditOpen, setIsEditOpen] = useState(false)
+export default function ScrapCard({
+  scrap,
+  onUpdate,
+  onDelete,
+  highlightedTitle,
+  highlightedContent,
+  highlightedSource,
+  highlightedTags,
+  onChatClick
+}: ScrapCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
-
-  const openChat = () => {
-    setIsChatOpen(true)
-  }
-
-  const openEdit = () => {
-    setIsEditOpen(true)
-  }
+  const cardRef = useRef<HTMLDivElement>(null)
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this scrap? This action cannot be undone.')) {
-      return
-    }
-
     setIsDeleting(true)
-    try {
-      await deleteScrap(scrap.id)
-      onDelete(scrap.id)
-    } catch (error) {
-      console.error('Failed to delete scrap:', error)
-      alert('Failed to delete scrap. Please try again.')
-    } finally {
-      setIsDeleting(false)
-    }
+    // Add a small delay for animation
+    await new Promise(resolve => setTimeout(resolve, 300))
+    onDelete(scrap.id)
   }
 
-  if (!scrap) {
-    return (
-      <div className="bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto">
-        <p className="text-neutral-text-muted">Loading scrap...</p>
-      </div>
-    )
+  const { onTouchStart, onTouchMove, onTouchEnd, isSwiping, swipeDistance } = useSwipe({
+    minSwipeDistance: 100,
+    onSwipeLeft: handleDelete
+  })
+
+  const cardStyle = {
+    transform: isSwiping ? `translateX(${-swipeDistance}px)` : 'none',
+    transition: isSwiping ? 'none' : 'transform 0.3s ease'
   }
 
   return (
-    <>
-      <motion.div
-        whileHover={{ y: -2 }}
-        className="bg-neutral-bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group overflow-visible mb-2"
+    <motion.div
+      ref={cardRef}
+      className={`relative bg-neutral-bg-card rounded-xl border border-neutral-border overflow-hidden ${
+        isDeleting ? 'opacity-0 scale-95' : ''
+      }`}
+      style={cardStyle}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      transition={{ duration: 0.3 }}
+    >
+      {/* Delete indicator */}
+      <div 
+        className="absolute inset-y-0 right-0 bg-red-500 flex items-center px-6"
+        style={{
+          opacity: Math.min(swipeDistance / 100, 1),
+          transform: `translateX(${Math.max(100 - swipeDistance, 0)}px)`
+        }}
       >
-        {scrap.type === 'image' && scrap.image_url && (
-          <div className="mb-4 flex justify-center">
-            <div className="relative w-full max-w-xs sm:max-w-sm aspect-[3/4] overflow-hidden rounded-lg">
-              <Image
-                src={scrap.image_url}
-                alt={scrap.title || 'Scrap image'}
-                fill
-                className="object-cover rounded-lg"
-                unoptimized={true}
-              />
-            </div>
+        <Trash2 className="text-white" size={24} />
+      </div>
+
+      <div className="p-6">
+        {scrap.type === 'text' ? (
+          <div>
+            <p className="text-neutral-text-primary text-lg mb-3 leading-relaxed selection:bg-brand-primary selection:text-white">
+              {highlightedContent || scrap.content}
+            </p>
+            {scrap.source && (
+              <p className="text-neutral-text-secondary text-sm">
+                — {highlightedSource || scrap.source}
+              </p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <h3 className="text-xl font-semibold text-neutral-text-primary mb-2 selection:bg-brand-primary selection:text-white">
+              {highlightedTitle || scrap.title}
+            </h3>
+            {scrap.content && (
+              <p className="text-neutral-text-secondary mb-4 selection:bg-brand-primary selection:text-white">
+                {highlightedContent || scrap.content}
+              </p>
+            )}
+            {scrap.source && (
+              <p className="text-neutral-text-muted text-sm selection:bg-brand-primary selection:text-white">
+                {highlightedSource || scrap.source}
+              </p>
+            )}
           </div>
         )}
 
-        {scrap.title && (
-          <h3 className="text-lg font-semibold text-neutral-text-primary mb-3 leading-tight">
-            {highlightedTitle ?? scrap.title}
-          </h3>
-        )}
-
-        {scrap.content && (
-          <p className={`text-neutral-text-primary mb-4 ${
-            scrap.type === 'text' ? 'italic text-base leading-relaxed' : 'text-sm leading-relaxed'
-          }`}>
-            {scrap.type === 'text'
-              ? `"${highlightedContent ?? scrap.content}"`
-              : highlightedContent ?? scrap.content}
-          </p>
-        )}
-
-        {scrap.source && (
-          <p className="text-sm text-neutral-text-secondary italic mb-4">
-            — {highlightedSource ?? scrap.source}
-          </p>
-        )}
-
-        {/* Action Bar */}
-        <div className="flex items-center justify-between border-t border-neutral-border mt-4 pt-4">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-neutral-text-muted">
-              {scrap.created_at ? new Date(scrap.created_at).toLocaleDateString() : 'Unknown date'}
-            </span>
+        {scrap.tags && scrap.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-4">
+            {(highlightedTags || scrap.tags).map((tag, i) => (
+              <span
+                key={i}
+                className="px-2 py-1 bg-neutral-bg-hover text-neutral-text-secondary text-sm rounded selection:bg-brand-primary selection:text-white"
+              >
+                {tag}
+              </span>
+            ))}
           </div>
-          
-          <div className="flex items-center gap-2">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={openEdit}
-              className="w-8 h-8 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
-              aria-label="Edit scrap"
-            >
-              <Edit size={15} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="w-8 h-8 bg-neutral-bg-hover hover:bg-red-50 rounded-full flex items-center justify-center transition-colors group disabled:opacity-50"
-              aria-label="Delete scrap"
-            >
-              <Trash2 size={15} className="text-neutral-text-secondary group-hover:text-red-600 transition-colors" />
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={openChat}
-              className="w-8 h-8 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
-              aria-label="Explore this scrap"
-            >
-              <Rabbit size={15} className="text-white group-hover:scale-110 transition-transform" />
-            </motion.button>
-          </div>
+        )}
+
+        {/* Action buttons */}
+        <div className="flex gap-2 mt-6 -mb-2">
+          <button
+            onClick={() => onUpdate(scrap)}
+            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary transition-colors min-w-[44px] min-h-[44px]"
+          >
+            <Edit3 size={18} />
+            <span className="sr-only md:not-sr-only">Edit</span>
+          </button>
+          <button
+            onClick={handleDelete}
+            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-red-500 transition-colors min-w-[44px] min-h-[44px]"
+          >
+            <Trash2 size={18} />
+            <span className="sr-only md:not-sr-only">Delete</span>
+          </button>
+          <button
+            onClick={onChatClick}
+            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary transition-colors min-w-[44px] min-h-[44px]"
+          >
+            <MessageCircle size={18} />
+            <span className="sr-only md:not-sr-only">Chat</span>
+          </button>
         </div>
-      </motion.div>
-
-      <ChatModal 
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        scrap={scrap}
-      />
-
-      <EditScrapModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        scrap={scrap}
-        onUpdate={onUpdate}
-      />
-    </>
+      </div>
+    </motion.div>
   )
 }

@@ -97,6 +97,26 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     }
   }, [currentMessage])
 
+  // Auto-focus textarea when modal opens on desktop
+  useEffect(() => {
+    if (isOpen && textareaRef.current && window.innerWidth >= 768) {
+      textareaRef.current.focus()
+    }
+  }, [isOpen])
+
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Close modal on Escape
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
+
   const clearChatHistory = async () => {
     if (!user || !scrap.id) return
     
@@ -205,20 +225,20 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            exit={{ opacity: 0, y: '100%' }}
+            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-x-0 bottom-0 z-50 md:static md:inset-auto md:flex md:items-center md:justify-center"
           >
-            <div className="bg-neutral-bg-main w-full max-w-lg max-h-[90vh] rounded-xl shadow-xl overflow-hidden flex flex-col">
+            <div className="bg-neutral-bg-main w-full max-w-lg max-h-[90vh] md:max-h-[80vh] rounded-t-xl md:rounded-xl shadow-xl overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl">
+              <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl safe-top">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onClose}
-                  className="text-neutral-text-secondary hover:text-brand-primary transition-colors"
+                  className="text-neutral-text-secondary hover:text-brand-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
                   aria-label="Close chat"
                 >
                   <X size={20} />
@@ -226,12 +246,12 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                 <h2 className="text-lg font-semibold text-neutral-text-primary">
                   Chat
                 </h2>
-                <div className="w-6" />
+                <div className="w-[44px]" />
               </div>
 
               {/* Context Card */}
               <div className="p-4 bg-neutral-bg-card border-b border-neutral-border">
-                <div className="text-sm">
+                <div className="text-sm selection:bg-brand-primary selection:text-white">
                   {scrap.type === 'text' ? (
                     <div>
                       <p className="italic text-neutral-text-primary mb-2">
@@ -297,7 +317,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
               </div>
 
               {/* Input */}
-              <div className="p-4 border-t border-neutral-border bg-neutral-bg-main rounded-b-xl">
+              <div className="p-4 border-t border-neutral-border bg-neutral-bg-main rounded-b-xl safe-bottom">
                 <div className="flex gap-3">
                   <textarea
                     ref={textareaRef}
@@ -305,7 +325,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                     onChange={(e) => setCurrentMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Ask about this scrap..."
-                    className="flex-1 resize-none bg-neutral-bg-card border border-neutral-border rounded-lg px-4 py-3 text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[44px] max-h-32"
+                    className="flex-1 resize-none bg-neutral-bg-card border border-neutral-border rounded-lg px-4 py-3 text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[44px] max-h-32 selection:bg-brand-primary selection:text-white"
                     rows={1}
                   />
                   <motion.button
@@ -313,7 +333,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                     whileTap={{ scale: 0.95 }}
                     onClick={sendMessage}
                     disabled={!currentMessage.trim() || isLoading}
-                    className="px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="min-w-[44px] min-h-[44px] px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                     aria-label="Send message"
                   >
                     <Send size={16} />

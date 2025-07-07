@@ -1,13 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { FileText, Search, AlertCircle, Plus } from 'lucide-react'
+import { FileText, Search, AlertCircle, Plus, RefreshCw } from 'lucide-react'
 import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import ScrapCardSkeleton from './ScrapCardSkeleton'
 import EmptyState from './EmptyState'
 import { motion, AnimatePresence } from 'framer-motion'
+import { usePullToRefresh } from '@/lib/hooks/usePullToRefresh'
 
 interface ScrapFeedProps {
   search: string
@@ -28,28 +29,39 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
   const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
 
-  useEffect(() => {
-    async function fetchScraps() {
-      if (!user) {
-        setLoading(false)
-        return
-      }
-
-      try {
-        setError(null)
-        const fetchedScraps = await getScraps(user.id)
-        setScraps(fetchedScraps || [])
-      } catch (error) {
-        console.error('Error fetching scraps:', error)
-        setError('Failed to load your scraps. Please try again.')
-        setScraps([])
-      } finally {
-        setLoading(false)
-      }
+  const fetchScraps = async () => {
+    if (!user) {
+      setLoading(false)
+      return
     }
 
+    try {
+      setError(null)
+      const fetchedScraps = await getScraps(user.id)
+      setScraps(fetchedScraps || [])
+    } catch (error) {
+      console.error('Error fetching scraps:', error)
+      setError('Failed to load your scraps. Please try again.')
+      setScraps([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
     fetchScraps()
   }, [user])
+
+  const { 
+    isPulling,
+    pullProgress,
+    isRefreshing,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd
+  } = usePullToRefresh({
+    onRefresh: fetchScraps
+  })
 
   const handleScrapUpdate = (updatedScrap: Scrap) => {
     setScraps(prev => 
@@ -76,103 +88,116 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
       })
     : scraps
 
-  if (loading) {
-    return (
-      <div className="space-y-6">
-        <ScrapCardSkeleton showImage={false} />
-        <ScrapCardSkeleton showImage={true} />
-        <ScrapCardSkeleton showImage={false} />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <EmptyState
-        icon={AlertCircle}
-        title="Something went wrong"
-        message={error}
-        action={{
-          label: "Try Again",
-          onClick: () => window.location.reload()
-        }}
-        variant="error"
-      />
-    )
-  }
-
-  if (!user) {
-    return (
-      <EmptyState
-        icon={FileText}
-        title="Sign in to view your scraps"
-        message="Create an account to start saving and organizing your cultural discoveries."
-        action={{
-          label: "Sign In",
-          onClick: onAddClick || (() => {})
-        }}
-      />
-    )
-  }
-
-  if (scraps.length === 0) {
-    return (
-      <EmptyState
-        icon={FileText}
-        title="No scraps yet"
-        message="Start building your cultural journal by adding your first scrap."
-        action={{
-          label: "Add Your First Scrap",
-          onClick: onAddClick || (() => {})
-        }}
-      />
-    )
-  }
-
-  if (filteredScraps.length === 0) {
-    return (
-      <EmptyState
-        icon={Search}
-        title="No matching scraps"
-        message={`No scraps found matching "${search}". Try a different search term or add a new scrap.`}
-        action={{
-          label: "Add New Scrap",
-          onClick: onAddClick || (() => {})
-        }}
-      />
-    )
-  }
-
   return (
-    <motion.div
-      className="space-y-6 mt-6"
-      initial="hidden"
-      animate="visible"
-      variants={{}}
+    <div
+      className="min-h-screen"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
     >
-      {filteredScraps.map((scrap, i) => {
-        const hasSearch = !!searchTerm
-        return (
+      {/* Pull to refresh indicator */}
+      <AnimatePresence>
+        {(isPulling || isRefreshing) && (
           <motion.div
-            key={scrap.id}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ delay: i * 0.08, duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            layout
+            exit={{ opacity: 0, y: -20 }}
+            className="sticky top-0 left-0 right-0 flex justify-center items-center py-4 bg-neutral-bg-main z-10"
           >
-            <ScrapCard
-              scrap={scrap}
-              onUpdate={handleScrapUpdate}
-              onDelete={handleScrapDelete}
-              highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
-              highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
-              highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
-              highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
-            />
+            <motion.div
+              animate={{ 
+                rotate: isRefreshing ? 360 : pullProgress * 3.6,
+                scale: isRefreshing ? 1 : Math.min(1, pullProgress / 100)
+              }}
+              transition={{ 
+                rotate: isRefreshing ? { duration: 1, repeat: Infinity, ease: "linear" } : { duration: 0 }
+              }}
+            >
+              <RefreshCw size={24} className="text-brand-primary" />
+            </motion.div>
           </motion.div>
-        )
-      })}
-    </motion.div>
+        )}
+      </AnimatePresence>
+
+      {loading ? (
+        <div className="space-y-6">
+          <ScrapCardSkeleton showImage={false} />
+          <ScrapCardSkeleton showImage={true} />
+          <ScrapCardSkeleton showImage={false} />
+        </div>
+      ) : error ? (
+        <EmptyState
+          icon={AlertCircle}
+          title="Something went wrong"
+          message={error}
+          action={{
+            label: "Try Again",
+            onClick: () => window.location.reload()
+          }}
+          variant="error"
+        />
+      ) : !user ? (
+        <EmptyState
+          icon={FileText}
+          title="Sign in to view your scraps"
+          message="Create an account to start saving and organizing your cultural discoveries."
+          action={{
+            label: "Sign In",
+            onClick: onAddClick || (() => {})
+          }}
+        />
+      ) : scraps.length === 0 ? (
+        <EmptyState
+          icon={FileText}
+          title="No scraps yet"
+          message="Start building your cultural journal by adding your first scrap."
+          action={{
+            label: "Add Your First Scrap",
+            onClick: onAddClick || (() => {})
+          }}
+        />
+      ) : filteredScraps.length === 0 ? (
+        <EmptyState
+          icon={Search}
+          title="No matching scraps"
+          message={`No scraps found matching "${search}". Try a different search term or add a new scrap.`}
+          action={{
+            label: "Add New Scrap",
+            onClick: onAddClick || (() => {})
+          }}
+        />
+      ) : (
+        <motion.div
+          className="space-y-6 mt-6"
+          initial="hidden"
+          animate="visible"
+          variants={{}}
+        >
+          {filteredScraps.map((scrap, i) => {
+            const hasSearch = !!searchTerm
+            return (
+              <motion.div
+                key={scrap.id}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 24 }}
+                transition={{ delay: i * 0.08, duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+                layout
+              >
+                <ScrapCard
+                  scrap={scrap}
+                  onUpdate={handleScrapUpdate}
+                  onDelete={handleScrapDelete}
+                  highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
+                  highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
+                  highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
+                  highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
+                />
+              </motion.div>
+            )
+          })}
+        </motion.div>
+      )}
+    </div>
   )
 }

@@ -2,6 +2,55 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Mobile optimizations */
+@supports (-webkit-touch-callout: none) {
+  .safe-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  .safe-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Improved text selection */
+::selection {
+  @apply bg-brand-primary text-white;
+}
+
+/* Better touch interactions */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea,
+  button {
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+
+  /* Disable pull-to-refresh when not at top */
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Improve tap target sizes */
+  a, button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.5rem;
+  }
+}
+
+/* Smooth scrolling */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent text size adjustment */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 @layer base {
   html {
     font-family: 'Inter', system-ui, sans-serif;
