@@ -131,7 +131,7 @@ export function SkeletonMessage({ isUser = false, className = '' }: {
   return (
     <div className={`space-y-1 ${className}`}>
       <div className="text-xs uppercase tracking-wide text-neutral-text-muted">
-        {isUser ? 'YOU' : 'AI ASSISTANT'}
+        {isUser ? 'YOU' : 'BOBBIN'}
       </div>
       <div className={`${isUser ? 'text-brand-primary' : ''}`}>
         <SkeletonParagraph lines={Math.floor(Math.random() * 3) + 1} />

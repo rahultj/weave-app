@@ -30,7 +30,7 @@ function StreamingMessage({ message }: { message: Message }) {
       className="space-y-1"
     >
       <div className="text-xs uppercase tracking-wide text-neutral-text-muted">
-        {message.sender === 'ai' ? 'AI ASSISTANT' : 'YOU'}
+        {message.sender === 'ai' ? 'BOBBIN' : 'YOU'}
       </div>
       <div className={`text-neutral-text-primary ${
         message.sender === 'user' ? 'text-brand-primary font-medium' : ''
@@ -267,7 +267,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                   </div>
                 ) : messages.length === 0 ? (
                   <div className="text-center text-neutral-text-muted py-8">
-                    <p>Ask me anything about this cultural discovery...</p>
+                    <p>Hi! I'm Bobbin. Ask me anything about this cultural discovery...</p>
                   </div>
                 ) : (
                   messages.map((message) => (
@@ -278,7 +278,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                 {isLoading && (
                   <div className="space-y-1">
                     <div className="text-xs uppercase tracking-wide text-neutral-text-muted">
-                      AI ASSISTANT
+                      BOBBIN
                     </div>
                     <div className="text-neutral-text-muted">
                       <div className="flex space-x-1">
