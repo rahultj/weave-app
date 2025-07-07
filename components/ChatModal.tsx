@@ -207,131 +207,125 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 bg-black/20 z-40"
             onClick={onClose}
           />
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed inset-x-4 top-20 bottom-20 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-2xl bg-neutral-bg-main rounded-xl shadow-xl z-50 flex flex-col"
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl">
-              <button
-                onClick={onClose}
-                className="text-neutral-text-secondary hover:text-brand-primary transition-colors"
-              >
-                ← Back
-              </button>
-              <h2 className="text-lg font-semibold text-neutral-text-primary">
-                Explore This
-              </h2>
-              <div className="flex items-center gap-2">
-                {messages.length > 0 && (
-                  <button
-                    onClick={() => setShowClearConfirm(true)}
-                    className="text-neutral-text-secondary hover:text-red-500 transition-colors p-1"
-                    title="Clear conversation"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-                )}
-                <button
+            <div className="bg-neutral-bg-main w-full max-w-lg max-h-[90vh] rounded-xl shadow-xl overflow-hidden flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onClose}
                   className="text-neutral-text-secondary hover:text-brand-primary transition-colors"
+                  aria-label="Close chat"
                 >
                   <X size={20} />
-                </button>
+                </motion.button>
+                <h2 className="text-lg font-semibold text-neutral-text-primary">
+                  Chat
+                </h2>
+                <div className="w-6" />
               </div>
-            </div>
 
-            {/* Context Card */}
-            <div className="p-4 bg-neutral-bg-card border-b border-neutral-border">
-              <div className="text-sm">
-                {scrap.type === 'text' ? (
-                  <div>
-                    <p className="italic text-neutral-text-primary mb-2">
-                      &quot;{scrap.content}&quot;
-                    </p>
-                    {scrap.source && (
-                      <p className="text-neutral-text-secondary">
-                        — {scrap.source}
+              {/* Context Card */}
+              <div className="p-4 bg-neutral-bg-card border-b border-neutral-border">
+                <div className="text-sm">
+                  {scrap.type === 'text' ? (
+                    <div>
+                      <p className="italic text-neutral-text-primary mb-2">
+                        &quot;{scrap.content}&quot;
                       </p>
-                    )}
+                      {scrap.source && (
+                        <p className="text-neutral-text-secondary">
+                          — {scrap.source}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div>
+                      <h3 className="font-medium text-neutral-text-primary mb-1">
+                        {scrap.title}
+                      </h3>
+                      {scrap.content && (
+                        <p className="text-neutral-text-secondary text-sm">
+                          {scrap.content}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Messages */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                {isLoadingHistory ? (
+                  <div className="space-y-6">
+                    <SkeletonMessage isUser={false} />
+                    <SkeletonMessage isUser={true} />
+                    <SkeletonMessage isUser={false} />
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="text-center text-neutral-text-muted py-8">
+                    <p>Ask me anything about this cultural discovery...</p>
                   </div>
                 ) : (
-                  <div>
-                    <h3 className="font-medium text-neutral-text-primary mb-1">
-                      {scrap.title}
-                    </h3>
-                    {scrap.content && (
-                      <p className="text-neutral-text-secondary text-sm">
-                        {scrap.content}
-                      </p>
-                    )}
-                  </div>
+                  messages.map((message) => (
+                    <StreamingMessage key={message.id} message={message} />
+                  ))
                 )}
-              </div>
-            </div>
 
-            {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {isLoadingHistory ? (
-                <div className="space-y-6">
-                  <SkeletonMessage isUser={false} />
-                  <SkeletonMessage isUser={true} />
-                  <SkeletonMessage isUser={false} />
-                </div>
-              ) : messages.length === 0 ? (
-                <div className="text-center text-neutral-text-muted py-8">
-                  <p>Ask me anything about this cultural discovery...</p>
-                </div>
-              ) : (
-                messages.map((message) => (
-                  <StreamingMessage key={message.id} message={message} />
-                ))
-              )}
-
-              {isLoading && (
-                <div className="space-y-1">
-                  <div className="text-xs uppercase tracking-wide text-neutral-text-muted">
-                    AI ASSISTANT
-                  </div>
-                  <div className="text-neutral-text-muted">
-                    <div className="flex space-x-1">
-                      <div className="w-1 h-1 bg-current rounded-full animate-pulse"></div>
-                      <div className="w-1 h-1 bg-current rounded-full animate-pulse delay-100"></div>
-                      <div className="w-1 h-1 bg-current rounded-full animate-pulse delay-200"></div>
+                {isLoading && (
+                  <div className="space-y-1">
+                    <div className="text-xs uppercase tracking-wide text-neutral-text-muted">
+                      AI ASSISTANT
+                    </div>
+                    <div className="text-neutral-text-muted">
+                      <div className="flex space-x-1">
+                        <div className="w-1 h-1 bg-current rounded-full animate-pulse"></div>
+                        <div className="w-1 h-1 bg-current rounded-full animate-pulse delay-100"></div>
+                        <div className="w-1 h-1 bg-current rounded-full animate-pulse delay-200"></div>
+                      </div>
                     </div>
                   </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Input */}
+              <div className="p-4 border-t border-neutral-border bg-neutral-bg-main rounded-b-xl">
+                <div className="flex gap-3">
+                  <textarea
+                    ref={textareaRef}
+                    value={currentMessage}
+                    onChange={(e) => setCurrentMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Ask about this scrap..."
+                    className="flex-1 resize-none bg-neutral-bg-card border border-neutral-border rounded-lg px-4 py-3 text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[44px] max-h-32"
+                    rows={1}
+                  />
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={sendMessage}
+                    disabled={!currentMessage.trim() || isLoading}
+                    className="px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Send message"
+                  >
+                    <Send size={16} />
+                  </motion.button>
                 </div>
-              )}
-
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input */}
-            <div className="p-4 border-t border-neutral-border bg-neutral-bg-main rounded-b-xl">
-              <div className="flex gap-3">
-                <textarea
-                  ref={textareaRef}
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Ask about this scrap..."
-                  className="flex-1 resize-none bg-neutral-bg-card border border-neutral-border rounded-lg px-4 py-3 text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[44px] max-h-32"
-                  rows={1}
-                />
-                <button
-                  onClick={sendMessage}
-                  disabled={!currentMessage.trim() || isLoading}
-                  className="px-4 py-3 bg-brand-primary text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                  <Send size={16} />
-                </button>
               </div>
             </div>
           </motion.div>

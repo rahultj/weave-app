@@ -5,6 +5,7 @@ import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import ScrapCardSkeleton from './ScrapCardSkeleton'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface ScrapFeedProps {
   search: string
@@ -111,22 +112,35 @@ export default function ScrapFeed({ search }: ScrapFeedProps) {
   }
 
   return (
-    <div className="space-y-6 mt-6">
-      {filteredScraps.map((scrap) => {
+    <motion.div
+      className="space-y-6 mt-6"
+      initial="hidden"
+      animate="visible"
+      variants={{}}
+    >
+      {filteredScraps.map((scrap, i) => {
         const hasSearch = !!searchTerm
         return (
-          <ScrapCard 
-            key={scrap.id} 
-            scrap={scrap}
-            onUpdate={handleScrapUpdate}
-            onDelete={handleScrapDelete}
-            highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
-            highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
-            highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
-            highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
-          />
+          <motion.div
+            key={scrap.id}
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ delay: i * 0.08, duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            layout
+          >
+            <ScrapCard
+              scrap={scrap}
+              onUpdate={handleScrapUpdate}
+              onDelete={handleScrapDelete}
+              highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
+              highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
+              highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
+              highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
+            />
+          </motion.div>
         )
       })}
-    </div>
+    </motion.div>
   )
 }

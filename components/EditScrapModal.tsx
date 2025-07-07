@@ -70,36 +70,42 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 bg-black/20 z-40"
             onClick={onClose}
           />
 
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
+            exit={{ opacity: 0, y: 24 }}
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-x-4 top-20 bottom-20 md:inset-x-auto md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-xl bg-neutral-bg-main rounded-xl shadow-xl z-50 flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onClose}
                 className="text-neutral-text-secondary hover:text-brand-primary transition-colors"
               >
                 Cancel
-              </button>
+              </motion.button>
               <h2 className="text-lg font-semibold text-neutral-text-primary">
                 Edit Scrap
               </h2>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleSave}
                 disabled={!content.trim() || isLoading}
                 className="flex items-center gap-2 px-3 py-1 bg-brand-primary text-white rounded-lg hover:bg-brand-hover disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
               >
                 <Save size={14} />
                 {isLoading ? 'Saving...' : 'Save'}
-              </button>
+              </motion.button>
             </div>
 
             {/* Form */}

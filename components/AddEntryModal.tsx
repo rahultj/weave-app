@@ -80,27 +80,31 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 bg-black/20 z-40"
             onClick={handleCancel}
           />
           
           {/* Modal */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.96, y: 24 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.96, y: 24 }}
+            transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
             <div className="bg-neutral-bg-main w-full max-w-md max-h-[90vh] rounded-xl shadow-xl overflow-hidden flex flex-col">
               
               {/* Header */}
               <div className="bg-neutral-bg-card px-4 py-4 border-b border-neutral-border flex items-center justify-between">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleCancel}
                   className="text-brand-primary font-medium"
                 >
                   Cancel
-                </button>
+                </motion.button>
                 <h2 className="text-lg font-semibold text-neutral-text-primary">
                   New Scrap
                 </h2>
