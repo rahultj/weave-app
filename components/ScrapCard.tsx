@@ -8,14 +8,19 @@ import ChatModal from './ChatModal'
 import EditScrapModal from './EditScrapModal'
 import { Scrap, deleteScrap } from '@/lib/scraps'
 import { Rabbit } from 'lucide-react';
+import { ReactNode } from 'react'
 
 interface ScrapCardProps {
   scrap: Scrap
   onUpdate: (updatedScrap: Scrap) => void
   onDelete: (scrapId: string) => void
+  highlightedTitle?: ReactNode
+  highlightedContent?: ReactNode
+  highlightedSource?: ReactNode
+  highlightedTags?: ReactNode[]
 }
 
-export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps) {
+export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle, highlightedContent, highlightedSource, highlightedTags }: ScrapCardProps) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -129,7 +134,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
 
         {scrap.title && (
           <h3 className="text-lg font-semibold text-neutral-text-primary mb-3 pr-10 leading-tight">
-            {scrap.title}
+            {highlightedTitle ?? scrap.title}
           </h3>
         )}
 
@@ -137,13 +142,15 @@ export default function ScrapCard({ scrap, onUpdate, onDelete }: ScrapCardProps)
           <p className={`text-neutral-text-primary mb-4 ${
             scrap.type === 'text' ? 'italic text-base leading-relaxed' : 'text-sm leading-relaxed'
           }`}>
-            {scrap.type === 'text' ? `"${scrap.content}"` : scrap.content}
+            {scrap.type === 'text'
+              ? `"${highlightedContent ?? scrap.content}"`
+              : highlightedContent ?? scrap.content}
           </p>
         )}
 
         {scrap.source && (
           <p className="text-sm text-neutral-text-secondary italic mb-4">
-            — {scrap.source}
+            — {highlightedSource ?? scrap.source}
           </p>
         )}
 

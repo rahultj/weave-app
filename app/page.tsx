@@ -13,6 +13,7 @@ export default function HomePage() {
   const { user, loading } = useAuth()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSignInOpen, setIsSignInOpen] = useState(false)
+  const [search, setSearch] = useState('')
 
   const handleSaveScrap = async (scrapData: {
     type: 'text' | 'image',
@@ -91,8 +92,8 @@ export default function HomePage() {
   // Show main app for authenticated users
   return (
     <div className="min-h-screen bg-neutral-bg-main">
-      <HomeHeader />
-      <ScrapFeed />
+      <HomeHeader search={search} setSearch={setSearch} />
+      <ScrapFeed search={search} />
       <FloatingAddButton onClick={() => setIsModalOpen(true)} />
       
       <AddEntryModal

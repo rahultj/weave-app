@@ -6,7 +6,20 @@ import { getScraps, Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import ScrapCardSkeleton from './ScrapCardSkeleton'
 
-export default function ScrapFeed() {
+interface ScrapFeedProps {
+  search: string
+}
+
+function highlight(text: string, term: string) {
+  if (!term) return text
+  // Escape special regex characters in the term
+  const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return text.split(new RegExp(`(${escapedTerm})`, 'gi')).map((part, i) =>
+    i % 2 === 1 ? <mark key={i} className="bg-yellow-200 text-brand-primary px-0.5 rounded">{part}</mark> : part
+  )
+}
+
+export default function ScrapFeed({ search }: ScrapFeedProps) {
   const [scraps, setScraps] = useState<Scrap[]>([])
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
@@ -44,6 +57,19 @@ export default function ScrapFeed() {
     setScraps(prev => prev.filter(scrap => scrap.id !== scrapId))
   }
 
+  // Filter scraps by search term
+  const searchTerm = search.trim().toLowerCase()
+  const filteredScraps = searchTerm
+    ? scraps.filter(scrap => {
+        return (
+          (scrap.title && scrap.title.toLowerCase().includes(searchTerm)) ||
+          (scrap.content && scrap.content.toLowerCase().includes(searchTerm)) ||
+          (scrap.source && scrap.source.toLowerCase().includes(searchTerm)) ||
+          (scrap.tags && scrap.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
+        )
+      })
+    : scraps
+
   if (loading) {
     return (
       <div className="space-y-6">
@@ -54,7 +80,7 @@ export default function ScrapFeed() {
     )
   }
 
-  if (!scraps || scraps.length === 0) {
+  if (!filteredScraps || filteredScraps.length === 0) {
     return (
       <div className="space-y-6">
         <div className="text-center py-12">
@@ -74,10 +100,10 @@ export default function ScrapFeed() {
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-neutral-text-primary mb-2">
-            Your scrapbook is empty
+            No scraps found
           </h3>
           <p className="text-neutral-text-secondary max-w-md mx-auto">
-            Start collecting your cultural discoveries. Save quotes, thoughts, and images that inspire you.
+            Try a different search term or add new scraps to your collection.
           </p>
         </div>
       </div>
@@ -86,14 +112,21 @@ export default function ScrapFeed() {
 
   return (
     <div className="space-y-6">
-      {scraps.map((scrap) => (
-        <ScrapCard 
-          key={scrap.id} 
-          scrap={scrap} 
-          onUpdate={handleScrapUpdate}
-          onDelete={handleScrapDelete}
-        />
-      ))}
+      {filteredScraps.map((scrap) => {
+        const hasSearch = !!searchTerm
+        return (
+          <ScrapCard 
+            key={scrap.id} 
+            scrap={scrap}
+            onUpdate={handleScrapUpdate}
+            onDelete={handleScrapDelete}
+            highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
+            highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
+            highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
+            highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
+          />
+        )
+      })}
     </div>
   )
 }
