@@ -2,11 +2,12 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Trash2 } from 'lucide-react'
+import { X, Send, Trash2, MessageCircle, AlertCircle, Loader } from 'lucide-react'
 import { Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChatHistory, saveChatHistory, deleteChatHistory } from '@/lib/chat-history'
 import { SkeletonMessage } from './Skeleton'
+import EmptyState from './EmptyState'
 
 interface Message {
   id: string
@@ -266,9 +267,11 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                     <SkeletonMessage isUser={false} />
                   </div>
                 ) : messages.length === 0 ? (
-                  <div className="text-center text-neutral-text-muted py-8">
-                    <p>Hi! I'm Bobbin. Ask me anything about this cultural discovery...</p>
-                  </div>
+                  <EmptyState
+                    icon={MessageCircle}
+                    title="Start a conversation"
+                    message="Hi! I'm Bobbin. Ask me anything about this cultural discovery..."
+                  />
                 ) : (
                   messages.map((message) => (
                     <StreamingMessage key={message.id} message={message} />

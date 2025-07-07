@@ -1,28 +1,31 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { FileText, Search, AlertCircle, Plus } from 'lucide-react'
 import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import ScrapCardSkeleton from './ScrapCardSkeleton'
+import EmptyState from './EmptyState'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface ScrapFeedProps {
   search: string
+  onAddClick?: () => void
 }
 
 function highlight(text: string, term: string) {
   if (!term) return text
-  // Escape special regex characters in the term
   const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return text.split(new RegExp(`(${escapedTerm})`, 'gi')).map((part, i) =>
     i % 2 === 1 ? <mark key={i} className="bg-yellow-200 text-brand-primary px-0.5 rounded">{part}</mark> : part
   )
 }
 
-export default function ScrapFeed({ search }: ScrapFeedProps) {
+export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
   const [scraps, setScraps] = useState<Scrap[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -33,10 +36,12 @@ export default function ScrapFeed({ search }: ScrapFeedProps) {
       }
 
       try {
+        setError(null)
         const fetchedScraps = await getScraps(user.id)
         setScraps(fetchedScraps || [])
       } catch (error) {
         console.error('Error fetching scraps:', error)
+        setError('Failed to load your scraps. Please try again.')
         setScraps([])
       } finally {
         setLoading(false)
@@ -81,33 +86,60 @@ export default function ScrapFeed({ search }: ScrapFeedProps) {
     )
   }
 
-  if (!filteredScraps || filteredScraps.length === 0) {
+  if (error) {
     return (
-      <div className="space-y-6">
-        <div className="text-center py-12">
-          <div className="w-16 h-16 bg-neutral-bg-hover rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg 
-              className="w-8 h-8 text-neutral-text-muted" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={1.5} 
-                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" 
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-neutral-text-primary mb-2">
-            No scraps found
-          </h3>
-          <p className="text-neutral-text-secondary max-w-md mx-auto">
-            Try a different search term or add new scraps to your collection.
-          </p>
-        </div>
-      </div>
+      <EmptyState
+        icon={AlertCircle}
+        title="Something went wrong"
+        message={error}
+        action={{
+          label: "Try Again",
+          onClick: () => window.location.reload()
+        }}
+        variant="error"
+      />
+    )
+  }
+
+  if (!user) {
+    return (
+      <EmptyState
+        icon={FileText}
+        title="Sign in to view your scraps"
+        message="Create an account to start saving and organizing your cultural discoveries."
+        action={{
+          label: "Sign In",
+          onClick: onAddClick || (() => {})
+        }}
+      />
+    )
+  }
+
+  if (scraps.length === 0) {
+    return (
+      <EmptyState
+        icon={FileText}
+        title="No scraps yet"
+        message="Start building your cultural journal by adding your first scrap."
+        action={{
+          label: "Add Your First Scrap",
+          onClick: onAddClick || (() => {})
+        }}
+      />
+    )
+  }
+
+  if (filteredScraps.length === 0) {
+    return (
+      <EmptyState
+        icon={Search}
+        title="No matching scraps"
+        message={`No scraps found matching "${search}". Try a different search term or add a new scrap.`}
+        action={{
+          label: "Add New Scrap",
+          onClick: onAddClick || (() => {})
+        }}
+      />
     )
   }
 

@@ -88,7 +88,7 @@ export default function HomeContent() {
     <main className="min-h-screen bg-neutral-bg-main">
       <HomeHeader search={search} setSearch={setSearch} />
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <ScrapFeed search={search} />
+        <ScrapFeed search={search} onAddClick={handleAddClick} />
       </div>
       <FloatingAddButton onClick={handleAddClick} />
       
