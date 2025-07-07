@@ -1,39 +1,34 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import HomeHeader from '@/components/HomeHeader'
 import ScrapFeed from '@/components/ScrapFeed'
 import FloatingAddButton from '@/components/FloatingAddButton'
 import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
-import { createScrap } from '@/lib/scraps'
+import OnboardingModal from '@/components/OnboardingModal'
 
-export default function HomePage() {
+export default function Home() {
   const { user, loading } = useAuth()
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isSignInOpen, setIsSignInOpen] = useState(false)
   const [search, setSearch] = useState('')
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
-  const handleSaveScrap = async (scrapData: {
-    type: 'text' | 'image',
-    title?: string,
-    content?: string,
-    source?: string,
-    imageFile?: File
-  }) => {
-    try {
-      await createScrap({
-        type: scrapData.type,
-        title: scrapData.title,
-        content: scrapData.content,
-        source: scrapData.source
-      }, scrapData.imageFile)
-      
-      console.log('✅ Successfully saved scrap!')
-      window.location.reload()
-    } catch (error) {
-      console.error('❌ Error saving scrap:', error)
+  // Check if we should show onboarding when user logs in
+  useEffect(() => {
+    if (user && !loading) {
+      const hasCompletedOnboarding = localStorage.getItem('weave-onboarding-completed')
+      setShowOnboarding(!hasCompletedOnboarding)
+    }
+  }, [user, loading])
+
+  const handleAddClick = () => {
+    if (!user) {
+      setIsSignInModalOpen(true)
+    } else {
+      setIsAddModalOpen(true)
     }
   }
 
@@ -72,7 +67,7 @@ export default function HomePage() {
                 Save and explore the books, quotes, thoughts, and cultural discoveries that inspire you.
               </p>
               <button
-                onClick={() => setIsSignInOpen(true)}
+                onClick={() => setIsSignInModalOpen(true)}
                 className="w-full py-3 px-6 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors font-medium"
               >
                 Get Started
@@ -82,25 +77,39 @@ export default function HomePage() {
         </div>
 
         <SignInModal 
-          isOpen={isSignInOpen}
-          onClose={() => setIsSignInOpen(false)}
+          isOpen={isSignInModalOpen}
+          onClose={() => setIsSignInModalOpen(false)}
         />
       </div>
     )
   }
 
-  // Show main app for authenticated users
   return (
-    <div className="min-h-screen bg-neutral-bg-main">
+    <main className="min-h-screen bg-neutral-bg-main">
       <HomeHeader search={search} setSearch={setSearch} />
-      <ScrapFeed search={search} />
-      <FloatingAddButton onClick={() => setIsModalOpen(true)} />
+      <div className="max-w-2xl mx-auto px-4 py-6">
+        <ScrapFeed search={search} />
+      </div>
+      <FloatingAddButton onClick={handleAddClick} />
       
       <AddEntryModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSaveScrap}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={async () => {
+          setIsAddModalOpen(false)
+          // Refresh scraps will happen automatically through state management
+        }}
       />
-    </div>
+
+      <SignInModal
+        isOpen={isSignInModalOpen}
+        onClose={() => setIsSignInModalOpen(false)}
+      />
+
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+      />
+    </main>
   )
 }
