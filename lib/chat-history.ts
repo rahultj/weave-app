@@ -20,6 +20,7 @@ export interface ChatHistory {
 
 
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
+  console.log('Fetching chat history for:', { scrapId, userId })
   try {
     const { data, error } = await supabase
       .from('chat_history')
@@ -30,13 +31,19 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
 
     if (error) {
       if (error.code === 'PGRST116') {
-        // No rows returned - this is expected for new conversations
+        console.log('No existing chat history found')
         return null
       }
+      console.error('Error in getChatHistory:', error)
       throw error
     }
 
-    if (!data || !data.user_id || !data.scrap_id) return null
+    if (!data || !data.user_id || !data.scrap_id) {
+      console.log('No valid chat history data found')
+      return null
+    }
+
+    console.log('Found chat history:', data)
 
     // Parse the messages JSON and convert timestamps back to Date objects
     const messages: ChatMessage[] = (data.messages as unknown as ChatMessage[]).map((msg) => ({
@@ -63,6 +70,7 @@ export async function saveChatHistory(
   userId: string, 
   messages: ChatMessage[]
 ): Promise<ChatHistory | null> {
+  console.log('Saving chat history:', { scrapId, userId, messageCount: messages.length })
   try {
     // Convert Date objects to ISO strings for JSON storage
     const messagesForStorage = messages.map((msg: ChatMessage) => ({
@@ -71,7 +79,7 @@ export async function saveChatHistory(
     })) as Database['public']['Tables']['chat_history']['Insert']['messages']
 
     // Try to update existing chat history first
-    const { data: updateData } = await supabase
+    const { data: updateData, error: updateError } = await supabase
       .from('chat_history')
       .update({ 
         messages: messagesForStorage,
@@ -82,7 +90,10 @@ export async function saveChatHistory(
       .select()
       .single()
 
-    if (updateData && updateData.user_id && updateData.scrap_id) {
+    if (updateError) {
+      console.log('No existing chat history to update, creating new one')
+    } else if (updateData && updateData.user_id && updateData.scrap_id) {
+      console.log('Successfully updated existing chat history')
       // Successfully updated existing chat history
       const parsedMessages: ChatMessage[] = (updateData.messages as unknown as ChatMessage[]).map((msg) => ({
         ...msg,
@@ -99,6 +110,7 @@ export async function saveChatHistory(
     }
 
     // If no existing chat history, create new one
+    console.log('Creating new chat history')
     const { data: insertData, error: insertError } = await supabase
       .from('chat_history')
       .insert({
@@ -109,9 +121,17 @@ export async function saveChatHistory(
       .select()
       .single()
 
-    if (insertError) throw insertError
-    if (!insertData || !insertData.user_id || !insertData.scrap_id) return null
+    if (insertError) {
+      console.error('Error creating new chat history:', insertError)
+      throw insertError
+    }
+    
+    if (!insertData || !insertData.user_id || !insertData.scrap_id) {
+      console.error('Failed to create chat history - no data returned')
+      return null
+    }
 
+    console.log('Successfully created new chat history')
     const parsedMessages: ChatMessage[] = (insertData.messages as unknown as ChatMessage[]).map((msg) => ({
       ...msg,
       timestamp: new Date(msg.timestamp)

@@ -146,7 +146,15 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         })
       })
 
+      if (!response.ok) {
+        throw new Error('Failed to get response from chat API')
+      }
+
       const data = await response.json()
+      
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to process chat request')
+      }
       
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -158,15 +166,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       const finalMessages = [...updatedMessages, aiMessage]
       setMessages(finalMessages)
 
-      // Save chat history to database
-      if (user && scrap.id) {
-        try {
-          await saveChatHistory(scrap.id, user.id, finalMessages)
-        } catch (error) {
-          console.error('Error saving chat history:', error)
-        }
-      }
-
+      // Let the API handle saving chat history
     } catch (error) {
       console.error('Failed to send message:', error)
       const errorMessage: Message = {
@@ -175,17 +175,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         sender: 'ai',
         timestamp: new Date()
       }
-      const finalMessages = [...updatedMessages, errorMessage]
-      setMessages(finalMessages)
-      
-      // Save chat history even if there was an error
-      if (user && scrap.id) {
-        try {
-          await saveChatHistory(scrap.id, user.id, finalMessages)
-        } catch (error) {
-          console.error('Error saving chat history:', error)
-        }
-      }
+      setMessages(prev => [...prev, errorMessage])
     } finally {
       setIsLoading(false)
     }
