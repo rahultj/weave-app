@@ -1,10 +1,10 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Edit3, Trash2, MessageCircle } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { Edit3, Trash2, Rabbit } from 'lucide-react'
 import { Scrap } from '@/lib/scraps'
-import { useSwipe } from '@/lib/hooks/useSwipe'
+import Image from 'next/image'
 
 interface ScrapCardProps {
   scrap: Scrap
@@ -28,49 +28,43 @@ export default function ScrapCard({
   onChatClick
 }: ScrapCardProps) {
   const [isDeleting, setIsDeleting] = useState(false)
-  const cardRef = useRef<HTMLDivElement>(null)
+  const [imageError, setImageError] = useState(false)
 
   const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this scrap?')) {
+      return
+    }
     setIsDeleting(true)
     // Add a small delay for animation
     await new Promise(resolve => setTimeout(resolve, 300))
     onDelete(scrap.id)
   }
 
-  const { onTouchStart, onTouchMove, onTouchEnd, isSwiping, swipeDistance } = useSwipe({
-    minSwipeDistance: 100,
-    onSwipeLeft: handleDelete
-  })
-
-  const cardStyle = {
-    transform: isSwiping ? `translateX(${-swipeDistance}px)` : 'none',
-    transition: isSwiping ? 'none' : 'transform 0.3s ease'
-  }
-
   return (
     <motion.div
-      ref={cardRef}
-      className={`relative bg-neutral-bg-card rounded-xl border border-neutral-border overflow-hidden ${
+      className={`bg-neutral-bg-card rounded-xl border border-neutral-border overflow-hidden ${
         isDeleting ? 'opacity-0 scale-95' : ''
       }`}
-      style={cardStyle}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
       transition={{ duration: 0.3 }}
     >
-      {/* Delete indicator */}
-      <div 
-        className="absolute inset-y-0 right-0 bg-red-500 flex items-center px-6"
-        style={{
-          opacity: Math.min(swipeDistance / 100, 1),
-          transform: `translateX(${Math.max(100 - swipeDistance, 0)}px)`
-        }}
-      >
-        <Trash2 className="text-white" size={24} />
-      </div>
-
       <div className="p-6">
+        {/* Image handling */}
+        {scrap.type === 'image' && scrap.image_url && !imageError && (
+          <div className="mb-4 flex justify-center">
+            <div className="relative w-full max-w-xs sm:max-w-sm aspect-[3/4] overflow-hidden rounded-lg">
+              <Image
+                src={scrap.image_url}
+                alt={scrap.title || 'Scrap image'}
+                fill
+                className="object-cover rounded-lg"
+                onError={() => setImageError(true)}
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                priority={true}
+              />
+            </div>
+          </div>
+        )}
+
         {scrap.type === 'text' ? (
           <div>
             <p className="text-neutral-text-primary text-lg mb-3 leading-relaxed selection:bg-brand-primary selection:text-white">
@@ -114,26 +108,26 @@ export default function ScrapCard({
         )}
 
         {/* Action buttons */}
-        <div className="flex gap-2 mt-6 -mb-2">
+        <div className="flex items-center justify-end gap-2 mt-6 -mb-2">
           <button
             onClick={() => onUpdate(scrap)}
-            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary transition-colors min-w-[44px] min-h-[44px]"
+            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary active:text-brand-hover transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
           >
             <Edit3 size={18} />
             <span className="sr-only md:not-sr-only">Edit</span>
           </button>
           <button
             onClick={handleDelete}
-            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-red-500 transition-colors min-w-[44px] min-h-[44px]"
+            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-red-500 active:text-red-600 transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
           >
             <Trash2 size={18} />
             <span className="sr-only md:not-sr-only">Delete</span>
           </button>
           <button
             onClick={onChatClick}
-            className="flex items-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary transition-colors min-w-[44px] min-h-[44px]"
+            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary active:text-brand-hover transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
           >
-            <MessageCircle size={18} />
+            <Rabbit size={18} />
             <span className="sr-only md:not-sr-only">Chat</span>
           </button>
         </div>
