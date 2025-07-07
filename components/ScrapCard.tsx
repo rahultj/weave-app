@@ -66,14 +66,14 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
     <>
       <motion.div
         whileHover={{ y: -2 }}
-        className="bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group"
+        className="bg-neutral-bg-card rounded-xl p-4 sm:p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group overflow-visible mb-2"
       >
         {/* Menu Button */}
         <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
           <div className="relative">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="w-8 h-8 bg-neutral-bg-main hover:bg-neutral-bg-hover rounded-full flex items-center justify-center transition-colors border border-neutral-border"
+              className="w-10 h-10 bg-neutral-bg-main hover:bg-neutral-bg-hover rounded-full flex items-center justify-center transition-colors border border-neutral-border"
               aria-label="More options"
             >
               <MoreVertical size={16} className="text-neutral-text-secondary" />
@@ -94,11 +94,11 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
                     initial={{ opacity: 0, scale: 0.95, y: -5 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -5 }}
-                    className="absolute right-0 top-10 bg-neutral-bg-main border border-neutral-border rounded-lg shadow-lg py-2 min-w-[120px] z-20"
+                    className="absolute right-0 top-12 bg-neutral-bg-main border border-neutral-border rounded-lg shadow-lg py-2 min-w-[140px] z-30"
                   >
                     <button
                       onClick={openEdit}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors"
+                      className="flex items-center gap-2 w-full px-3 py-3 text-sm text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors"
                     >
                       <Edit size={14} />
                       Edit
@@ -106,7 +106,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-2 w-full px-3 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
                     >
                       <Trash2 size={14} />
                       {isDeleting ? 'Deleting...' : 'Delete'}
@@ -119,13 +119,13 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
         </div>
 
         {scrap.type === 'image' && scrap.image_url && (
-          <div className="mb-4">
-            <div className="relative w-full aspect-[3/4] overflow-hidden rounded-lg">
+          <div className="mb-4 flex justify-center">
+            <div className="relative w-full max-w-xs sm:max-w-sm aspect-[3/4] overflow-hidden rounded-lg">
               <Image
                 src={scrap.image_url}
                 alt={scrap.title || 'Scrap image'}
                 fill
-                className="object-cover"
+                className="object-cover rounded-lg"
                 unoptimized={true}
               />
             </div>
