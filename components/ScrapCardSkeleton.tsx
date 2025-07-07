@@ -16,11 +16,6 @@ export default function ScrapCardSkeleton({ showImage = false, className = '' }:
       transition={{ duration: 0.3 }}
       className={`bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group ${className}`}
     >
-      {/* Menu Button Skeleton */}
-      <div className="absolute top-4 right-4">
-        <Skeleton className="w-8 h-8 rounded-full" />
-      </div>
-
       {/* Image Skeleton (conditionally shown) */}
       {showImage && (
         <div className="mb-4">
@@ -32,7 +27,7 @@ export default function ScrapCardSkeleton({ showImage = false, className = '' }:
       )}
 
       {/* Title Skeleton */}
-      <div className="mb-3 pr-10">
+      <div className="mb-3">
         <SkeletonTitle />
       </div>
 
@@ -49,12 +44,16 @@ export default function ScrapCardSkeleton({ showImage = false, className = '' }:
         <Skeleton className="h-4 w-32" />
       </div>
 
-      {/* Bottom Row */}
-      <div className="flex justify-between items-center">
-        <div className="text-xs text-neutral-text-muted">
+      {/* Action Bar */}
+      <div className="flex items-center justify-between border-t border-neutral-border mt-4 pt-4">
+        <div className="flex items-center gap-2">
           <Skeleton className="h-3 w-20" />
         </div>
-        <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
+        <div className="flex items-center gap-2">
+          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
+          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
+          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
+        </div>
       </div>
     </motion.div>
   )
