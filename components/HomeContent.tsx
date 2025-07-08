@@ -8,6 +8,7 @@ import FloatingAddButton from '@/components/FloatingAddButton'
 import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
 import OnboardingModal from '@/components/OnboardingModal'
+import { createScrap } from '@/lib/scraps'
 
 export default function HomeContent() {
   const { user, loading } = useAuth()
@@ -15,6 +16,7 @@ export default function HomeContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)
 
   // Check if we should show onboarding when user logs in
   useEffect(() => {
@@ -29,6 +31,25 @@ export default function HomeContent() {
       setIsSignInModalOpen(true)
     } else {
       setIsAddModalOpen(true)
+    }
+  }
+
+  const handleSaveScrap = async (data: { type: 'text' | 'image', title?: string, content?: string, source?: string, imageFile?: File }) => {
+    try {
+      setIsCreating(true)
+      await createScrap({
+        type: data.type,
+        title: data.title,
+        content: data.content,
+        source: data.source,
+      }, data.imageFile)
+      
+      setIsAddModalOpen(false)
+    } catch (error) {
+      console.error('Failed to create scrap:', error)
+      alert('Failed to save your scrap. Please try again.')
+    } finally {
+      setIsCreating(false)
     }
   }
 
@@ -95,10 +116,8 @@ export default function HomeContent() {
       <AddEntryModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onSave={async () => {
-          setIsAddModalOpen(false)
-          // Refresh scraps will happen automatically through state management
-        }}
+        onSave={handleSaveScrap}
+        isSaving={isCreating}
       />
 
       <SignInModal
