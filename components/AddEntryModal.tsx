@@ -21,6 +21,7 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageSelect = (file: File) => {
     setSelectedImage(file)
@@ -36,6 +37,8 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
     if (file) {
       handleImageSelect(file)
     }
+    // Reset the input value so the same file can be selected again
+    event.target.value = ''
   }
 
   const handleSave = async () => {
@@ -171,6 +174,14 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
                         </div>
                         <div className="flex gap-3">
                           <button
+                            onClick={() => !isSaving && cameraInputRef.current?.click()}
+                            disabled={isSaving}
+                            className={`flex items-center gap-2 px-4 py-2 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <Camera size={16} />
+                            Capture
+                          </button>
+                          <button
                             onClick={() => !isSaving && fileInputRef.current?.click()}
                             disabled={isSaving}
                             className={`flex items-center gap-2 px-4 py-2 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -238,6 +249,23 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
               </div>
             </div>
           </motion.div>
+
+          {/* Hidden file inputs */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileInput}
+            className="hidden"
+          />
+          <input
+            ref={cameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={handleFileInput}
+            className="hidden"
+          />
         </>
       )}
     </AnimatePresence>
