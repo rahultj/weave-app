@@ -99,21 +99,21 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
         className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border hover:border-neutral-border/80 transition-colors"
       >
         {scrap.type === 'image' ? (
-          // Image Card Layout (Horizontal)
-          <div className="flex gap-3 p-4">
+          // Image Card Layout (Vertical with large image)
+          <div className="flex flex-col">
             {/* Image Container */}
-            <div className="relative w-20 h-20 shrink-0">
+            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-lg">
               <Image
                 src={scrap.image_url || '/placeholder.jpg'}
                 alt={scrap.title || 'Scrap image'}
                 fill
-                className="object-cover rounded-lg"
+                className="object-cover"
                 unoptimized={true}
               />
             </div>
             
             {/* Content Container */}
-            <div className="flex-1 min-w-0">
+            <div className="p-4">
               {/* Title - Priority 1 */}
               {scrap.title && (
                 <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
@@ -145,19 +145,19 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
             </div>
           </div>
         ) : (
-          // Text Card Layout (Vertical Compact)
-          <div className="p-4 border-l-4 border-l-brand-primary">
+          // Text Card Layout (Vertical with proper padding)
+          <div className="p-5 border-l-4 border-l-brand-primary">
             {/* Title - Priority 1 */}
             {scrap.title && (
-              <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
+              <h3 className="text-base font-semibold text-neutral-text-primary mb-3 line-clamp-2">
                 {highlightedTitle ?? scrap.title}
               </h3>
             )}
             
             {/* Quote - Priority 2 */}
             {scrap.content && (
-              <div className="relative mb-3">
-                <p className="text-sm italic text-neutral-text-primary leading-relaxed line-clamp-3 pl-4">
+              <div className="relative mb-4">
+                <p className="text-base italic text-neutral-text-primary leading-relaxed line-clamp-3 pl-4">
                   <span className="absolute left-0 top-0 text-neutral-text-muted">"</span>
                   {highlightedContent ?? scrap.content}
                   <span className="text-neutral-text-muted">"</span>
@@ -167,7 +167,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
             
             {/* Attribution - Priority 3 */}
             {scrap.source && (
-              <p className="text-xs text-neutral-text-secondary font-medium mb-2 pl-4">
+              <p className="text-sm text-neutral-text-secondary font-medium mb-3 pl-4">
                 <span className="text-neutral-text-muted">— </span>
                 {highlightedSource ?? scrap.source}
               </p>
