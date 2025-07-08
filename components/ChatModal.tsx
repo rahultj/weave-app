@@ -66,10 +66,15 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     try {
       const history = await getChatHistory(scrap.id, user.id)
       if (history) {
+        console.log('Loaded chat history:', history)
         setMessages(history.messages)
+      } else {
+        console.log('No existing chat history found')
+        setMessages([])
       }
     } catch (error) {
       console.error('Error loading chat history:', error)
+      setMessages([])
     } finally {
       setIsLoadingHistory(false)
     }
@@ -89,16 +94,6 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       setHasLoadedInitialHistory(false)
     }
   }, [isOpen])
-
-  // Save chat history after each message
-  useEffect(() => {
-    const saveHistory = async () => {
-      if (user && scrap.id && messages.length > 0) {
-        await saveChatHistory(scrap.id, user.id, messages)
-      }
-    }
-    saveHistory()
-  }, [messages, user, scrap.id])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -122,6 +117,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       setShowClearConfirm(false)
     } catch (error) {
       console.error('Error clearing chat history:', error)
+      alert('Failed to clear chat history. Please try again.')
     }
   }
 
@@ -129,7 +125,6 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     if (!currentMessage.trim() || isLoading) return
     
     if (!user) {
-      // Show a message that user needs to be authenticated
       const errorMessage: Message = {
         id: Date.now().toString(),
         content: 'Please sign in to continue the conversation.',
@@ -147,8 +142,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       timestamp: new Date()
     }
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
+    setMessages(prev => [...prev, userMessage])
     setCurrentMessage('')
     setIsLoading(true)
 
@@ -172,21 +166,9 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       if (!data.success) {
         throw new Error(data.error || 'Failed to process chat request')
       }
-      
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: data.response,
-        sender: 'ai',
-        timestamp: new Date()
-      }
 
-      const finalMessages = [...updatedMessages, aiMessage]
-      setMessages(finalMessages)
-
-      // Save chat history after receiving AI response
-      if (user && scrap.id) {
-        await saveChatHistory(scrap.id, user.id, finalMessages)
-      }
+      // Load the updated chat history after receiving response
+      await loadChatHistory()
     } catch (error) {
       console.error('Failed to send message:', error)
       const errorMessage: Message = {

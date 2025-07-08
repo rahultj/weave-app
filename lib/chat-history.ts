@@ -17,7 +17,21 @@ export interface ChatHistory {
   updated_at: string
 }
 
+// Helper function to serialize dates for storage
+function serializeMessages(messages: ChatMessage[]): any[] {
+  return messages.map(msg => ({
+    ...msg,
+    timestamp: msg.timestamp.toISOString()
+  }))
+}
 
+// Helper function to deserialize dates from storage
+function deserializeMessages(messages: any[]): ChatMessage[] {
+  return messages.map(msg => ({
+    ...msg,
+    timestamp: new Date(msg.timestamp)
+  }))
+}
 
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
   console.log('Fetching chat history for:', { scrapId, userId })
@@ -45,17 +59,11 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
 
     console.log('Found chat history:', data)
 
-    // Parse the messages JSON and convert timestamps back to Date objects
-    const messages: ChatMessage[] = (data.messages as unknown as ChatMessage[]).map((msg) => ({
-      ...msg,
-      timestamp: new Date(msg.timestamp)
-    }))
-
     return {
       id: data.id,
       user_id: data.user_id,
       scrap_id: data.scrap_id,
-      messages,
+      messages: deserializeMessages(data.messages as any[]),
       created_at: data.created_at || new Date().toISOString(),
       updated_at: data.updated_at || new Date().toISOString()
     }
@@ -72,11 +80,8 @@ export async function saveChatHistory(
 ): Promise<ChatHistory | null> {
   console.log('Saving chat history:', { scrapId, userId, messageCount: messages.length })
   try {
-    // Convert Date objects to ISO strings for JSON storage
-    const messagesForStorage = messages.map((msg: ChatMessage) => ({
-      ...msg,
-      timestamp: msg.timestamp.toISOString()
-    })) as Database['public']['Tables']['chat_history']['Insert']['messages']
+    // Serialize messages for storage
+    const messagesForStorage = serializeMessages(messages)
 
     // Try to update existing chat history first
     const { data: updateData, error: updateError } = await supabase
@@ -94,16 +99,11 @@ export async function saveChatHistory(
       console.log('No existing chat history to update, creating new one')
     } else if (updateData && updateData.user_id && updateData.scrap_id) {
       console.log('Successfully updated existing chat history')
-      // Successfully updated existing chat history
-      const parsedMessages: ChatMessage[] = (updateData.messages as unknown as ChatMessage[]).map((msg) => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }))
       return {
         id: updateData.id,
         user_id: updateData.user_id,
         scrap_id: updateData.scrap_id,
-        messages: parsedMessages,
+        messages: deserializeMessages(updateData.messages as any[]),
         created_at: updateData.created_at || new Date().toISOString(),
         updated_at: updateData.updated_at || new Date().toISOString()
       }
@@ -116,7 +116,9 @@ export async function saveChatHistory(
       .insert({
         scrap_id: scrapId,
         user_id: userId,
-        messages: messagesForStorage
+        messages: messagesForStorage,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       })
       .select()
       .single()
@@ -132,16 +134,11 @@ export async function saveChatHistory(
     }
 
     console.log('Successfully created new chat history')
-    const parsedMessages: ChatMessage[] = (insertData.messages as unknown as ChatMessage[]).map((msg) => ({
-      ...msg,
-      timestamp: new Date(msg.timestamp)
-    }))
-
     return {
       id: insertData.id,
       user_id: insertData.user_id,
       scrap_id: insertData.scrap_id,
-      messages: parsedMessages,
+      messages: deserializeMessages(insertData.messages as any[]),
       created_at: insertData.created_at || new Date().toISOString(),
       updated_at: insertData.updated_at || new Date().toISOString()
     }
