@@ -49,14 +49,6 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
     }
   }
 
-  if (!scrap) {
-    return (
-      <div className="bg-neutral-bg-card rounded-lg p-4 border border-neutral-border">
-        <p className="text-neutral-text-muted">Loading scrap...</p>
-      </div>
-    )
-  }
-
   const ActionButtons = () => (
     <div className="flex items-center gap-2">
       <motion.button
@@ -92,34 +84,59 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
     </div>
   )
 
+  if (!scrap) {
+    return (
+      <div className="bg-neutral-bg-card rounded-lg p-4 border border-neutral-border">
+        <p className="text-neutral-text-muted">Loading scrap...</p>
+      </div>
+    )
+  }
+
   return (
     <>
       <motion.div
         whileHover={{ y: -1 }}
-        className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border"
+        className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border hover:border-neutral-border/80 transition-colors"
       >
-        {scrap.type === 'image' && scrap.image_url ? (
-          <div className="flex flex-col">
+        {scrap.type === 'image' ? (
+          // Image Card Layout (Horizontal)
+          <div className="flex gap-3 p-4">
             {/* Image Container */}
-            <div className="relative w-full aspect-[4/3] overflow-hidden">
+            <div className="relative w-20 h-20 shrink-0">
               <Image
-                src={scrap.image_url}
+                src={scrap.image_url || '/placeholder.jpg'}
                 alt={scrap.title || 'Scrap image'}
                 fill
-                className="object-cover"
+                className="object-cover rounded-lg"
                 unoptimized={true}
               />
             </div>
             
             {/* Content Container */}
-            <div className="p-3 flex flex-col">
+            <div className="flex-1 min-w-0">
+              {/* Title - Priority 1 */}
               {scrap.title && (
-                <h3 className="text-sm font-semibold text-neutral-text-primary line-clamp-2 mb-2">
+                <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
                   {highlightedTitle ?? scrap.title}
                 </h3>
               )}
               
-              <div className="flex justify-between items-center mt-auto">
+              {/* Description - Priority 2 */}
+              {scrap.content && (
+                <p className="text-xs text-neutral-text-secondary mb-2 line-clamp-3 leading-relaxed">
+                  {highlightedContent ?? scrap.content}
+                </p>
+              )}
+              
+              {/* Source - Priority 3 */}
+              {scrap.source && (
+                <p className="text-xs text-neutral-text-secondary font-medium mb-2">
+                  {highlightedSource ?? scrap.source}
+                </p>
+              )}
+              
+              {/* Meta + Actions - Priority 4 */}
+              <div className="flex justify-between items-center">
                 <span className="text-xs text-neutral-text-muted">
                   {new Date(scrap.created_at).toLocaleDateString()}
                 </span>
@@ -128,26 +145,35 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
             </div>
           </div>
         ) : (
-          // Text Card Layout
+          // Text Card Layout (Vertical Compact)
           <div className="p-4 border-l-4 border-l-brand-primary">
+            {/* Title - Priority 1 */}
             {scrap.title && (
-              <h3 className="text-sm md:text-base font-semibold text-neutral-text-primary line-clamp-2 mb-2">
+              <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
                 {highlightedTitle ?? scrap.title}
               </h3>
             )}
             
+            {/* Quote - Priority 2 */}
             {scrap.content && (
-              <p className="text-sm italic text-neutral-text-primary line-clamp-3 mb-2">
-                "{highlightedContent ?? scrap.content}"
-              </p>
+              <div className="relative mb-3">
+                <p className="text-sm italic text-neutral-text-primary leading-relaxed line-clamp-3 pl-4">
+                  <span className="absolute left-0 top-0 text-neutral-text-muted">"</span>
+                  {highlightedContent ?? scrap.content}
+                  <span className="text-neutral-text-muted">"</span>
+                </p>
+              </div>
             )}
             
+            {/* Attribution - Priority 3 */}
             {scrap.source && (
-              <p className="text-xs text-neutral-text-secondary italic mb-3">
-                — {highlightedSource ?? scrap.source}
+              <p className="text-xs text-neutral-text-secondary font-medium mb-2 pl-4">
+                <span className="text-neutral-text-muted">— </span>
+                {highlightedSource ?? scrap.source}
               </p>
             )}
             
+            {/* Meta + Actions - Priority 4 */}
             <div className="flex justify-between items-center">
               <span className="text-xs text-neutral-text-muted">
                 {new Date(scrap.created_at).toLocaleDateString()}
