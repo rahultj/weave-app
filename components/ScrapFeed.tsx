@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FileText, Search, AlertCircle, Plus } from 'lucide-react'
 import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
@@ -14,8 +14,8 @@ interface ScrapFeedProps {
   onAddClick?: () => void
 }
 
-function highlight(text: string, term: string) {
-  if (!term) return text
+function highlight(text: string | undefined, term: string): React.ReactNode {
+  if (!text || !term) return text || ''
   const escapedTerm = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return text.split(new RegExp(`(${escapedTerm})`, 'gi')).map((part, i) =>
     i % 2 === 1 ? <mark key={i} className="bg-yellow-200 text-brand-primary px-0.5 rounded">{part}</mark> : part
@@ -78,7 +78,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-3">
         <ScrapCardSkeleton showImage={false} />
         <ScrapCardSkeleton showImage={true} />
         <ScrapCardSkeleton showImage={false} />
@@ -145,7 +145,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   return (
     <motion.div
-      className="space-y-6 mt-6"
+      className="px-4 py-4 space-y-3 max-w-2xl mx-auto"
       initial="hidden"
       animate="visible"
       variants={{}}
@@ -155,10 +155,10 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
         return (
           <motion.div
             key={scrap.id}
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 24 }}
-            transition={{ delay: i * 0.08, duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ delay: i * 0.05, duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
             layout
           >
             <ScrapCard
