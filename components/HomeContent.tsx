@@ -8,6 +8,7 @@ import FloatingAddButton from '@/components/FloatingAddButton'
 import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
 import OnboardingModal from '@/components/OnboardingModal'
+import Toast from '@/components/Toast'
 import { createScrap } from '@/lib/scraps'
 
 export default function HomeContent() {
@@ -17,6 +18,8 @@ export default function HomeContent() {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [isCreating, setIsCreating] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   // Check if we should show onboarding when user logs in
   useEffect(() => {
@@ -25,6 +28,16 @@ export default function HomeContent() {
       setShowOnboarding(!hasCompletedOnboarding)
     }
   }, [user, loading])
+
+  // Auto-hide toast after 2 seconds
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false)
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [showToast])
 
   const handleAddClick = () => {
     if (!user) {
@@ -44,6 +57,9 @@ export default function HomeContent() {
         source: data.source,
       }, data.imageFile)
       
+      // Show success toast and refresh feed
+      setShowToast(true)
+      setRefreshKey(prev => prev + 1)
       setIsAddModalOpen(false)
     } catch (error) {
       console.error('Failed to create scrap:', error)
@@ -109,7 +125,7 @@ export default function HomeContent() {
     <main className="min-h-screen bg-neutral-bg-main">
       <HomeHeader search={search} setSearch={setSearch} />
       <div className="max-w-2xl mx-auto px-4 py-6">
-        <ScrapFeed search={search} onAddClick={handleAddClick} />
+        <ScrapFeed key={refreshKey} search={search} onAddClick={handleAddClick} />
       </div>
       <FloatingAddButton onClick={handleAddClick} />
       
@@ -128,6 +144,12 @@ export default function HomeContent() {
       <OnboardingModal
         isOpen={showOnboarding}
         onClose={() => setShowOnboarding(false)}
+      />
+
+      <Toast
+        message="Scrap saved successfully!"
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
       />
     </main>
   )
