@@ -58,15 +58,15 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
   }
 
   const ActionButtons = () => (
-    <div className="flex items-center gap-1.5">
+    <div className="flex items-center gap-2">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={openEdit}
-        className="w-6 h-6 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
+        className="w-7 h-7 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
         aria-label="Edit scrap"
       >
-        <Edit size={12} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
+        <Edit size={14} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
       </motion.button>
       
       <motion.button
@@ -74,20 +74,20 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
         whileTap={{ scale: 0.95 }}
         onClick={handleDelete}
         disabled={isDeleting}
-        className="w-6 h-6 bg-neutral-bg-hover hover:bg-red-50 rounded-full flex items-center justify-center transition-colors group disabled:opacity-50"
+        className="w-7 h-7 bg-neutral-bg-hover hover:bg-red-50 rounded-full flex items-center justify-center transition-colors group disabled:opacity-50"
         aria-label="Delete scrap"
       >
-        <Trash2 size={12} className="text-neutral-text-secondary group-hover:text-red-600 transition-colors" />
+        <Trash2 size={14} className="text-neutral-text-secondary group-hover:text-red-600 transition-colors" />
       </motion.button>
       
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={openChat}
-        className="w-6 h-6 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
+        className="w-7 h-7 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
         aria-label="Explore this scrap"
       >
-        <Rabbit size={12} className="text-white group-hover:scale-110 transition-transform" />
+        <Rabbit size={14} className="text-white group-hover:scale-110 transition-transform" />
       </motion.button>
     </div>
   )
@@ -96,51 +96,40 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
     <>
       <motion.div
         whileHover={{ y: -1 }}
-        className={`group relative overflow-visible ${
-          scrap.type === 'image'
-            ? 'flex gap-3 bg-neutral-bg-card rounded-lg p-4 border border-neutral-border'
-            : 'bg-neutral-bg-card rounded-lg p-4 border border-neutral-border border-l-4 border-l-brand-primary'
-        }`}
+        className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border"
       >
         {scrap.type === 'image' && scrap.image_url ? (
-          <>
-            {/* Left: Image thumbnail */}
-            <div className="flex-shrink-0">
+          <div className="flex flex-col">
+            {/* Image Container */}
+            <div className="relative w-full aspect-[4/3] overflow-hidden">
               <Image
                 src={scrap.image_url}
                 alt={scrap.title || 'Scrap image'}
-                width={80}
-                height={80}
-                className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-lg"
+                fill
+                className="object-cover"
                 unoptimized={true}
               />
             </div>
             
-            {/* Right: Content */}
-            <div className="flex-1 min-w-0">
+            {/* Content Container */}
+            <div className="p-3 flex flex-col">
               {scrap.title && (
-                <h3 className="text-sm md:text-base font-semibold text-neutral-text-primary line-clamp-2 mb-2">
+                <h3 className="text-sm font-semibold text-neutral-text-primary line-clamp-2 mb-2">
                   {highlightedTitle ?? scrap.title}
                 </h3>
               )}
               
-              {scrap.content && (
-                <p className="text-xs md:text-sm text-neutral-text-secondary line-clamp-2 mb-2">
-                  {highlightedContent ?? scrap.content}
-                </p>
-              )}
-              
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center mt-auto">
                 <span className="text-xs text-neutral-text-muted">
                   {new Date(scrap.created_at).toLocaleDateString()}
                 </span>
                 <ActionButtons />
               </div>
             </div>
-          </>
+          </div>
         ) : (
           // Text Card Layout
-          <>
+          <div className="p-4 border-l-4 border-l-brand-primary">
             {scrap.title && (
               <h3 className="text-sm md:text-base font-semibold text-neutral-text-primary line-clamp-2 mb-2">
                 {highlightedTitle ?? scrap.title}
@@ -165,7 +154,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
               </span>
               <ActionButtons />
             </div>
-          </>
+          </div>
         )}
       </motion.div>
 

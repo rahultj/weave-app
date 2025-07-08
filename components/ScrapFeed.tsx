@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FileText, Search, AlertCircle, Plus } from 'lucide-react'
 import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
@@ -78,8 +78,8 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   if (loading) {
     return (
-      <div className="space-y-3">
-        <ScrapCardSkeleton showImage={false} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4">
+        <ScrapCardSkeleton showImage={true} />
         <ScrapCardSkeleton showImage={true} />
         <ScrapCardSkeleton showImage={false} />
       </div>
@@ -145,7 +145,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   return (
     <motion.div
-      className="px-4 py-4 space-y-3 max-w-2xl mx-auto"
+      className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-4 max-w-5xl mx-auto"
       initial="hidden"
       animate="visible"
       variants={{}}
