@@ -57,6 +57,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [hasLoadedInitialHistory, setHasLoadedInitialHistory] = useState(false)
 
   const loadChatHistory = useCallback(async () => {
     if (!user || !scrap.id) return
@@ -74,15 +75,30 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     }
   }, [user, scrap.id])
 
-  // Load chat history when modal opens
+  // Load chat history when modal opens or user changes
   useEffect(() => {
-    if (isOpen && user && scrap.id) {
+    if (user && scrap.id && isOpen && !hasLoadedInitialHistory) {
       loadChatHistory()
-    } else if (isOpen && !user) {
-      // Clear messages if user is not authenticated
-      setMessages([])
+      setHasLoadedInitialHistory(true)
     }
-  }, [isOpen, user, scrap.id, loadChatHistory])
+  }, [user, scrap.id, isOpen, loadChatHistory, hasLoadedInitialHistory])
+
+  // Reset hasLoadedInitialHistory when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setHasLoadedInitialHistory(false)
+    }
+  }, [isOpen])
+
+  // Save chat history after each message
+  useEffect(() => {
+    const saveHistory = async () => {
+      if (user && scrap.id && messages.length > 0) {
+        await saveChatHistory(scrap.id, user.id, messages)
+      }
+    }
+    saveHistory()
+  }, [messages, user, scrap.id])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -167,7 +183,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       const finalMessages = [...updatedMessages, aiMessage]
       setMessages(finalMessages)
 
-      // Let the API handle saving chat history
+      // Save chat history after receiving AI response
+      if (user && scrap.id) {
+        await saveChatHistory(scrap.id, user.id, finalMessages)
+      }
     } catch (error) {
       console.error('Failed to send message:', error)
       const errorMessage: Message = {
