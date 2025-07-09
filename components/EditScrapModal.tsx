@@ -48,7 +48,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
         medium: medium.trim() || undefined
       })
       
-      onUpdate(updatedScrap)
+      onUpdate(updatedScrap as Scrap)
       onClose()
     } catch (error) {
       console.error('Failed to update observation:', error)

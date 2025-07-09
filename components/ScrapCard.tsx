@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Edit, Trash2, Rabbit } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { MessageCircle, Trash2, Edit3 } from 'lucide-react'
 import ChatModal from './ChatModal'
 import EditScrapModal from './EditScrapModal'
 import { Scrap, deleteScrap } from '@/lib/scraps'
@@ -26,7 +26,6 @@ export default function ScrapCard({
   highlightedTitle, 
   highlightedContent, 
   highlightedCreator, 
-  highlightedTags 
 }: ScrapCardProps) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
@@ -66,7 +65,7 @@ export default function ScrapCard({
         className="w-7 h-7 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
         aria-label="Edit scrap"
       >
-        <Edit size={14} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
+        <Edit3 size={14} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
       </motion.button>
       
       <motion.button
@@ -87,7 +86,7 @@ export default function ScrapCard({
         className="w-7 h-7 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
         aria-label="Explore this scrap"
       >
-        <Rabbit size={14} className="text-white group-hover:scale-110 transition-transform" />
+        <MessageCircle size={14} className="text-white group-hover:scale-110 transition-transform" />
       </motion.button>
     </div>
   )

@@ -8,6 +8,8 @@ import FloatingAddButton from '@/components/FloatingAddButton'
 import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
 import OnboardingModal from '@/components/OnboardingModal'
+import InstallPrompt from '@/components/InstallPrompt'
+import OfflineIndicator from '@/components/OfflineIndicator'
 import Toast from '@/components/Toast'
 import { createScrap } from '@/lib/scraps'
 
@@ -29,6 +31,14 @@ export default function HomeContent() {
     }
   }, [user, loading])
 
+  // Check for URL action parameter to auto-open add modal
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('action') === 'add' && user) {
+      setIsAddModalOpen(true)
+    }
+  }, [user])
+
   // Auto-hide toast after 2 seconds
   useEffect(() => {
     if (showToast) {
@@ -47,23 +57,32 @@ export default function HomeContent() {
     }
   }
 
-  const handleSaveScrap = async (data: { type: 'text' | 'image', title?: string, content?: string, source?: string, imageFile?: File }) => {
+  const handleSaveScrap = async (scrapData: {
+    type: 'text' | 'image'
+    title?: string
+    content?: string
+    creator?: string
+    medium?: string
+    imageFile?: File
+  }) => {
+    if (!user) return
+
+    setIsCreating(true)
     try {
-      setIsCreating(true)
       await createScrap({
-        type: data.type,
-        title: data.title,
-        content: data.content,
-        source: data.source,
-      }, data.imageFile)
+        title: scrapData.title,
+        content: scrapData.content,
+        creator: scrapData.creator,
+        medium: scrapData.medium,
+        type: scrapData.type
+      }, scrapData.imageFile)
       
-      // Show success toast and refresh feed
-      setShowToast(true)
-      setRefreshKey(prev => prev + 1)
       setIsAddModalOpen(false)
+      setRefreshKey(prev => prev + 1)
+      setShowToast(true)
     } catch (error) {
-      console.error('Failed to create scrap:', error)
-      alert('Failed to save your scrap. Please try again.')
+      console.error('Error saving scrap:', error)
+      // Could add error toast here
     } finally {
       setIsCreating(false)
     }
@@ -151,6 +170,10 @@ export default function HomeContent() {
         isVisible={showToast}
         onClose={() => setShowToast(false)}
       />
+
+      {/* PWA Components */}
+      <InstallPrompt />
+      <OfflineIndicator />
     </main>
   )
 } 

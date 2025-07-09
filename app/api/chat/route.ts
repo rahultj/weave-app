@@ -9,12 +9,8 @@ const anthropic = new Anthropic({
 })
 
 export async function POST(request: NextRequest) {
-  console.log('API route called') // Debug log
-  
   try {
     const body = await request.json()
-    console.log('Request body:', body) // Debug log
-    
     const { message, scrap, chatHistory } = body
 
     // Get the authenticated user
@@ -66,20 +62,6 @@ A:`
         }
       ]
     })
-
-    // Debug: Log the full response from Anthropic
-    console.log('Claude API raw response:', JSON.stringify(response, null, 2));
-    // Try to log possible text locations
-    if (Array.isArray(response.content) && response.content.length > 0) {
-      const firstBlock = response.content[0];
-      if ('text' in firstBlock && typeof firstBlock.text === 'string') {
-        console.log('Claude API text:', firstBlock.text);
-      } else {
-        console.log('Claude API first block (no text):', firstBlock);
-      }
-    }
-    console.log('Claude API content:', response.content)
-    console.log('Claude API content block type:', response.content?.[0]?.type);
     
     // Safely extract the AI text from the response
     let aiText = '';
@@ -87,13 +69,11 @@ A:`
       const firstBlock = response.content[0];
       if ('text' in firstBlock && typeof firstBlock.text === 'string') {
         aiText = firstBlock.text;
-        console.log('Claude API text:', aiText);
       } else {
-        aiText = JSON.stringify(firstBlock);
-        console.log('Claude API first block (no text):', firstBlock);
+        aiText = 'I apologize, but I encountered an error processing your request.';
       }
     } else {
-      console.log('Claude API content is empty or not an array:', response.content);
+      aiText = 'I apologize, but I encountered an error processing your request.';
     }
 
     // Save the updated chat history to the database

@@ -37,7 +37,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
       try {
         setError(null)
-        const fetchedScraps = await getScraps(user.id)
+        const fetchedScraps = await getScraps()
         setScraps(fetchedScraps || [])
       } catch (error) {
         console.error('Error fetching scraps:', error)
@@ -70,7 +70,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
         return (
           (scrap.title && scrap.title.toLowerCase().includes(searchTerm)) ||
           (scrap.content && scrap.content.toLowerCase().includes(searchTerm)) ||
-          (scrap.source && scrap.source.toLowerCase().includes(searchTerm)) ||
+          (scrap.creator && scrap.creator.toLowerCase().includes(searchTerm)) ||
           (scrap.tags && scrap.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
         )
       })
@@ -167,7 +167,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
               onDelete={handleScrapDelete}
               highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
               highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
-              highlightedSource={hasSearch && scrap.source ? highlight(scrap.source, searchTerm) : undefined}
+              highlightedCreator={hasSearch && scrap.creator ? highlight(scrap.creator, searchTerm) : undefined}
               highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
             />
           </motion.div>

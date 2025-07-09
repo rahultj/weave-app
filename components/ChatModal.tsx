@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { X, Send, MessageCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Trash2, MessageCircle, AlertCircle, Loader } from 'lucide-react'
 import { Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChatHistory, saveChatHistory, deleteChatHistory } from '@/lib/chat-history'
@@ -59,7 +59,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [hasLoadedInitialHistory, setHasLoadedInitialHistory] = useState(false)
 
-  const loadChatHistory = useCallback(async () => {
+  const loadChatHistory = async () => {
     if (!user || !scrap.id) return
     
     setIsLoadingHistory(true)
@@ -78,7 +78,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     } finally {
       setIsLoadingHistory(false)
     }
-  }, [user, scrap.id])
+  }
 
   // Load chat history when modal opens or user changes
   useEffect(() => {
@@ -258,10 +258,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                       <p className="italic text-neutral-text-primary mb-2">
                         &quot;{scrap.content}&quot;
                       </p>
-                      {scrap.source && (
-                        <p className="text-neutral-text-secondary">
-                          — {scrap.source}
-                        </p>
+                      {scrap.creator && (
+                        <span className="text-neutral-text-muted">
+                          — {scrap.creator}
+                        </span>
                       )}
                     </div>
                   ) : (
