@@ -68,7 +68,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       try {
         const history = await getChatHistory(scrap.id, user.id)
         if (history) {
-          console.log('Loaded chat history:', history)
+          console.log('Loaded chat history:', history.messages.length, 'messages')
           setMessages(history.messages)
         } else {
           console.log('No existing chat history found')
@@ -83,16 +83,17 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     }
 
     if (user && scrap.id && isOpen && !hasLoadedInitialHistory) {
+      console.log('Loading chat history for scrap:', scrap.id)
       loadChatHistory()
       setHasLoadedInitialHistory(true)
     }
   }, [user, scrap.id, isOpen, hasLoadedInitialHistory])
 
-  // Reset hasLoadedInitialHistory when modal closes or user changes
+  // Reset hasLoadedInitialHistory when modal closes (but keep messages)
   useEffect(() => {
     if (!isOpen) {
       setHasLoadedInitialHistory(false)
-      setMessages([]) // Clear messages when modal closes
+      // Don't clear messages - they should persist when modal is closed and reopened
     }
   }, [isOpen])
 
@@ -103,16 +104,17 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     setMessages([]) // Clear messages when user changes
   }, [user?.id])
 
-  // Debug logging for user state changes
+  // Debug logging for important state changes
   useEffect(() => {
-    console.log('ChatModal: User state changed', { 
-      userId: user?.id, 
-      isOpen, 
-      scrapId: scrap.id, 
-      hasLoadedInitialHistory,
-      messageCount: messages.length 
-    })
-  }, [user, isOpen, scrap.id, hasLoadedInitialHistory, messages.length])
+    if (isOpen) {
+      console.log('ChatModal opened:', { 
+        userId: user?.id, 
+        scrapId: scrap.id, 
+        hasLoadedInitialHistory,
+        messageCount: messages.length 
+      })
+    }
+  }, [isOpen, user?.id, scrap.id, hasLoadedInitialHistory, messages.length])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
