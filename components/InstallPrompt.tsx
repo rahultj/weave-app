@@ -16,23 +16,58 @@ export default function InstallPrompt() {
   useEffect(() => {
     // Check if app is already installed
     const checkInstalled = () => {
+      // Check for desktop PWA (Chrome, Edge, etc.)
       if (window.matchMedia('(display-mode: standalone)').matches) {
         console.log('PWA Debug: App already installed (standalone mode)')
         setIsInstalled(true)
-        return
+        return true
       }
       
       // Check for iOS standalone mode
       if ((window.navigator as Navigator & { standalone?: boolean }).standalone) {
         console.log('PWA Debug: App already installed (iOS standalone)')
         setIsInstalled(true)
-        return
+        return true
+      }
+      
+      // Check if running in a PWA context (additional check)
+      if (window.matchMedia('(display-mode: minimal-ui)').matches) {
+        console.log('PWA Debug: App already installed (minimal-ui mode)')
+        setIsInstalled(true)
+        return true
+      }
+      
+      // Check for related applications (Chrome feature)
+      if ('getInstalledRelatedApps' in navigator) {
+        (navigator as any).getInstalledRelatedApps().then((apps: any[]) => {
+          if (apps.length > 0) {
+            console.log('PWA Debug: App already installed (related apps)')
+            setIsInstalled(true)
+          }
+        }).catch(() => {
+          // Ignore errors from this experimental API
+        })
+      }
+      
+      // Additional check for desktop PWA context
+      if (window.location.search.includes('utm_source=pwa') || 
+          window.location.search.includes('source=pwa') ||
+          document.referrer.includes('weave-app')) {
+        console.log('PWA Debug: App likely installed (PWA context indicators)')
+        setIsInstalled(true)
+        return true
       }
       
       console.log('PWA Debug: App not installed, waiting for beforeinstallprompt')
+      return false
     }
 
-    checkInstalled()
+    const isAlreadyInstalled = checkInstalled()
+
+    // Only set up install prompt listeners if not already installed
+    if (isAlreadyInstalled) {
+      return
+    }
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
