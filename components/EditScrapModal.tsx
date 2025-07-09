@@ -15,7 +15,8 @@ interface EditScrapModalProps {
 export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: EditScrapModalProps) {
   const [title, setTitle] = useState(scrap.title || '')
   const [content, setContent] = useState(scrap.content || '')
-  const [source, setSource] = useState(scrap.source || '')
+  const [creator, setCreator] = useState(scrap.creator || '')
+  const [medium, setMedium] = useState(scrap.medium || '')
   const [isLoading, setIsLoading] = useState(false)
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -23,7 +24,8 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
   useEffect(() => {
     setTitle(scrap.title || '')
     setContent(scrap.content || '')
-    setSource(scrap.source || '')
+    setCreator(scrap.creator || '')
+    setMedium(scrap.medium || '')
   }, [scrap])
 
   // Auto-resize textarea
@@ -42,13 +44,14 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
       const updatedScrap = await updateScrap(scrap.id, {
         title: title.trim() || undefined,
         content: content.trim(),
-        source: source.trim() || undefined
+        creator: creator.trim() || undefined,
+        medium: medium.trim() || undefined
       })
       
       onUpdate(updatedScrap)
       onClose()
     } catch (error) {
-      console.error('Failed to update scrap:', error)
+      console.error('Failed to update observation:', error)
     } finally {
       setIsLoading(false)
     }
@@ -94,7 +97,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
                 Cancel
               </motion.button>
               <h2 className="text-lg font-semibold text-neutral-text-primary">
-                Edit Scrap
+                Edit Observation
               </h2>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -110,48 +113,63 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
 
             {/* Form */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Title Input */}
+              {/* Title Input (Cultural Artifact Name) */}
               <div>
                 <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Title {scrap.type === 'text' ? '(optional)' : ''}
+                  Cultural Artifact Name
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={scrap.type === 'text' ? 'Add a title...' : 'Enter title...'}
+                  placeholder="Name of the book, film, artwork, etc."
                   className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 />
               </div>
 
-              {/* Content Input */}
+              {/* Medium Input */}
               <div>
                 <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  {scrap.type === 'text' ? 'Quote or Thought' : 'Description'}
+                  Medium
+                </label>
+                <input
+                  type="text"
+                  value={medium}
+                  onChange={(e) => setMedium(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Book, film, artwork, etc."
+                  className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                />
+              </div>
+
+              {/* Content Input (Observation) */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-text-primary mb-2">
+                  Your Observation
                 </label>
                 <textarea
                   ref={contentTextareaRef}
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder={scrap.type === 'text' ? 'What\'s on your mind?' : 'Describe this image...'}
+                  placeholder={scrap.type === 'text' ? 'Share your thoughts about this cultural artifact...' : 'Describe what you observe in this image...'}
                   className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[120px] max-h-60 resize-none"
                   rows={4}
                 />
               </div>
 
-              {/* Source Input */}
+              {/* Creator Input */}
               <div>
                 <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Source (optional)
+                  Creator
                 </label>
                 <input
                   type="text"
-                  value={source}
-                  onChange={(e) => setSource(e.target.value)}
+                  value={creator}
+                  onChange={(e) => setCreator(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Author, book, website..."
+                  placeholder="Author, artist, director, etc."
                   className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
                 />
               </div>

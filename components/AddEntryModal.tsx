@@ -9,7 +9,14 @@ import Image from 'next/image';
 interface AddEntryModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (scrap: { type: 'text' | 'image', title?: string, content?: string, source?: string, imageFile?: File }) => void
+  onSave: (scrap: { 
+    type: 'text' | 'image', 
+    title?: string, 
+    content?: string, 
+    creator?: string, 
+    medium?: string,
+    imageFile?: File 
+  }) => void
   isSaving?: boolean
 }
 
@@ -17,7 +24,8 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
   const [contentType, setContentType] = useState<'text' | 'image'>('text')
   const [content, setContent] = useState('')
   const [title, setTitle] = useState('')
-  const [source, setSource] = useState('')
+  const [creator, setCreator] = useState('')
+  const [medium, setMedium] = useState('')
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -50,7 +58,8 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
       type: contentType,
       title: title.trim() || undefined,
       content: content.trim() || undefined,
-      source: source.trim() || undefined,
+      creator: creator.trim() || undefined,
+      medium: medium.trim() || undefined,
       imageFile: selectedImage || undefined
     })
     
@@ -61,7 +70,8 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
   const resetForm = () => {
     setContent('')
     setTitle('')
-    setSource('')
+    setCreator('')
+    setMedium('')
     setSelectedImage(null)
     setImagePreview(null)
     setContentType('text')
@@ -108,7 +118,7 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
                   Cancel
                 </motion.button>
                 <h2 className="text-lg font-semibold text-neutral-text-primary">
-                  New Scrap
+                  New Observation
                 </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -151,13 +161,31 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
 
               {/* Content */}
               <div className="p-6 flex-1 flex flex-col min-h-0 overflow-y-auto">
+                {/* Required fields first */}
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Name of cultural artifact"
+                  className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base mb-4"
+                  disabled={isSaving}
+                />
+
+                <input
+                  type="text"
+                  value={medium}
+                  onChange={(e) => setMedium(e.target.value)}
+                  placeholder="Medium (book, film, artwork, etc.)"
+                  className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base mb-4"
+                  disabled={isSaving}
+                />
                 
                 {contentType === 'text' ? (
                   /* Text Content */
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="What's on your mind?"
+                    placeholder="Share your thoughts and observations about this cultural artifact..."
                     className="flex-1 min-h-[180px] w-full bg-transparent border-none outline-none resize-none text-neutral-text-primary placeholder-neutral-text-muted text-base leading-relaxed"
                     autoFocus
                     disabled={isSaving}
@@ -170,7 +198,7 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
                         <div className="text-neutral-text-muted text-center">
                           <Camera size={32} className="mx-auto mb-2 opacity-50" />
                           <p className="font-medium">Add a photo</p>
-                          <p className="text-sm">Capture or upload an image</p>
+                          <p className="text-sm">Capture or upload an image of the artifact</p>
                         </div>
                         <div className="flex gap-3">
                           <button
@@ -216,56 +244,50 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
                       </div>
                     )}
                     
-                    {/* Caption for image */}
+                    {/* Observation for image */}
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      placeholder="Add a caption (optional)"
+                      placeholder="Share your thoughts about this artifact..."
                       className="mt-4 w-full bg-transparent border-none outline-none resize-none text-neutral-text-primary placeholder-neutral-text-muted text-base"
                       disabled={isSaving}
                     />
                   </div>
                 )}
 
-                {/* Optional fields */}
-                <div className="mt-4 space-y-4">
+                {/* Creator field */}
+                <div className="mt-4">
                   <input
                     type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Title (optional)"
-                    className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base"
-                    disabled={isSaving}
-                  />
-                  <input
-                    type="text"
-                    value={source}
-                    onChange={(e) => setSource(e.target.value)}
-                    placeholder="Source (optional)"
+                    value={creator}
+                    onChange={(e) => setCreator(e.target.value)}
+                    placeholder="Creator (author, artist, director, etc.)"
                     className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base"
                     disabled={isSaving}
                   />
                 </div>
               </div>
+
+              {/* Hidden file inputs */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileInput}
+                accept="image/*"
+                className="hidden"
+                disabled={isSaving}
+              />
+              <input
+                type="file"
+                ref={cameraInputRef}
+                onChange={handleFileInput}
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                disabled={isSaving}
+              />
             </div>
           </motion.div>
-
-          {/* Hidden file inputs */}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileInput}
-            className="hidden"
-          />
-          <input
-            ref={cameraInputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileInput}
-            className="hidden"
-          />
         </>
       )}
     </AnimatePresence>

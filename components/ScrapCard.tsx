@@ -15,11 +15,19 @@ interface ScrapCardProps {
   onDelete: (scrapId: string) => void
   highlightedTitle?: ReactNode
   highlightedContent?: ReactNode
-  highlightedSource?: ReactNode
+  highlightedCreator?: ReactNode
   highlightedTags?: ReactNode[]
 }
 
-export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle, highlightedContent, highlightedSource, highlightedTags }: ScrapCardProps) {
+export default function ScrapCard({ 
+  scrap, 
+  onUpdate, 
+  onDelete, 
+  highlightedTitle, 
+  highlightedContent, 
+  highlightedCreator, 
+  highlightedTags 
+}: ScrapCardProps) {
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
@@ -87,7 +95,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
   if (!scrap) {
     return (
       <div className="bg-neutral-bg-card rounded-lg p-4 border border-neutral-border">
-        <p className="text-neutral-text-muted">Loading scrap...</p>
+        <p className="text-neutral-text-muted">Loading observation...</p>
       </div>
     )
   }
@@ -105,7 +113,7 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
             <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-lg">
               <Image
                 src={scrap.image_url || '/placeholder.jpg'}
-                alt={scrap.title || 'Scrap image'}
+                alt={scrap.title || 'Cultural artifact image'}
                 fill
                 className="object-cover"
                 unoptimized={true}
@@ -114,28 +122,35 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
             
             {/* Content Container */}
             <div className="p-4">
-              {/* Title - Priority 1 */}
+              {/* Title (Cultural Artifact Name) - Priority 1 */}
               {scrap.title && (
                 <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
                   {highlightedTitle ?? scrap.title}
                 </h3>
               )}
               
-              {/* Description - Priority 2 */}
+              {/* Medium - Priority 2 */}
+              {scrap.medium && (
+                <p className="text-xs text-neutral-text-muted mb-2">
+                  {scrap.medium}
+                </p>
+              )}
+              
+              {/* Observation - Priority 3 */}
               {scrap.content && (
                 <p className="text-xs text-neutral-text-secondary mb-2 line-clamp-3 leading-relaxed">
                   {highlightedContent ?? scrap.content}
                 </p>
               )}
               
-              {/* Source - Priority 3 */}
-              {scrap.source && (
+              {/* Creator - Priority 4 */}
+              {scrap.creator && (
                 <p className="text-xs text-neutral-text-secondary font-medium mb-2">
-                  {highlightedSource ?? scrap.source}
+                  by {highlightedCreator ?? scrap.creator}
                 </p>
               )}
               
-              {/* Meta + Actions - Priority 4 */}
+              {/* Meta + Actions - Priority 5 */}
               <div className="flex justify-between items-center">
                 <span className="text-xs text-neutral-text-muted">
                   {new Date(scrap.created_at).toLocaleDateString()}
@@ -146,34 +161,38 @@ export default function ScrapCard({ scrap, onUpdate, onDelete, highlightedTitle,
           </div>
         ) : (
           // Text Card Layout (Vertical with proper padding)
-          <div className="p-5 border-l-4 border-l-brand-primary">
-            {/* Title - Priority 1 */}
+          <div className="p-5">
+            {/* Title (Cultural Artifact Name) - Priority 1 */}
             {scrap.title && (
-              <h3 className="text-base font-semibold text-neutral-text-primary mb-3 line-clamp-2">
+              <h3 className="text-base font-semibold text-neutral-text-primary mb-2 line-clamp-2">
                 {highlightedTitle ?? scrap.title}
               </h3>
             )}
             
-            {/* Quote - Priority 2 */}
+            {/* Medium - Priority 2 */}
+            {scrap.medium && (
+              <p className="text-sm text-neutral-text-muted mb-3">
+                {scrap.medium}
+              </p>
+            )}
+            
+            {/* Observation - Priority 3 */}
             {scrap.content && (
-              <div className="relative mb-4">
-                <p className="text-base italic text-neutral-text-primary leading-relaxed line-clamp-3 pl-4">
-                  <span className="absolute left-0 top-0 text-neutral-text-muted">"</span>
+              <div className="mb-4">
+                <p className="text-base text-neutral-text-primary leading-relaxed line-clamp-3">
                   {highlightedContent ?? scrap.content}
-                  <span className="text-neutral-text-muted">"</span>
                 </p>
               </div>
             )}
             
-            {/* Attribution - Priority 3 */}
-            {scrap.source && (
-              <p className="text-sm text-neutral-text-secondary font-medium mb-3 pl-4">
-                <span className="text-neutral-text-muted">— </span>
-                {highlightedSource ?? scrap.source}
+            {/* Creator - Priority 4 */}
+            {scrap.creator && (
+              <p className="text-sm text-neutral-text-secondary font-medium mb-3">
+                by {highlightedCreator ?? scrap.creator}
               </p>
             )}
             
-            {/* Meta + Actions - Priority 4 */}
+            {/* Meta + Actions - Priority 5 */}
             <div className="flex justify-between items-center">
               <span className="text-xs text-neutral-text-muted">
                 {new Date(scrap.created_at).toLocaleDateString()}

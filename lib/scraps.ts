@@ -5,10 +5,11 @@ export interface Scrap {
   id: string
   user_id?: string
   type: 'image' | 'text'
-  title?: string
-  content?: string
+  title?: string  // Name of the cultural artifact
+  content?: string  // User's observation/reflection
   image_url?: string
-  source?: string
+  creator?: string  // Author, artist, director, etc.
+  medium?: string  // Book, film, artwork, etc.
   tags?: string[]
   created_at: string
   updated_at?: string
@@ -16,10 +17,11 @@ export interface Scrap {
 
 export interface CreateScrapData {
   type: 'text' | 'image'
-  title?: string
-  content?: string
+  title?: string  // Name of the cultural artifact
+  content?: string  // User's observation/reflection
   image_url?: string
-  source?: string
+  creator?: string  // Author, artist, director, etc.
+  medium?: string  // Book, film, artwork, etc.
   tags?: string[]
 }
 
@@ -79,7 +81,8 @@ export async function createScrap(data: CreateScrapData, imageFile?: File): Prom
         title: data.title,
         content: data.content,
         image_url: image_url,
-        source: data.source,
+        creator: data.creator,
+        medium: data.medium,
         tags: data.tags || []
       }
     ])
