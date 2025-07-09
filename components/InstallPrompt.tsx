@@ -62,6 +62,33 @@ export default function InstallPrompt() {
       return false
     }
 
+    // Detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const isAndroid = /Android/.test(navigator.userAgent)
+    
+    console.log(`PWA Debug: Device detection - Mobile: ${isMobile}, iOS: ${isIOS}, Android: ${isAndroid}`)
+    console.log(`PWA Debug: User Agent: ${navigator.userAgent}`)
+    console.log(`PWA Debug: Current URL: ${window.location.href}`)
+    console.log(`PWA Debug: Service Worker supported: ${'serviceWorker' in navigator}`)
+    
+    // Special handling for iOS
+    if (isIOS) {
+      console.log('PWA Debug: iOS detected - beforeinstallprompt event not supported')
+      // On iOS, we can't show custom install prompts since beforeinstallprompt doesn't fire
+      // Users must manually use "Add to Home Screen" from Safari menu
+      const isStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone
+      if (isStandalone) {
+        console.log('PWA Debug: iOS app running in standalone mode')
+        setIsInstalled(true)
+        return
+      } else {
+        console.log('PWA Debug: iOS app running in browser - install prompt not available')
+        console.log('PWA Debug: iOS users must manually use "Add to Home Screen" from Safari menu')
+        return
+      }
+    }
+
     const isAlreadyInstalled = checkInstalled()
 
     // Only set up install prompt listeners if not already installed
@@ -69,11 +96,29 @@ export default function InstallPrompt() {
       return
     }
 
+    // Set up timeout for Android to detect if beforeinstallprompt doesn't fire
+    let timeoutId: NodeJS.Timeout | null = null
+    if (isAndroid) {
+      console.log('PWA Debug: Android detected - setting up beforeinstallprompt listener with timeout')
+      timeoutId = setTimeout(() => {
+        if (!deferredPrompt) {
+          console.log('PWA Debug: Android - beforeinstallprompt event did not fire within 5 seconds')
+          console.log('PWA Debug: This might indicate PWA requirements are not met or app is already installed')
+        }
+      }, 5000)
+    }
+
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
       console.log('PWA Debug: beforeinstallprompt event received')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
+      
+      // Clear the timeout since we received the event
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
       
       // Show prompt after a delay to not be too aggressive
       setTimeout(() => {
@@ -101,8 +146,13 @@ export default function InstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
       window.removeEventListener('appinstalled', handleAppInstalled)
+      
+      // Clear timeout if it exists
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
     }
-  }, [])
+  }, [deferredPrompt])
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return
