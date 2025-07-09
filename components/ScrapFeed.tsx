@@ -145,10 +145,10 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   return (
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-4 max-w-5xl mx-auto"
-      initial="hidden"
-      animate="visible"
-      variants={{}}
+      className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-4 pb-20 max-w-5xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
     >
       {filteredScraps.map((scrap, i) => {
         const hasSearch = !!searchTerm
