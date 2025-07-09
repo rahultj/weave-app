@@ -8,6 +8,7 @@
   "theme_color": "#C85A5A",
   "orientation": "portrait-primary",
   "scope": "/",
+  "id": "weave-cultural-journal",
   "icons": [
     {
       "src": "/favicon-16x16.png",
@@ -53,6 +54,7 @@
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone"],
   "shortcuts": [
     {
       "name": "Add New Scrap",
@@ -65,20 +67,6 @@
           "sizes": "192x192"
         }
       ]
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "/screenshot-narrow.png", 
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
     }
   ]
 }

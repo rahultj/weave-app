@@ -17,21 +17,26 @@ export default function InstallPrompt() {
     // Check if app is already installed
     const checkInstalled = () => {
       if (window.matchMedia('(display-mode: standalone)').matches) {
+        console.log('PWA Debug: App already installed (standalone mode)')
         setIsInstalled(true)
         return
       }
       
       // Check for iOS standalone mode
       if ((window.navigator as Navigator & { standalone?: boolean }).standalone) {
+        console.log('PWA Debug: App already installed (iOS standalone)')
         setIsInstalled(true)
         return
       }
+      
+      console.log('PWA Debug: App not installed, waiting for beforeinstallprompt')
     }
 
     checkInstalled()
 
     // Listen for beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      console.log('PWA Debug: beforeinstallprompt event received')
       e.preventDefault()
       setDeferredPrompt(e as BeforeInstallPromptEvent)
       
@@ -39,13 +44,17 @@ export default function InstallPrompt() {
       setTimeout(() => {
         const dismissed = localStorage.getItem('weave-install-dismissed')
         if (!dismissed) {
+          console.log('PWA Debug: Showing custom install prompt')
           setShowPrompt(true)
+        } else {
+          console.log('PWA Debug: Install prompt previously dismissed')
         }
       }, 3000)
     }
 
     // Listen for app installed event
     const handleAppInstalled = () => {
+      console.log('PWA Debug: App installed successfully')
       setIsInstalled(true)
       setShowPrompt(false)
       setDeferredPrompt(null)

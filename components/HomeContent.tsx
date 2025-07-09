@@ -136,6 +136,10 @@ export default function HomeContent() {
           isOpen={isSignInModalOpen}
           onClose={() => setIsSignInModalOpen(false)}
         />
+
+        {/* PWA Components - Show for all users */}
+        <InstallPrompt />
+        <OfflineIndicator />
       </div>
     )
   }
