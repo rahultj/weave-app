@@ -137,11 +137,12 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: currentMessage,
+      content: currentMessage.trim(),
       sender: 'user',
       timestamp: new Date()
     }
 
+    // Update UI immediately with user message
     setMessages(prev => [...prev, userMessage])
     setCurrentMessage('')
     setIsLoading(true)
@@ -151,7 +152,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: currentMessage,
+          message: userMessage.content,
           scrap: scrap,
           chatHistory: messages
         })
@@ -167,12 +168,31 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         throw new Error(data.error || 'Failed to process chat request')
       }
 
-      // Load the updated chat history after receiving response
-      await loadChatHistory()
+      // Create AI message
+      const aiMessage: Message = {
+        id: Date.now().toString(),
+        content: data.response,
+        sender: 'ai',
+        timestamp: new Date()
+      }
+
+      // Update UI with AI response
+      const updatedMessages = [...messages, userMessage, aiMessage]
+      setMessages(updatedMessages)
+
+      // Save to database in the background
+      if (user && scrap.id) {
+        try {
+          await saveChatHistory(scrap.id, user.id, updatedMessages)
+        } catch (error) {
+          console.error('Error saving chat history:', error)
+          // Don't show error to user since the chat is still functional
+        }
+      }
     } catch (error) {
       console.error('Failed to send message:', error)
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: Date.now().toString(),
         content: 'Sorry, I encountered an error. Please try again.',
         sender: 'ai',
         timestamp: new Date()
