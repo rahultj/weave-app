@@ -59,41 +59,60 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [hasLoadedInitialHistory, setHasLoadedInitialHistory] = useState(false)
 
-  const loadChatHistory = async () => {
-    if (!user || !scrap.id) return
-    
-    setIsLoadingHistory(true)
-    try {
-      const history = await getChatHistory(scrap.id, user.id)
-      if (history) {
-        console.log('Loaded chat history:', history)
-        setMessages(history.messages)
-      } else {
-        console.log('No existing chat history found')
-        setMessages([])
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error)
-      setMessages([])
-    } finally {
-      setIsLoadingHistory(false)
-    }
-  }
-
   // Load chat history when modal opens or user changes
   useEffect(() => {
+    const loadChatHistory = async () => {
+      if (!user || !scrap.id) return
+      
+      setIsLoadingHistory(true)
+      try {
+        const history = await getChatHistory(scrap.id, user.id)
+        if (history) {
+          console.log('Loaded chat history:', history)
+          setMessages(history.messages)
+        } else {
+          console.log('No existing chat history found')
+          setMessages([])
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error)
+        setMessages([])
+      } finally {
+        setIsLoadingHistory(false)
+      }
+    }
+
     if (user && scrap.id && isOpen && !hasLoadedInitialHistory) {
       loadChatHistory()
       setHasLoadedInitialHistory(true)
     }
-  }, [user, scrap.id, isOpen, loadChatHistory, hasLoadedInitialHistory])
+  }, [user, scrap.id, isOpen, hasLoadedInitialHistory])
 
-  // Reset hasLoadedInitialHistory when modal closes
+  // Reset hasLoadedInitialHistory when modal closes or user changes
   useEffect(() => {
     if (!isOpen) {
       setHasLoadedInitialHistory(false)
+      setMessages([]) // Clear messages when modal closes
     }
   }, [isOpen])
+
+  // Reset history when user changes
+  useEffect(() => {
+    console.log('User changed:', user?.id)
+    setHasLoadedInitialHistory(false)
+    setMessages([]) // Clear messages when user changes
+  }, [user?.id])
+
+  // Debug logging for user state changes
+  useEffect(() => {
+    console.log('ChatModal: User state changed', { 
+      userId: user?.id, 
+      isOpen, 
+      scrapId: scrap.id, 
+      hasLoadedInitialHistory,
+      messageCount: messages.length 
+    })
+  }, [user, isOpen, scrap.id, hasLoadedInitialHistory, messages.length])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

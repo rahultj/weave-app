@@ -94,6 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     setLoading(true)
+    // Clear localStorage when signing out
+    localStorage.removeItem('rememberMe')
     const { error } = await supabase.auth.signOut()
     setLoading(false)
     if (error) throw error
