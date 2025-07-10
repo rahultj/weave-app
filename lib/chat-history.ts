@@ -35,37 +35,15 @@ function deserializeMessages(messages: any[]): ChatMessage[] {
 
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
   console.log('Fetching chat history for:', { scrapId, userId })
+  console.log('User ID type:', typeof userId, 'Scrap ID type:', typeof scrapId)
   
-  // First, let's test if we can access the table at all
   try {
-    console.log('Testing database connection...')
-    const { data: testData, error: testError } = await supabase
-      .from('chat_history')
-      .select('count')
-      .limit(1)
-    
-    if (testError) {
-      console.error('Database connection test failed:', testError)
-      console.error('Error details:', {
-        code: testError.code,
-        message: testError.message,
-        details: testError.details,
-        hint: testError.hint
-      })
-    } else {
-      console.log('Database connection test passed')
-    }
-  } catch (error) {
-    console.error('Database connection test error:', error)
-  }
-
-  try {
+    // Try without .single() first to see if we get any results
     const { data, error } = await supabase
       .from('chat_history')
       .select('*')
       .eq('scrap_id', scrapId)
       .eq('user_id', userId)
-      .single()
 
     if (error) {
       console.error('Detailed error information:', {
@@ -75,29 +53,34 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
         hint: error.hint,
         statusCode: (error as any).statusCode
       })
-      
-      if (error.code === 'PGRST116') {
-        console.log('No existing chat history found (expected for new conversations)')
-        return null
-      }
       console.error('Error in getChatHistory:', error)
-      throw error
+      return null
     }
 
-    if (!data || !data.user_id || !data.scrap_id) {
+    console.log('Query result:', { dataLength: data?.length, data })
+
+    if (!data || data.length === 0) {
+      console.log('No existing chat history found (expected for new conversations)')
+      return null
+    }
+
+    // Take the first result (should only be one anyway)
+    const chatData = data[0]
+    
+    if (!chatData || !chatData.user_id || !chatData.scrap_id) {
       console.log('No valid chat history data found')
       return null
     }
 
-    console.log('Found chat history:', data)
+    console.log('Found chat history:', chatData)
 
     return {
-      id: data.id,
-      user_id: data.user_id,
-      scrap_id: data.scrap_id,
-      messages: deserializeMessages(data.messages as any[]),
-      created_at: data.created_at || new Date().toISOString(),
-      updated_at: data.updated_at || new Date().toISOString()
+      id: chatData.id,
+      user_id: chatData.user_id,
+      scrap_id: chatData.scrap_id,
+      messages: deserializeMessages(chatData.messages as any[]),
+      created_at: chatData.created_at || new Date().toISOString(),
+      updated_at: chatData.updated_at || new Date().toISOString()
     }
   } catch (error) {
     console.error('Error fetching chat history:', error)
