@@ -110,20 +110,22 @@ export async function saveChatHistory(
       .eq('scrap_id', scrapId)
       .eq('user_id', userId)
       .select()
-      .single()
 
     if (updateError) {
-      console.log('No existing chat history to update, creating new one')
-    } else if (updateData && updateData.user_id && updateData.scrap_id) {
+      console.log('Update failed, will create new one. Error:', updateError)
+    } else if (updateData && updateData.length > 0) {
+      const updatedRecord = updateData[0]
       console.log('Successfully updated existing chat history')
       return {
-        id: updateData.id,
-        user_id: updateData.user_id,
-        scrap_id: updateData.scrap_id,
-        messages: deserializeMessages(updateData.messages as any[]),
-        created_at: updateData.created_at || new Date().toISOString(),
-        updated_at: updateData.updated_at || new Date().toISOString()
+        id: updatedRecord.id,
+        user_id: updatedRecord.user_id || '',
+        scrap_id: updatedRecord.scrap_id || '',
+        messages: deserializeMessages(updatedRecord.messages as any[]),
+        created_at: updatedRecord.created_at || new Date().toISOString(),
+        updated_at: updatedRecord.updated_at || new Date().toISOString()
       }
+    } else {
+      console.log('No existing chat history to update, creating new one')
     }
 
     // If no existing chat history, create new one
@@ -153,8 +155,8 @@ export async function saveChatHistory(
     console.log('Successfully created new chat history')
     return {
       id: insertData.id,
-      user_id: insertData.user_id,
-      scrap_id: insertData.scrap_id,
+      user_id: insertData.user_id || '',
+      scrap_id: insertData.scrap_id || '',
       messages: deserializeMessages(insertData.messages as any[]),
       created_at: insertData.created_at || new Date().toISOString(),
       updated_at: insertData.updated_at || new Date().toISOString()
