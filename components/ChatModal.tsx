@@ -163,8 +163,11 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       timestamp: new Date()
     }
 
+    // Create the messages array with the new user message for API call
+    const messagesWithUserMessage = [...messages, userMessage]
+    
     // Update UI immediately with user message
-    setMessages(prev => [...prev, userMessage])
+    setMessages(messagesWithUserMessage)
     setCurrentMessage('')
     setIsLoading(true)
 
@@ -175,7 +178,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         body: JSON.stringify({
           message: userMessage.content,
           scrap: scrap,
-          chatHistory: messages
+          chatHistory: messagesWithUserMessage
         })
       })
 
@@ -198,13 +201,15 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       }
 
       // Update UI with AI response
-      const updatedMessages = [...messages, userMessage, aiMessage]
+      const updatedMessages = [...messagesWithUserMessage, aiMessage]
       setMessages(updatedMessages)
 
       // Save to database in the background
       if (user && scrap.id) {
         try {
+          console.log('Saving chat history with', updatedMessages.length, 'messages')
           await saveChatHistory(scrap.id, user.id, updatedMessages)
+          console.log('Chat history saved successfully')
         } catch (error) {
           console.error('Error saving chat history:', error)
           // Don't show error to user since the chat is still functional

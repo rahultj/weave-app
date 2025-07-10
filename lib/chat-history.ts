@@ -94,9 +94,11 @@ export async function saveChatHistory(
   messages: ChatMessage[]
 ): Promise<ChatHistory | null> {
   console.log('Saving chat history:', { scrapId, userId, messageCount: messages.length })
+  console.log('Messages to save:', messages.map(m => ({ sender: m.sender, content: m.content.substring(0, 50) + '...' })))
   try {
     // Serialize messages for storage
     const messagesForStorage = serializeMessages(messages)
+    console.log('Serialized messages:', messagesForStorage.length, 'items')
 
     // Try to update existing chat history first
     const { data: updateData, error: updateError } = await supabase
