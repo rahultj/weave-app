@@ -57,9 +57,9 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [hasLoadedInitialHistory, setHasLoadedInitialHistory] = useState(false)
 
-  // Load chat history when modal opens or user changes
+
+  // Load chat history when modal opens or user/scrap changes
   useEffect(() => {
     const loadChatHistory = async () => {
       if (!user || !scrap.id) return
@@ -82,27 +82,18 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       }
     }
 
-    if (user && scrap.id && isOpen && !hasLoadedInitialHistory) {
+    if (user && scrap.id && isOpen) {
       console.log('Loading chat history for scrap:', scrap.id)
       loadChatHistory()
-      setHasLoadedInitialHistory(true)
     }
-  }, [user, scrap.id, isOpen, hasLoadedInitialHistory])
+  }, [user?.id, scrap.id, isOpen])
 
-  // Reset hasLoadedInitialHistory when modal closes (but keep messages)
+  // Clear messages when modal closes to ensure fresh load next time
   useEffect(() => {
     if (!isOpen) {
-      setHasLoadedInitialHistory(false)
-      // Don't clear messages - they should persist when modal is closed and reopened
+      setMessages([])
     }
   }, [isOpen])
-
-  // Reset history when user changes
-  useEffect(() => {
-    console.log('User changed:', user?.id)
-    setHasLoadedInitialHistory(false)
-    setMessages([]) // Clear messages when user changes
-  }, [user?.id])
 
   // Debug logging for important state changes
   useEffect(() => {
@@ -110,11 +101,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       console.log('ChatModal opened:', { 
         userId: user?.id, 
         scrapId: scrap.id, 
-        hasLoadedInitialHistory,
         messageCount: messages.length 
       })
     }
-  }, [isOpen, user?.id, scrap.id, hasLoadedInitialHistory, messages.length])
+  }, [isOpen, user?.id, scrap.id, messages.length])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

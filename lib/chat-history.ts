@@ -19,6 +19,7 @@ export interface ChatHistory {
 
 // Helper function to serialize dates for storage
 function serializeMessages(messages: ChatMessage[]): any[] {
+  console.log('Serializing messages:', messages.length)
   return messages.map(msg => ({
     ...msg,
     timestamp: msg.timestamp.toISOString()
@@ -27,6 +28,7 @@ function serializeMessages(messages: ChatMessage[]): any[] {
 
 // Helper function to deserialize dates from storage
 function deserializeMessages(messages: any[]): ChatMessage[] {
+  console.log('Deserializing messages:', messages.length)
   return messages.map(msg => ({
     ...msg,
     timestamp: new Date(msg.timestamp)
@@ -34,56 +36,62 @@ function deserializeMessages(messages: any[]): ChatMessage[] {
 }
 
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
-  console.log('Fetching chat history for:', { scrapId, userId })
-  console.log('User ID type:', typeof userId, 'Scrap ID type:', typeof scrapId)
+  console.log('getChatHistory called with:', { scrapId, userId })
+  
+  // Validate inputs
+  if (!scrapId || !userId) {
+    console.error('Missing required parameters:', { scrapId, userId })
+    return null
+  }
   
   try {
-    // Try without .single() first to see if we get any results
+    console.log('Executing Supabase query...')
     const { data, error } = await supabase
       .from('chat_history')
       .select('*')
       .eq('scrap_id', scrapId)
       .eq('user_id', userId)
 
-    if (error) {
-      console.error('Detailed error information:', {
+    console.log('Supabase query completed:', { 
+      error: error ? { 
+        message: error.message, 
         code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        statusCode: (error as any).statusCode
-      })
-      console.error('Error in getChatHistory:', error)
+        details: error.details 
+      } : null,
+      dataCount: data?.length || 0
+    })
+
+    if (error) {
+      console.error('Supabase error:', error)
       return null
     }
-
-    console.log('Query result:', { dataLength: data?.length, data })
 
     if (!data || data.length === 0) {
-      console.log('No existing chat history found (expected for new conversations)')
+      console.log('No chat history found (this is normal for new conversations)')
       return null
     }
 
-    // Take the first result (should only be one anyway)
     const chatData = data[0]
-    
-    if (!chatData || !chatData.user_id || !chatData.scrap_id) {
-      console.log('No valid chat history data found')
+    console.log('Processing chat data:', { 
+      id: chatData.id, 
+      messageCount: Array.isArray(chatData.messages) ? chatData.messages.length : 'not array' 
+    })
+
+    if (!chatData.messages || !Array.isArray(chatData.messages)) {
+      console.error('Invalid messages data:', chatData.messages)
       return null
     }
-
-    console.log('Found chat history:', chatData)
 
     return {
       id: chatData.id,
-      user_id: chatData.user_id,
-      scrap_id: chatData.scrap_id,
-      messages: deserializeMessages(chatData.messages as any[]),
+      user_id: chatData.user_id || '',
+      scrap_id: chatData.scrap_id || '',
+      messages: deserializeMessages(chatData.messages),
       created_at: chatData.created_at || new Date().toISOString(),
       updated_at: chatData.updated_at || new Date().toISOString()
     }
   } catch (error) {
-    console.error('Error fetching chat history:', error)
+    console.error('Unexpected error in getChatHistory:', error)
     return null
   }
 }
@@ -93,14 +101,24 @@ export async function saveChatHistory(
   userId: string, 
   messages: ChatMessage[]
 ): Promise<ChatHistory | null> {
-  console.log('Saving chat history:', { scrapId, userId, messageCount: messages.length })
-  console.log('Messages to save:', messages.map(m => ({ sender: m.sender, content: m.content.substring(0, 50) + '...' })))
-  try {
-    // Serialize messages for storage
-    const messagesForStorage = serializeMessages(messages)
-    console.log('Serialized messages:', messagesForStorage.length, 'items')
+  console.log('saveChatHistory called with:', { 
+    scrapId, 
+    userId, 
+    messageCount: messages.length 
+  })
+  
+  // Validate inputs
+  if (!scrapId || !userId || !Array.isArray(messages)) {
+    console.error('Invalid parameters:', { scrapId, userId, messages: Array.isArray(messages) })
+    return null
+  }
 
-    // Try to update existing chat history first
+  try {
+    const messagesForStorage = serializeMessages(messages)
+    console.log('Prepared messages for storage:', messagesForStorage.length)
+
+    // Try to update existing record first
+    console.log('Attempting to update existing chat history...')
     const { data: updateData, error: updateError } = await supabase
       .from('chat_history')
       .update({ 
@@ -112,10 +130,10 @@ export async function saveChatHistory(
       .select()
 
     if (updateError) {
-      console.log('Update failed, will create new one. Error:', updateError)
+      console.log('Update failed, will try insert:', updateError.message)
     } else if (updateData && updateData.length > 0) {
-      const updatedRecord = updateData[0]
       console.log('Successfully updated existing chat history')
+      const updatedRecord = updateData[0]
       return {
         id: updatedRecord.id,
         user_id: updatedRecord.user_id || '',
@@ -124,12 +142,10 @@ export async function saveChatHistory(
         created_at: updatedRecord.created_at || new Date().toISOString(),
         updated_at: updatedRecord.updated_at || new Date().toISOString()
       }
-    } else {
-      console.log('No existing chat history to update, creating new one')
     }
 
-    // If no existing chat history, create new one
-    console.log('Creating new chat history')
+    // Create new record
+    console.log('Creating new chat history record...')
     const { data: insertData, error: insertError } = await supabase
       .from('chat_history')
       .insert({
@@ -143,12 +159,7 @@ export async function saveChatHistory(
       .single()
 
     if (insertError) {
-      console.error('Error creating new chat history:', insertError)
-      throw insertError
-    }
-    
-    if (!insertData || !insertData.user_id || !insertData.scrap_id) {
-      console.error('Failed to create chat history - no data returned')
+      console.error('Insert error:', insertError)
       return null
     }
 
@@ -162,12 +173,19 @@ export async function saveChatHistory(
       updated_at: insertData.updated_at || new Date().toISOString()
     }
   } catch (error) {
-    console.error('Error saving chat history:', error)
+    console.error('Unexpected error in saveChatHistory:', error)
     return null
   }
 }
 
 export async function deleteChatHistory(scrapId: string, userId: string): Promise<boolean> {
+  console.log('deleteChatHistory called with:', { scrapId, userId })
+  
+  if (!scrapId || !userId) {
+    console.error('Missing required parameters for delete')
+    return false
+  }
+
   try {
     const { error } = await supabase
       .from('chat_history')
@@ -175,10 +193,15 @@ export async function deleteChatHistory(scrapId: string, userId: string): Promis
       .eq('scrap_id', scrapId)
       .eq('user_id', userId)
 
-    if (error) throw error
+    if (error) {
+      console.error('Delete error:', error)
+      return false
+    }
+
+    console.log('Successfully deleted chat history')
     return true
   } catch (error) {
-    console.error('Error deleting chat history:', error)
+    console.error('Unexpected error in deleteChatHistory:', error)
     return false
   }
 } 
