@@ -38,20 +38,21 @@ function deserializeMessages(messages: any[]): ChatMessage[] {
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
   console.log('getChatHistory called with:', { scrapId, userId })
   
+  // Validate inputs
   if (!scrapId || !userId) {
     console.error('Missing required parameters:', { scrapId, userId })
     return null
   }
   
   try {
-    // Get the most recent record (in case there are duplicates)
+    console.log('Executing Supabase query...')
     const { data, error } = await supabase
       .from('chat_history')
       .select('*')
       .eq('scrap_id', scrapId)
       .eq('user_id', userId)
-      .order('updated_at', { ascending: false })  // ← Get most recent
-      .limit(1)
+      .order('updated_at', { ascending: false })  // ← NEW: Get most recent record
+      .limit(1)  // ← NEW: Only get one record
 
     console.log('Supabase query completed:', { 
       error: error ? { 
@@ -68,12 +69,32 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
     }
 
     if (!data || data.length === 0) {
-      console.log('No chat history found')
+      console.log('No chat history found (this is normal for new conversations)')
       return null
     }
 
-    const chatData = data[0]  // Now this is the most recent one
-    // ... rest of function stays the same
+    const chatData = data[0]
+    console.log('Processing chat data:', { 
+      id: chatData.id, 
+      messageCount: Array.isArray(chatData.messages) ? chatData.messages.length : 'not array' 
+    })
+
+    if (!chatData.messages || !Array.isArray(chatData.messages)) {
+      console.error('Invalid messages data:', chatData.messages)
+      return null
+    }
+
+    return {
+      id: chatData.id,
+      user_id: chatData.user_id || '',
+      scrap_id: chatData.scrap_id || '',
+      messages: deserializeMessages(chatData.messages),
+      created_at: chatData.created_at || new Date().toISOString(),
+      updated_at: chatData.updated_at || new Date().toISOString()
+    }
+  } catch (error) {
+    console.error('Unexpected error in getChatHistory:', error)
+    return null
   }
 }
 
