@@ -35,6 +35,30 @@ function deserializeMessages(messages: any[]): ChatMessage[] {
 
 export async function getChatHistory(scrapId: string, userId: string): Promise<ChatHistory | null> {
   console.log('Fetching chat history for:', { scrapId, userId })
+  
+  // First, let's test if we can access the table at all
+  try {
+    console.log('Testing database connection...')
+    const { data: testData, error: testError } = await supabase
+      .from('chat_history')
+      .select('count')
+      .limit(1)
+    
+    if (testError) {
+      console.error('Database connection test failed:', testError)
+      console.error('Error details:', {
+        code: testError.code,
+        message: testError.message,
+        details: testError.details,
+        hint: testError.hint
+      })
+    } else {
+      console.log('Database connection test passed')
+    }
+  } catch (error) {
+    console.error('Database connection test error:', error)
+  }
+
   try {
     const { data, error } = await supabase
       .from('chat_history')
@@ -44,8 +68,16 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
       .single()
 
     if (error) {
+      console.error('Detailed error information:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        statusCode: (error as any).statusCode
+      })
+      
       if (error.code === 'PGRST116') {
-        console.log('No existing chat history found')
+        console.log('No existing chat history found (expected for new conversations)')
         return null
       }
       console.error('Error in getChatHistory:', error)
