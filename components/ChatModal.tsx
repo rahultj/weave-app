@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChatHistory, saveChatHistory, deleteChatHistory } from '@/lib/chat-history'
-import { SkeletonMessage } from './Skeleton'
+
 import EmptyState from './EmptyState'
 
 interface Message {
@@ -53,7 +53,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [currentMessage, setCurrentMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+
   const [showClearConfirm, setShowClearConfirm] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -64,7 +64,6 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     const loadChatHistory = async () => {
       if (!user || !scrap.id) return
       
-      setIsLoadingHistory(true)
       try {
         const history = await getChatHistory(scrap.id, user.id)
         if (history) {
@@ -77,8 +76,6 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       } catch (error) {
         console.error('Error loading chat history:', error)
         setMessages([])
-      } finally {
-        setIsLoadingHistory(false)
       }
     }
 
@@ -266,7 +263,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             className="fixed inset-0 bg-black/20 z-40"
             onClick={onClose}
           />
@@ -276,10 +273,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
             initial={{ opacity: 0, y: '100%' }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: '100%' }}
-            transition={{ duration: 0.32, ease: [0.4, 0, 0.2, 1] }}
-            className="fixed inset-x-0 bottom-0 z-50 md:static md:inset-auto md:flex md:items-center md:justify-center"
+            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-x-0 bottom-0 z-50 md:fixed md:inset-0 md:flex md:items-center md:justify-center md:p-4"
           >
-            <div className="bg-neutral-bg-main w-full max-w-lg max-h-[90vh] md:max-h-[80vh] rounded-t-xl md:rounded-xl shadow-xl overflow-hidden flex flex-col">
+            <div className="bg-neutral-bg-main w-full max-w-lg max-h-[90vh] md:max-h-[80vh] rounded-t-xl md:rounded-xl shadow-xl overflow-hidden flex flex-col md:mx-auto">
               {/* Header */}
               <div className="flex items-center justify-between px-4 py-4 border-b border-neutral-border bg-neutral-bg-card rounded-t-xl safe-top">
                 <motion.button
@@ -328,13 +325,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
 
               {/* Messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                {isLoadingHistory ? (
-                  <div className="space-y-6">
-                    <SkeletonMessage isUser={false} />
-                    <SkeletonMessage isUser={true} />
-                    <SkeletonMessage isUser={false} />
-                  </div>
-                ) : messages.length === 0 ? (
+                {messages.length === 0 ? (
                   <EmptyState
                     icon={MessageCircle}
                     title="Start a conversation"
