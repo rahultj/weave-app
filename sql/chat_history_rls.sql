@@ -1,6 +1,22 @@
 -- Add unique constraint to prevent duplicate chat histories per scrap/user combination
-ALTER TABLE chat_history ADD CONSTRAINT chat_history_scrap_user_unique 
-  UNIQUE (scrap_id, user_id);
+-- NOTE: Run cleanup_duplicate_chat_history.sql first if this fails due to existing duplicates
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint 
+    WHERE conname = 'chat_history_scrap_user_unique'
+  ) THEN
+    ALTER TABLE chat_history ADD CONSTRAINT chat_history_scrap_user_unique 
+      UNIQUE (scrap_id, user_id);
+    RAISE NOTICE 'Added unique constraint chat_history_scrap_user_unique';
+  ELSE
+    RAISE NOTICE 'Unique constraint chat_history_scrap_user_unique already exists';
+  END IF;
+EXCEPTION
+  WHEN unique_violation THEN
+    RAISE NOTICE 'Cannot add unique constraint due to existing duplicates. Run cleanup_duplicate_chat_history.sql first.';
+    RAISE;
+END $$;
 
 -- Enable RLS on chat_history table
 ALTER TABLE chat_history ENABLE ROW LEVEL SECURITY;
