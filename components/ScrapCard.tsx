@@ -8,6 +8,7 @@ import ChatModal from './ChatModal'
 import EditScrapModal from './EditScrapModal'
 import { Scrap, deleteScrap } from '@/lib/scraps'
 import { ReactNode } from 'react'
+import ErrorBoundary, { ChatErrorFallback, ModalErrorFallback } from './ErrorBoundary'
 
 interface ScrapCardProps {
   scrap: Scrap
@@ -202,18 +203,22 @@ export default function ScrapCard({
         )}
       </motion.div>
 
-      <ChatModal 
-        isOpen={isChatOpen}
-        onClose={() => setIsChatOpen(false)}
-        scrap={scrap}
-      />
+      <ErrorBoundary FallbackComponent={ChatErrorFallback}>
+        <ChatModal 
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          scrap={scrap}
+        />
+      </ErrorBoundary>
 
-      <EditScrapModal
-        isOpen={isEditOpen}
-        onClose={() => setIsEditOpen(false)}
-        scrap={scrap}
-        onUpdate={onUpdate}
-      />
+      <ErrorBoundary FallbackComponent={ModalErrorFallback}>
+        <EditScrapModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          scrap={scrap}
+          onUpdate={onUpdate}
+        />
+      </ErrorBoundary>
     </>
   )
 }

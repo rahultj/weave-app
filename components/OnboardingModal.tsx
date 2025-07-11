@@ -81,7 +81,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-6"
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-6 max-h-[90vh] overflow-y-auto"
       >
         {/* Close button */}
         <button

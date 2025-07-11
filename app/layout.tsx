@@ -2,6 +2,11 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
+import ErrorBoundary from '@/components/ErrorBoundary'
+import { validateEnv } from '@/lib/env'
+
+// Validate environment variables on app startup
+validateEnv()
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -9,8 +14,15 @@ export const metadata: Metadata = {
   title: 'Weave - Your Cultural Journal',
   description: 'A personal space to capture and explore cultural discoveries - books, films, art, and more',
   manifest: '/manifest.json',
-  themeColor: '#C85A5A',
-  viewport: 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover',
+  icons: {
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
@@ -46,15 +58,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  icons: {
-    icon: [
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-    ],
-  },
   other: {
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
@@ -64,6 +67,17 @@ export const metadata: Metadata = {
     'msapplication-TileColor': '#C85A5A',
     'msapplication-config': '/browserconfig.xml',
   },
+}
+
+export function generateViewport() {
+  return {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
+    themeColor: '#C85A5A',
+  }
 }
 
 export default function RootLayout({
@@ -88,11 +102,13 @@ export default function RootLayout({
         <link rel="manifest" href="/manifest.json" />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
-          <div className="min-h-screen bg-neutral-bg-main">
-            {children}
-          </div>
-        </AuthProvider>
+        <ErrorBoundary>
+          <AuthProvider>
+            <div className="min-h-screen bg-neutral-bg-main">
+              {children}
+            </div>
+          </AuthProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

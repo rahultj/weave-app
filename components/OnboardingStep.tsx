@@ -20,10 +20,10 @@ export default function OnboardingStep({ icon, title, description, isActive }: O
       <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
         {icon}
       </div>
-      <h3 className="text-xl font-semibold text-neutral-text-primary mb-3">
+      <h3 className="text-lg sm:text-xl font-semibold text-neutral-text-primary mb-3 px-2">
         {title}
       </h3>
-      <p className="text-neutral-text-secondary max-w-sm mx-auto">
+      <p className="text-sm sm:text-base text-neutral-text-secondary max-w-sm mx-auto px-2 leading-relaxed">
         {description}
       </p>
     </motion.div>

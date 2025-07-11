@@ -172,11 +172,15 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         })
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          throw new Error(data.error || 'Rate limit exceeded. Please wait a moment before sending another message.')
+        }
         throw new Error('Failed to get response from chat API')
       }
-
-      const data = await response.json()
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to process chat request')
@@ -207,9 +211,16 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       }
     } catch (error) {
       console.error('Failed to send message:', error)
+      
+      // Check if it's a rate limiting error
+      const isRateLimitError = error instanceof Error && 
+        error.message.includes('Rate limit exceeded')
+      
       const errorMessage: Message = {
         id: Date.now().toString(),
-        content: 'Sorry, I encountered an error. Please try again.',
+        content: isRateLimitError 
+          ? 'You\'ve sent too many messages recently. Please wait a moment before sending another message.'
+          : 'Sorry, I encountered an error. Please try again.',
         sender: 'ai',
         timestamp: new Date()
       }
