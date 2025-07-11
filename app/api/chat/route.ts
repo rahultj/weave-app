@@ -100,10 +100,69 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Build context about the scrap
-    const scrapContext = scrap.type === 'text' 
-      ? `A quote/thought: "${scrap.content}" from ${scrap.source || 'unknown source'}`
-      : `An image scrap titled "${scrap.title}" with description: "${scrap.content}" from ${scrap.source || 'unknown source'}`
+    // Build comprehensive context about the scrap
+    const buildScrapContext = (scrap: {
+      id: string
+      title?: string | null
+      content?: string | null
+      source?: string | null
+      tags?: string[] | null
+      type: string
+      image_url?: string | null
+      created_at?: string | null
+    }) => {
+      const parts = []
+      
+      // Start with the type and title
+      if (scrap.title) {
+        parts.push(`Title: "${scrap.title}"`)
+      }
+      
+      // Add content type information
+      if (scrap.type === 'text') {
+        parts.push(`Content Type: Text/Quote`)
+      } else if (scrap.type === 'image') {
+        parts.push(`Content Type: Image`)
+      } else {
+        parts.push(`Content Type: ${scrap.type}`)
+      }
+      
+      // Add source/creator information
+      if (scrap.source) {
+        parts.push(`Source/Creator: ${scrap.source}`)
+      }
+      
+      // Add tags/categories
+      if (scrap.tags && scrap.tags.length > 0) {
+        parts.push(`Categories: ${scrap.tags.join(', ')}`)
+      }
+      
+      // Add the actual content
+      if (scrap.content) {
+        if (scrap.type === 'text') {
+          parts.push(`Quote/Content: "${scrap.content}"`)
+        } else if (scrap.type === 'image') {
+          parts.push(`Image Description: "${scrap.content}"`)
+        } else {
+          parts.push(`Content: "${scrap.content}"`)
+        }
+      }
+      
+      // Add image URL info for image scraps
+      if (scrap.type === 'image' && scrap.image_url) {
+        parts.push(`Image URL: Available`)
+      }
+      
+      // Add creation date for context
+      if (scrap.created_at) {
+        const createdDate = new Date(scrap.created_at).toLocaleDateString()
+        parts.push(`Added to collection: ${createdDate}`)
+      }
+      
+      return parts.join('\n')
+    }
+
+    const scrapContext = buildScrapContext(scrap)
 
     // Build conversation history for Claude
     const conversationHistory = chatHistory.map((msg: { sender: string; content: string }) => {
@@ -118,8 +177,13 @@ When responding:
 - Focus on the most interesting or relevant point first
 - If suggesting related content, limit to 1-2 specific recommendations
 - Avoid abstract or overly academic language
+- Reference specific details from their saved item when relevant (title, creator, content type, etc.)
 
-The user has saved this in their collection: ${scrapContext}
+The user is asking about this item from their collection:
+
+${scrapContext}
+
+When they ask questions like "what is this about?", "tell me more about this", or "who created this?", use the specific information provided above to give detailed, contextual answers.
 
 ${conversationHistory ? `Previous conversation:\n${conversationHistory}` : ''}
 
