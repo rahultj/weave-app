@@ -3,18 +3,78 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { saveChatHistory } from '@/lib/chat-history'
+import { getEnv } from '@/lib/env'
 
 const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY
+  apiKey: getEnv().ANTHROPIC_API_KEY
 })
 
-export async function POST(request: NextRequest) {
-  console.log('API route called') // Debug log
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute in milliseconds
+const RATE_LIMIT_MAX_REQUESTS = 10 // 10 requests per minute per user
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000 // Clean up every 5 minutes
+
+// Rate limiting storage: Map<userId, { requests: timestamp[], lastCleanup: timestamp }>
+interface RateLimitData {
+  requests: number[]
+  lastCleanup: number
+}
+
+const rateLimitStore = new Map<string, RateLimitData>()
+
+// Cleanup old rate limit entries
+function cleanupRateLimitStore() {
+  const now = Date.now()
+  const cutoffTime = now - RATE_LIMIT_WINDOW_MS
   
+  for (const [userId, data] of rateLimitStore.entries()) {
+    // Remove old requests
+    data.requests = data.requests.filter(timestamp => timestamp > cutoffTime)
+    
+    // Remove users with no recent requests
+    if (data.requests.length === 0) {
+      rateLimitStore.delete(userId)
+    } else {
+      // Update last cleanup time
+      data.lastCleanup = now
+    }
+  }
+}
+
+// Check if user is rate limited
+function isRateLimited(userId: string): boolean {
+  const now = Date.now()
+  const cutoffTime = now - RATE_LIMIT_WINDOW_MS
+  
+  // Get or create user data
+  let userData = rateLimitStore.get(userId)
+  if (!userData) {
+    userData = { requests: [], lastCleanup: now }
+    rateLimitStore.set(userId, userData)
+  }
+  
+  // Clean up old requests for this user
+  userData.requests = userData.requests.filter(timestamp => timestamp > cutoffTime)
+  
+  // Check if user has exceeded rate limit
+  if (userData.requests.length >= RATE_LIMIT_MAX_REQUESTS) {
+    return true
+  }
+  
+  // Add current request
+  userData.requests.push(now)
+  
+  // Periodic cleanup (every 5 minutes)
+  if (now - userData.lastCleanup > CLEANUP_INTERVAL_MS) {
+    cleanupRateLimitStore()
+  }
+  
+  return false
+}
+
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    console.log('Request body:', body) // Debug log
-    
     const { message, scrap, chatHistory } = body
 
     // Get the authenticated user
@@ -25,6 +85,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized', success: false },
         { status: 401 }
+      )
+    }
+
+    // Rate limiting check
+    if (isRateLimited(user.id)) {
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded. Please wait a moment before sending another message.',
+          success: false,
+          rateLimitExceeded: true
+        },
+        { status: 429 }
       )
     }
 
@@ -66,20 +138,6 @@ A:`
         }
       ]
     })
-
-    // Debug: Log the full response from Anthropic
-    console.log('Claude API raw response:', JSON.stringify(response, null, 2));
-    // Try to log possible text locations
-    if (Array.isArray(response.content) && response.content.length > 0) {
-      const firstBlock = response.content[0];
-      if ('text' in firstBlock && typeof firstBlock.text === 'string') {
-        console.log('Claude API text:', firstBlock.text);
-      } else {
-        console.log('Claude API first block (no text):', firstBlock);
-      }
-    }
-    console.log('Claude API content:', response.content)
-    console.log('Claude API content block type:', response.content?.[0]?.type);
     
     // Safely extract the AI text from the response
     let aiText = '';
@@ -87,13 +145,11 @@ A:`
       const firstBlock = response.content[0];
       if ('text' in firstBlock && typeof firstBlock.text === 'string') {
         aiText = firstBlock.text;
-        console.log('Claude API text:', aiText);
       } else {
-        aiText = JSON.stringify(firstBlock);
-        console.log('Claude API first block (no text):', firstBlock);
+        aiText = 'I apologize, but I encountered an error processing your request.';
       }
     } else {
-      console.log('Claude API content is empty or not an array:', response.content);
+      aiText = 'I apologize, but I encountered an error processing your request.';
     }
 
     // Save the updated chat history to the database

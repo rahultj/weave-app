@@ -1,137 +1,224 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { Edit3, Trash2, Rabbit } from 'lucide-react'
-import { Scrap } from '@/lib/scraps'
+import { useState } from 'react'
 import Image from 'next/image'
+import { motion } from 'framer-motion'
+import { MessageCircle, Trash2, Edit3 } from 'lucide-react'
+import ChatModal from './ChatModal'
+import EditScrapModal from './EditScrapModal'
+import { Scrap, deleteScrap } from '@/lib/scraps'
+import { ReactNode } from 'react'
+import ErrorBoundary, { ChatErrorFallback, ModalErrorFallback } from './ErrorBoundary'
 
 interface ScrapCardProps {
   scrap: Scrap
-  onUpdate: (scrap: Scrap) => void
-  onDelete: (id: string) => void
-  highlightedTitle?: React.ReactNode
-  highlightedContent?: React.ReactNode
-  highlightedSource?: React.ReactNode
-  highlightedTags?: React.ReactNode[]
-  onChatClick?: () => void
+  onUpdate: (updatedScrap: Scrap) => void
+  onDelete: (scrapId: string) => void
+  highlightedTitle?: ReactNode
+  highlightedContent?: ReactNode
+  highlightedCreator?: ReactNode
+  highlightedTags?: ReactNode[]
 }
 
-export default function ScrapCard({
-  scrap,
-  onUpdate,
-  onDelete,
-  highlightedTitle,
-  highlightedContent,
-  highlightedSource,
-  highlightedTags,
-  onChatClick
+export default function ScrapCard({ 
+  scrap, 
+  onUpdate, 
+  onDelete, 
+  highlightedTitle, 
+  highlightedContent, 
+  highlightedCreator, 
 }: ScrapCardProps) {
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [isEditOpen, setIsEditOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [imageError, setImageError] = useState(false)
+
+  const openChat = () => {
+    setIsChatOpen(true)
+  }
+
+  const openEdit = () => {
+    setIsEditOpen(true)
+  }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this scrap?')) {
+    if (!confirm('Are you sure you want to delete this scrap? This action cannot be undone.')) {
       return
     }
+
     setIsDeleting(true)
-    // Add a small delay for animation
-    await new Promise(resolve => setTimeout(resolve, 300))
-    onDelete(scrap.id)
+    try {
+      await deleteScrap(scrap.id)
+      onDelete(scrap.id)
+    } catch (error) {
+      console.error('Failed to delete scrap:', error)
+      alert('Failed to delete scrap. Please try again.')
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const ActionButtons = () => (
+    <div className="flex items-center gap-2">
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={openEdit}
+        className="w-7 h-7 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
+        aria-label="Edit scrap"
+      >
+        <Edit3 size={14} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
+      </motion.button>
+      
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handleDelete}
+        disabled={isDeleting}
+        className="w-7 h-7 bg-neutral-bg-hover hover:bg-red-50 rounded-full flex items-center justify-center transition-colors group disabled:opacity-50"
+        aria-label="Delete scrap"
+      >
+        <Trash2 size={14} className="text-neutral-text-secondary group-hover:text-red-600 transition-colors" />
+      </motion.button>
+      
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={openChat}
+        className="w-7 h-7 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
+        aria-label="Explore this scrap"
+      >
+        <MessageCircle size={14} className="text-white group-hover:scale-110 transition-transform" />
+      </motion.button>
+    </div>
+  )
+
+  if (!scrap) {
+    return (
+      <div className="bg-neutral-bg-card rounded-lg p-4 border border-neutral-border">
+        <p className="text-neutral-text-muted">Loading observation...</p>
+      </div>
+    )
   }
 
   return (
-    <motion.div
-      className={`bg-neutral-bg-card rounded-xl border border-neutral-border overflow-hidden ${
-        isDeleting ? 'opacity-0 scale-95' : ''
-      }`}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="p-6">
-        {/* Image handling */}
-        {scrap.type === 'image' && scrap.image_url && !imageError && (
-          <div className="mb-4 flex justify-center">
-            <div className="relative w-full max-w-xs sm:max-w-sm aspect-[3/4] overflow-hidden rounded-lg">
+    <>
+      <motion.div
+        whileHover={{ y: -1 }}
+        className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border hover:border-neutral-border/80 transition-colors"
+      >
+        {scrap.type === 'image' ? (
+          // Image Card Layout (Vertical with large image)
+          <div className="flex flex-col">
+            {/* Image Container */}
+            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-lg">
               <Image
-                src={scrap.image_url}
-                alt={scrap.title || 'Scrap image'}
+                src={scrap.image_url || '/placeholder.jpg'}
+                alt={scrap.title || 'Cultural artifact image'}
                 fill
-                className="object-cover rounded-lg"
-                onError={() => setImageError(true)}
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                priority={true}
+                className="object-cover"
+                unoptimized={true}
               />
+            </div>
+            
+            {/* Content Container */}
+            <div className="p-4">
+              {/* Title (Cultural Artifact Name) - Priority 1 */}
+              {scrap.title && (
+                <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
+                  {highlightedTitle ?? scrap.title}
+                </h3>
+              )}
+              
+              {/* Medium - Priority 2 */}
+              {scrap.medium && (
+                <p className="text-xs text-neutral-text-muted mb-2">
+                  {scrap.medium}
+                </p>
+              )}
+              
+              {/* Observation - Priority 3 */}
+              {scrap.content && (
+                <p className="text-xs text-neutral-text-secondary mb-2 line-clamp-3 leading-relaxed">
+                  {highlightedContent ?? scrap.content}
+                </p>
+              )}
+              
+              {/* Creator - Priority 4 */}
+              {scrap.creator && (
+                <p className="text-xs text-neutral-text-secondary font-medium mb-2">
+                  by {highlightedCreator ?? scrap.creator}
+                </p>
+              )}
+              
+              {/* Meta + Actions - Priority 5 */}
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-neutral-text-muted">
+                  {new Date(scrap.created_at).toLocaleDateString()}
+                </span>
+                <ActionButtons />
+              </div>
+            </div>
+          </div>
+        ) : (
+          // Text Card Layout (Vertical with proper padding)
+          <div className="p-5">
+            {/* Title (Cultural Artifact Name) - Priority 1 */}
+            {scrap.title && (
+              <h3 className="text-base font-semibold text-neutral-text-primary mb-2 line-clamp-2">
+                {highlightedTitle ?? scrap.title}
+              </h3>
+            )}
+            
+            {/* Medium - Priority 2 */}
+            {scrap.medium && (
+              <p className="text-sm text-neutral-text-muted mb-3">
+                {scrap.medium}
+              </p>
+            )}
+            
+            {/* Observation - Priority 3 */}
+            {scrap.content && (
+              <div className="mb-4">
+                <p className="text-base text-neutral-text-primary leading-relaxed line-clamp-3">
+                  {highlightedContent ?? scrap.content}
+                </p>
+              </div>
+            )}
+            
+            {/* Creator - Priority 4 */}
+            {scrap.creator && (
+              <p className="text-sm text-neutral-text-secondary font-medium mb-3">
+                by {highlightedCreator ?? scrap.creator}
+              </p>
+            )}
+            
+            {/* Meta + Actions - Priority 5 */}
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-neutral-text-muted">
+                {new Date(scrap.created_at).toLocaleDateString()}
+              </span>
+              <ActionButtons />
             </div>
           </div>
         )}
+      </motion.div>
 
-        {scrap.type === 'text' ? (
-          <div>
-            <p className="text-neutral-text-primary text-lg mb-3 leading-relaxed selection:bg-brand-primary selection:text-white">
-              {highlightedContent || scrap.content}
-            </p>
-            {scrap.source && (
-              <p className="text-neutral-text-secondary text-sm">
-                — {highlightedSource || scrap.source}
-              </p>
-            )}
-          </div>
-        ) : (
-          <div>
-            <h3 className="text-xl font-semibold text-neutral-text-primary mb-2 selection:bg-brand-primary selection:text-white">
-              {highlightedTitle || scrap.title}
-            </h3>
-            {scrap.content && (
-              <p className="text-neutral-text-secondary mb-4 selection:bg-brand-primary selection:text-white">
-                {highlightedContent || scrap.content}
-              </p>
-            )}
-            {scrap.source && (
-              <p className="text-neutral-text-muted text-sm selection:bg-brand-primary selection:text-white">
-                {highlightedSource || scrap.source}
-              </p>
-            )}
-          </div>
-        )}
+      <ErrorBoundary FallbackComponent={ChatErrorFallback}>
+        <ChatModal 
+          isOpen={isChatOpen}
+          onClose={() => setIsChatOpen(false)}
+          scrap={scrap}
+        />
+      </ErrorBoundary>
 
-        {scrap.tags && scrap.tags.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-4">
-            {(highlightedTags || scrap.tags).map((tag, i) => (
-              <span
-                key={i}
-                className="px-2 py-1 bg-neutral-bg-hover text-neutral-text-secondary text-sm rounded selection:bg-brand-primary selection:text-white"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Action buttons */}
-        <div className="flex items-center justify-end gap-2 mt-6 -mb-2">
-          <button
-            onClick={() => onUpdate(scrap)}
-            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary active:text-brand-hover transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
-          >
-            <Edit3 size={18} />
-            <span className="sr-only md:not-sr-only">Edit</span>
-          </button>
-          <button
-            onClick={handleDelete}
-            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-red-500 active:text-red-600 transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
-          >
-            <Trash2 size={18} />
-            <span className="sr-only md:not-sr-only">Delete</span>
-          </button>
-          <button
-            onClick={onChatClick}
-            className="flex items-center justify-center gap-2 px-4 py-3 text-neutral-text-secondary hover:text-brand-primary active:text-brand-hover transition-colors min-w-[44px] min-h-[44px] touch-manipulation"
-          >
-            <Rabbit size={18} />
-            <span className="sr-only md:not-sr-only">Chat</span>
-          </button>
-        </div>
-      </div>
-    </motion.div>
+      <ErrorBoundary FallbackComponent={ModalErrorFallback}>
+        <EditScrapModal
+          isOpen={isEditOpen}
+          onClose={() => setIsEditOpen(false)}
+          scrap={scrap}
+          onUpdate={onUpdate}
+        />
+      </ErrorBoundary>
+    </>
   )
 }

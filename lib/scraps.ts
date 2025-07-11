@@ -3,54 +3,48 @@ import { supabase } from './supabase'
 
 export interface Scrap {
   id: string
-  user_id?: string
+  user_id?: string | null
   type: 'image' | 'text'
-  title?: string
-  content?: string
-  image_url?: string
-  source?: string
-  tags?: string[]
+  title?: string | null  // Name of the cultural artifact
+  content?: string | null  // User's observation/reflection
+  image_url?: string | null
+  creator?: string | null  // Author, artist, director, etc.
+  medium?: string | null  // Book, film, artwork, etc.
+  tags?: string[] | null
   created_at: string
-  updated_at?: string
+  updated_at?: string | null
 }
 
 export interface CreateScrapData {
   type: 'text' | 'image'
-  title?: string
-  content?: string
-  image_url?: string
-  source?: string
-  tags?: string[]
+  title?: string | null  // Name of the cultural artifact
+  content?: string | null  // User's observation/reflection
+  image_url?: string | null
+  creator?: string | null  // Author, artist, director, etc.
+  medium?: string | null  // Book, film, artwork, etc.
+  tags?: string[] | null
 }
 
 // new function to upload image to supabase storage
 // lib/scraps.ts (update uploadImage function with debug logging)
 export async function uploadImage(file: File, userId: string): Promise<string | null> {
-  console.log('🐛 Starting image upload:', { fileName: file.name, fileSize: file.size, userId })
-  
   // Generate unique filename
   const fileExt = file.name.split('.').pop()
   const fileName = `${userId}/${Date.now()}.${fileExt}`
-  
-  console.log('🐛 Generated filename:', fileName)
   
   const { data, error } = await supabase.storage
     .from('scrap-images')
     .upload(fileName, file)
   
   if (error) {
-    console.error('❌ Error uploading image:', error)
+    console.error('Error uploading image:', error)
     return null
   }
-  
-  console.log('🐛 Upload successful:', data)
   
   // Get public URL
   const { data: { publicUrl } } = supabase.storage
     .from('scrap-images')
     .getPublicUrl(data.path)
-  
-  console.log('🐛 Generated public URL:', publicUrl)
   
   return publicUrl
 }
@@ -79,7 +73,8 @@ export async function createScrap(data: CreateScrapData, imageFile?: File): Prom
         title: data.title,
         content: data.content,
         image_url: image_url,
-        source: data.source,
+        creator: data.creator,
+        medium: data.medium,
         tags: data.tags || []
       }
     ])
@@ -91,7 +86,7 @@ export async function createScrap(data: CreateScrapData, imageFile?: File): Prom
     return null
   }
   
-  return scrap
+  return scrap as Scrap
 }
 
 export async function getScraps(): Promise<Scrap[]> {
@@ -109,7 +104,7 @@ export async function getScraps(): Promise<Scrap[]> {
     return []
   }
   
-  return scraps || []
+  return (scraps || []) as Scrap[]
 }
 
 // Add these functions to your existing lib/scraps.ts file

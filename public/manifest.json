@@ -1,27 +1,72 @@
 {
-    "name": "Weave - Cultural Journal",
-    "short_name": "Weave",
-    "description": "Your personal cultural discovery journal",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#FAF8F5",
-    "theme_color": "#C85A5A",
-    "orientation": "portrait-primary",
-    "scope": "/",
-    "icons": [
-      {
-        "src": "/icon-192.png",
-        "sizes": "192x192",
-        "type": "image/png",
-        "purpose": "any maskable"
-      },
-      {
-        "src": "/icon-512.png", 
-        "sizes": "512x512",
-        "type": "image/png",
-        "purpose": "any maskable"
-      }
-    ],
-    "categories": ["lifestyle", "productivity"],
-    "lang": "en"
-  }
+  "name": "Weave - Cultural Journal",
+  "short_name": "Weave",
+  "description": "Your personal cultural discovery journal - capture, explore, and connect with meaningful cultural moments",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF8F5",
+  "theme_color": "#C85A5A",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "id": "weave-cultural-journal",
+  "icons": [
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png", 
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["lifestyle", "productivity", "education"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "display_override": ["window-controls-overlay", "standalone"],
+  "shortcuts": [
+    {
+      "name": "Add New Scrap",
+      "short_name": "Add Scrap",
+      "description": "Quickly add a new cultural discovery",
+      "url": "/?action=add",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

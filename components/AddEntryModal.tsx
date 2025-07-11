@@ -9,18 +9,27 @@ import Image from 'next/image';
 interface AddEntryModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (scrap: { type: 'text' | 'image', title?: string, content?: string, source?: string, imageFile?: File }) => void
+  onSave: (scrap: { 
+    type: 'text' | 'image', 
+    title?: string, 
+    content?: string, 
+    creator?: string, 
+    medium?: string,
+    imageFile?: File 
+  }) => void
+  isSaving?: boolean
 }
 
-export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModalProps) {
+export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = false }: AddEntryModalProps) {
   const [contentType, setContentType] = useState<'text' | 'image'>('text')
   const [content, setContent] = useState('')
   const [title, setTitle] = useState('')
-  const [source, setSource] = useState('')
+  const [creator, setCreator] = useState('')
+  const [medium, setMedium] = useState('')
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   const handleImageSelect = (file: File) => {
     setSelectedImage(file)
@@ -36,31 +45,33 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
     if (file) {
       handleImageSelect(file)
     }
+    // Reset the input value so the same file can be selected again
+    event.target.value = ''
   }
 
   const handleSave = async () => {
+    if (isSaving) return
     if (contentType === 'text' && !content.trim()) return
     if (contentType === 'image' && !selectedImage) return
     
-    setIsSaving(true)
     await onSave({
       type: contentType,
       title: title.trim() || undefined,
       content: content.trim() || undefined,
-      source: source.trim() || undefined,
+      creator: creator.trim() || undefined,
+      medium: medium.trim() || undefined,
       imageFile: selectedImage || undefined
     })
     
     // Reset form
     resetForm()
-    setIsSaving(false)
-    onClose()
   }
 
   const resetForm = () => {
     setContent('')
     setTitle('')
-    setSource('')
+    setCreator('')
+    setMedium('')
     setSelectedImage(null)
     setImagePreview(null)
     setContentType('text')
@@ -102,37 +113,46 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
                   whileTap={{ scale: 0.95 }}
                   onClick={handleCancel}
                   className="text-brand-primary font-medium"
+                  disabled={isSaving}
                 >
                   Cancel
                 </motion.button>
                 <h2 className="text-lg font-semibold text-neutral-text-primary">
-                  New Scrap
+                  New Observation
                 </h2>
-                <div className="text-xs text-neutral-text-muted">
-                  {isSaving ? 'Saving...' : ''}
-                </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSave}
+                  disabled={isSaving || (contentType === 'text' && !content.trim()) || (contentType === 'image' && !selectedImage)}
+                  className={`text-brand-primary font-medium ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isSaving ? 'Saving...' : 'Save'}
+                </motion.button>
               </div>
 
               {/* Content Type Toggle */}
               <div className="px-6 pt-4">
                 <div className="flex bg-neutral-bg-card rounded-lg p-1">
                   <button
-                    onClick={() => setContentType('text')}
+                    onClick={() => !isSaving && setContentType('text')}
+                    disabled={isSaving}
                     className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                       contentType === 'text'
                         ? 'bg-brand-primary text-white'
                         : 'text-neutral-text-secondary hover:text-neutral-text-primary'
-                    }`}
+                    } ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     Text
                   </button>
                   <button
-                    onClick={() => setContentType('image')}
+                    onClick={() => !isSaving && setContentType('image')}
+                    disabled={isSaving}
                     className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
                       contentType === 'image'
                         ? 'bg-brand-primary text-white'
                         : 'text-neutral-text-secondary hover:text-neutral-text-primary'
-                    }`}
+                    } ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     Image
                   </button>
@@ -141,15 +161,34 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
 
               {/* Content */}
               <div className="p-6 flex-1 flex flex-col min-h-0 overflow-y-auto">
+                {/* Required fields first */}
+                <input
+                  type="text"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Name of cultural artifact"
+                  className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base mb-4"
+                  disabled={isSaving}
+                />
+
+                <input
+                  type="text"
+                  value={medium}
+                  onChange={(e) => setMedium(e.target.value)}
+                  placeholder="Medium (book, film, artwork, etc.)"
+                  className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base mb-4"
+                  disabled={isSaving}
+                />
                 
                 {contentType === 'text' ? (
                   /* Text Content */
                   <textarea
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
-                    placeholder="What's on your mind?"
+                    placeholder="Share your thoughts and observations about this cultural artifact..."
                     className="flex-1 min-h-[180px] w-full bg-transparent border-none outline-none resize-none text-neutral-text-primary placeholder-neutral-text-muted text-base leading-relaxed"
                     autoFocus
+                    disabled={isSaving}
                   />
                 ) : (
                   /* Image Content */
@@ -159,12 +198,21 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
                         <div className="text-neutral-text-muted text-center">
                           <Camera size={32} className="mx-auto mb-2 opacity-50" />
                           <p className="font-medium">Add a photo</p>
-                          <p className="text-sm">Capture or upload an image</p>
+                          <p className="text-sm">Capture or upload an image of the artifact</p>
                         </div>
                         <div className="flex gap-3">
                           <button
-                            onClick={() => fileInputRef.current?.click()}
-                            className="flex items-center gap-2 px-4 py-2 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors"
+                            onClick={() => !isSaving && cameraInputRef.current?.click()}
+                            disabled={isSaving}
+                            className={`flex items-center gap-2 px-4 py-2 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          >
+                            <Camera size={16} />
+                            Capture
+                          </button>
+                          <button
+                            onClick={() => !isSaving && fileInputRef.current?.click()}
+                            disabled={isSaving}
+                            className={`flex items-center gap-2 px-4 py-2 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary hover:bg-neutral-bg-hover transition-colors ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
                           >
                             <ImageIcon size={16} />
                             Upload
@@ -174,78 +222,69 @@ export default function AddEntryModal({ isOpen, onClose, onSave }: AddEntryModal
                     ) : (
                       <div className="relative">
                         <Image
-  src={imagePreview}
-  alt="Preview"
-  width={400}
-  height={192}
-  className="w-full h-48 object-cover rounded-lg"
-  unoptimized={true}
-/>
+                          src={imagePreview}
+                          alt="Preview"
+                          width={400}
+                          height={192}
+                          className="w-full h-48 object-cover rounded-lg"
+                          unoptimized={true}
+                        />
                         <button
                           onClick={() => {
-                            setSelectedImage(null)
-                            setImagePreview(null)
+                            if (!isSaving) {
+                              setSelectedImage(null)
+                              setImagePreview(null)
+                            }
                           }}
-                          className="absolute top-2 right-2 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70"
+                          disabled={isSaving}
+                          className={`absolute top-2 right-2 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 ${isSaving ? 'opacity-50 cursor-not-allowed' : ''}`}
                         >
                           <X size={14} />
                         </button>
                       </div>
                     )}
                     
-                    {/* Caption for image */}
+                    {/* Observation for image */}
                     <textarea
                       value={content}
                       onChange={(e) => setContent(e.target.value)}
-                      placeholder="Add a caption (optional)"
-                      className="mt-4 w-full h-20 bg-neutral-bg-card border border-neutral-border rounded-lg px-3 py-2 text-neutral-text-primary placeholder-neutral-text-muted outline-none focus:border-brand-primary transition-colors resize-none"
+                      placeholder="Share your thoughts about this artifact..."
+                      className="mt-4 w-full bg-transparent border-none outline-none resize-none text-neutral-text-primary placeholder-neutral-text-muted text-base"
+                      disabled={isSaving}
                     />
                   </div>
                 )}
-                
-                {/* Source Input */}
+
+                {/* Creator field */}
                 <div className="mt-4">
                   <input
                     type="text"
-                    value={source}
-                    onChange={(e) => setSource(e.target.value)}
-                    placeholder="Source (e.g., Author, Book, Movie)"
-                    className="w-full bg-neutral-bg-card border border-neutral-border rounded-lg px-3 py-2.5 text-neutral-text-primary placeholder-neutral-text-muted outline-none focus:border-brand-primary transition-colors"
+                    value={creator}
+                    onChange={(e) => setCreator(e.target.value)}
+                    placeholder="Creator (author, artist, director, etc.)"
+                    className="w-full bg-transparent border-none outline-none text-neutral-text-primary placeholder-neutral-text-muted text-base"
+                    disabled={isSaving}
                   />
                 </div>
-                
-                {/* Title Input */}
-                <div className="mt-3">
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Add a title (optional)"
-                    className="w-full bg-neutral-bg-card border border-neutral-border rounded-lg px-3 py-2.5 text-neutral-text-primary placeholder-neutral-text-muted outline-none focus:border-brand-primary transition-colors"
-                  />
-                </div>
-
-                {/* Save Button */}
-                <button
-                  onClick={handleSave}
-                  disabled={
-                    (contentType === 'text' && !content.trim()) ||
-                    (contentType === 'image' && !selectedImage) ||
-                    isSaving
-                  }
-                  className="mt-6 w-full bg-brand-primary text-white py-3 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:bg-brand-hover transition-colors"
-                >
-                  {isSaving ? 'Saving...' : 'Save Scrap'}
-                </button>
               </div>
 
-              {/* Hidden file input */}
+              {/* Hidden file inputs */}
               <input
-                ref={fileInputRef}
                 type="file"
-                accept="image/*"
+                ref={fileInputRef}
                 onChange={handleFileInput}
+                accept="image/*"
                 className="hidden"
+                disabled={isSaving}
+              />
+              <input
+                type="file"
+                ref={cameraInputRef}
+                onChange={handleFileInput}
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                disabled={isSaving}
               />
             </div>
           </motion.div>

@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { X, Send, MessageCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Send, Trash2, MessageCircle, AlertCircle, Loader } from 'lucide-react'
 import { Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
 import { getChatHistory, saveChatHistory, deleteChatHistory } from '@/lib/chat-history'
@@ -58,31 +58,53 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
-  const loadChatHistory = useCallback(async () => {
-    if (!user || !scrap.id) return
-    
-    setIsLoadingHistory(true)
-    try {
-      const history = await getChatHistory(scrap.id, user.id)
-      if (history) {
-        setMessages(history.messages)
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error)
-    } finally {
-      setIsLoadingHistory(false)
-    }
-  }, [user, scrap.id])
 
-  // Load chat history when modal opens
+  // Load chat history when modal opens or user/scrap changes
   useEffect(() => {
-    if (isOpen && user && scrap.id) {
+    const loadChatHistory = async () => {
+      if (!user || !scrap.id) return
+      
+      setIsLoadingHistory(true)
+      try {
+        const history = await getChatHistory(scrap.id, user.id)
+        if (history) {
+          console.log('Loaded chat history:', history.messages.length, 'messages')
+          setMessages(history.messages)
+        } else {
+          console.log('No existing chat history found')
+          setMessages([])
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error)
+        setMessages([])
+      } finally {
+        setIsLoadingHistory(false)
+      }
+    }
+
+    if (user && scrap.id && isOpen) {
+      console.log('Loading chat history for scrap:', scrap.id)
       loadChatHistory()
-    } else if (isOpen && !user) {
-      // Clear messages if user is not authenticated
+    }
+  }, [user?.id, scrap.id, isOpen])
+
+  // Clear messages when modal closes to ensure fresh load next time
+  useEffect(() => {
+    if (!isOpen) {
       setMessages([])
     }
-  }, [isOpen, user, scrap.id, loadChatHistory])
+  }, [isOpen])
+
+  // Debug logging for important state changes
+  useEffect(() => {
+    if (isOpen) {
+      console.log('ChatModal opened:', { 
+        userId: user?.id, 
+        scrapId: scrap.id, 
+        messageCount: messages.length 
+      })
+    }
+  }, [isOpen, user?.id, scrap.id, messages.length])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -126,6 +148,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
       setShowClearConfirm(false)
     } catch (error) {
       console.error('Error clearing chat history:', error)
+      alert('Failed to clear chat history. Please try again.')
     }
   }
 
@@ -133,7 +156,6 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
     if (!currentMessage.trim() || isLoading) return
     
     if (!user) {
-      // Show a message that user needs to be authenticated
       const errorMessage: Message = {
         id: Date.now().toString(),
         content: 'Please sign in to continue the conversation.',
@@ -146,13 +168,16 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: currentMessage,
+      content: currentMessage.trim(),
       sender: 'user',
       timestamp: new Date()
     }
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
+    // Create the messages array with the new user message for API call
+    const messagesWithUserMessage = [...messages, userMessage]
+    
+    // Update UI immediately with user message
+    setMessages(messagesWithUserMessage)
     setCurrentMessage('')
     setIsLoading(true)
 
@@ -161,38 +186,61 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: currentMessage,
+          message: userMessage.content,
           scrap: scrap,
-          chatHistory: messages
+          chatHistory: messagesWithUserMessage
         })
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
+        // Handle rate limiting specifically
+        if (response.status === 429) {
+          throw new Error(data.error || 'Rate limit exceeded. Please wait a moment before sending another message.')
+        }
         throw new Error('Failed to get response from chat API')
       }
-
-      const data = await response.json()
       
       if (!data.success) {
         throw new Error(data.error || 'Failed to process chat request')
       }
-      
+
+      // Create AI message
       const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: Date.now().toString(),
         content: data.response,
         sender: 'ai',
         timestamp: new Date()
       }
 
-      const finalMessages = [...updatedMessages, aiMessage]
-      setMessages(finalMessages)
+      // Update UI with AI response
+      const updatedMessages = [...messagesWithUserMessage, aiMessage]
+      setMessages(updatedMessages)
 
-      // Let the API handle saving chat history
+      // Save to database in the background
+      if (user && scrap.id) {
+        try {
+          console.log('Saving chat history with', updatedMessages.length, 'messages')
+          await saveChatHistory(scrap.id, user.id, updatedMessages)
+          console.log('Chat history saved successfully')
+        } catch (error) {
+          console.error('Error saving chat history:', error)
+          // Don't show error to user since the chat is still functional
+        }
+      }
     } catch (error) {
       console.error('Failed to send message:', error)
+      
+      // Check if it's a rate limiting error
+      const isRateLimitError = error instanceof Error && 
+        error.message.includes('Rate limit exceeded')
+      
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: 'Sorry, I encountered an error. Please try again.',
+        id: Date.now().toString(),
+        content: isRateLimitError 
+          ? 'You\'ve sent too many messages recently. Please wait a moment before sending another message.'
+          : 'Sorry, I encountered an error. Please try again.',
         sender: 'ai',
         timestamp: new Date()
       }
@@ -257,10 +305,10 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                       <p className="italic text-neutral-text-primary mb-2">
                         &quot;{scrap.content}&quot;
                       </p>
-                      {scrap.source && (
-                        <p className="text-neutral-text-secondary">
-                          — {scrap.source}
-                        </p>
+                      {scrap.creator && (
+                        <span className="text-neutral-text-muted">
+                          — {scrap.creator}
+                        </span>
                       )}
                     </div>
                   ) : (

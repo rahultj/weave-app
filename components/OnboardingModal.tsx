@@ -81,19 +81,19 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-4 md:p-6 max-h-[90vh] overflow-y-auto"
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-6 max-h-[90vh] overflow-y-auto"
       >
         {/* Close button */}
         <button
           onClick={handleComplete}
-          className="absolute top-4 right-4 text-neutral-text-secondary hover:text-neutral-text-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          className="absolute top-4 right-4 text-neutral-text-secondary hover:text-neutral-text-primary transition-colors"
           aria-label="Skip onboarding"
         >
           <X size={20} />
         </button>
 
         {/* Steps */}
-        <div className="mb-6 md:mb-8 pt-4 md:pt-6">
+        <div className="mb-8 pt-6">
           <AnimatePresence mode="wait">
             {ONBOARDING_STEPS.map((step, index) => (
               <OnboardingStep
@@ -108,7 +108,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         </div>
 
         {/* Progress dots */}
-        <div className="flex justify-center gap-2 mb-6 md:mb-8">
+        <div className="flex justify-center gap-2 mb-8">
           {ONBOARDING_STEPS.map((_, index) => (
             <div
               key={index}
@@ -122,12 +122,12 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         </div>
 
         {/* Navigation */}
-        <div className="flex justify-between items-center px-2">
+        <div className="flex justify-between items-center">
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={prevStep}
-            className={`min-w-[44px] min-h-[44px] p-2 rounded-lg transition-colors flex items-center justify-center ${
+            className={`p-2 rounded-lg transition-colors ${
               currentStep === 0
                 ? 'text-neutral-text-muted cursor-not-allowed'
                 : 'text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover'
@@ -140,7 +140,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
 
           <button
             onClick={handleComplete}
-            className="text-sm text-neutral-text-secondary hover:text-neutral-text-primary transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+            className="text-sm text-neutral-text-secondary hover:text-neutral-text-primary transition-colors"
           >
             Skip
           </button>
@@ -149,7 +149,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={nextStep}
-            className="min-w-[44px] min-h-[44px] p-2 rounded-lg text-brand-primary hover:bg-neutral-bg-hover transition-colors flex items-center justify-center"
+            className="p-2 rounded-lg text-brand-primary hover:bg-neutral-bg-hover transition-colors"
             aria-label={currentStep === ONBOARDING_STEPS.length - 1 ? "Complete" : "Next step"}
           >
             <ChevronRight size={20} />

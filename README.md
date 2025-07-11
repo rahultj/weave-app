@@ -25,6 +25,26 @@ The app automatically saves all chat conversations to the database, allowing use
 
 ## Getting Started
 
+### Environment Setup
+
+1. **Copy the environment template**:
+   ```bash
+   cp env.template .env.local
+   ```
+
+2. **Fill in your environment variables** in `.env.local`:
+   - `NEXT_PUBLIC_SUPABASE_URL`: Your Supabase project URL
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Your Supabase anonymous key
+   - `ANTHROPIC_API_KEY`: Your Anthropic API key for Claude AI
+
+3. **Get your credentials**:
+   - **Supabase**: Go to [app.supabase.com](https://app.supabase.com) → Your Project → Settings → API
+   - **Anthropic**: Go to [console.anthropic.com](https://console.anthropic.com) → Get API Keys
+
+### Running the App
+
+The app includes automatic environment validation that will check for all required variables on startup.
+
 First, run the development server:
 
 ```bash
@@ -36,6 +56,8 @@ pnpm dev
 # or
 bun dev
 ```
+
+If any required environment variables are missing, you'll see a helpful error message with setup instructions.
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 

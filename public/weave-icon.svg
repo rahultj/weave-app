@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="64" fill="#FAF8F5"/>
+  <rect x="32" y="32" width="448" height="448" rx="32" fill="#C85A5A"/>
+  
+  <!-- Weave pattern -->
+  <path d="M128 160 L384 160 L384 192 L128 192 Z" fill="#FAF8F5" opacity="0.9"/>
+  <path d="M128 224 L384 224 L384 256 L128 256 Z" fill="#FAF8F5" opacity="0.7"/>
+  <path d="M128 288 L384 288 L384 320 L128 320 Z" fill="#FAF8F5" opacity="0.9"/>
+  <path d="M128 352 L384 352 L384 384 L128 384 Z" fill="#FAF8F5" opacity="0.7"/>
+  
+  <!-- Connecting threads -->
+  <circle cx="112" cy="176" r="8" fill="#FAF8F5"/>
+  <circle cx="400" cy="176" r="8" fill="#FAF8F5"/>
+  <circle cx="112" cy="240" r="8" fill="#FAF8F5"/>
+  <circle cx="400" cy="240" r="8" fill="#FAF8F5"/>
+  <circle cx="112" cy="304" r="8" fill="#FAF8F5"/>
+  <circle cx="400" cy="304" r="8" fill="#FAF8F5"/>
+  <circle cx="112" cy="368" r="8" fill="#FAF8F5"/>
+  <circle cx="400" cy="368" r="8" fill="#FAF8F5"/>
+  
+  <!-- Weave text -->
+  <text x="256" y="140" text-anchor="middle" fill="#FAF8F5" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="600">Weave</text>
+</svg> 
