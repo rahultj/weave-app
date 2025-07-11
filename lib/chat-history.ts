@@ -116,72 +116,75 @@ export async function saveChatHistory(
 
   try {
     const messagesForStorage = serializeMessages(messages)
+    const now = new Date().toISOString()
     
-    // First, check if a record exists
-    const { data: existingData } = await supabase
-      .from('chat_history')
-      .select('id')
-      .eq('scrap_id', scrapId)
-      .eq('user_id', userId)
-      .limit(1)
+    // Use custom RPC function for proper atomic upsert with created_at handling
+    console.log('Executing atomic upsert with RPC function...')
+    const { data, error } = await (supabase as any)
+      .rpc('upsert_chat_history', {
+        p_scrap_id: scrapId,
+        p_user_id: userId,
+        p_messages: messagesForStorage,
+        p_updated_at: now
+      })
 
-    if (existingData && existingData.length > 0) {
-      // Update existing record
-      console.log('Updating existing chat history...')
-      const { data: updateData, error: updateError } = await supabase
+    if (error) {
+      console.error('RPC upsert error:', error)
+      
+      // Fallback to standard upsert if RPC fails
+      console.log('Falling back to standard upsert...')
+      const { data: fallbackData, error: fallbackError } = await supabase
         .from('chat_history')
-        .update({ 
-          messages: messagesForStorage,
-          updated_at: new Date().toISOString()
-        })
-        .eq('scrap_id', scrapId)
-        .eq('user_id', userId)
-        .select()
-        .single()
-
-      if (updateError) {
-        console.error('Update error:', updateError)
-        return null
-      }
-
-      console.log('Successfully updated existing chat history')
-      return {
-        id: updateData.id,
-        user_id: updateData.user_id || '',
-        scrap_id: updateData.scrap_id || '',
-        messages: deserializeMessages(updateData.messages as any[]),
-        created_at: updateData.created_at || new Date().toISOString(),
-        updated_at: updateData.updated_at || new Date().toISOString()
-      }
-    } else {
-      // Create new record
-      console.log('Creating new chat history record...')
-      const { data: insertData, error: insertError } = await supabase
-        .from('chat_history')
-        .insert({
+        .upsert({
           scrap_id: scrapId,
           user_id: userId,
           messages: messagesForStorage,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          updated_at: now
+        }, {
+          onConflict: 'scrap_id,user_id'
         })
         .select()
         .single()
 
-      if (insertError) {
-        console.error('Insert error:', insertError)
+      if (fallbackError) {
+        console.error('Fallback upsert error:', fallbackError)
         return null
       }
 
-      console.log('Successfully created new chat history')
+      const result = fallbackData
+      console.log('Successfully upserted with fallback:', { 
+        id: result.id,
+        messageCount: Array.isArray(result.messages) ? result.messages.length : 0
+      })
+      
       return {
-        id: insertData.id,
-        user_id: insertData.user_id || '',
-        scrap_id: insertData.scrap_id || '',
-        messages: deserializeMessages(insertData.messages as any[]),
-        created_at: insertData.created_at || new Date().toISOString(),
-        updated_at: insertData.updated_at || new Date().toISOString()
+        id: result.id,
+        user_id: result.user_id || '',
+        scrap_id: result.scrap_id || '',
+        messages: deserializeMessages(result.messages as any[]),
+        created_at: result.created_at || now,
+        updated_at: result.updated_at || now
       }
+    }
+
+    if (!data || !Array.isArray(data) || data.length === 0) {
+      console.error('Invalid RPC response:', data)
+      return null
+    }
+
+    const result = data[0]
+    console.log('Successfully upserted with RPC:', { 
+      id: result.id,
+      messageCount: Array.isArray(result.messages) ? result.messages.length : 0
+    })
+    
+    return {
+      id: result.id,
+      user_id: result.user_id || '',
+      scrap_id: result.scrap_id || '',
+      messages: deserializeMessages(result.messages as any[]),
+      created_at: result.created_at || now,
+      updated_at: result.updated_at || now
     }
   } catch (error) {
     console.error('Unexpected error in saveChatHistory:', error)
