@@ -118,62 +118,28 @@ export async function saveChatHistory(
     const messagesForStorage = serializeMessages(messages)
     const now = new Date().toISOString()
     
-    // Use custom RPC function for proper atomic upsert with created_at handling
-    console.log('Executing atomic upsert with RPC function...')
-    const { data, error } = await (supabase as any)
-      .rpc('upsert_chat_history', {
-        p_scrap_id: scrapId,
-        p_user_id: userId,
-        p_messages: messagesForStorage,
-        p_updated_at: now
+    // Use standard Supabase upsert with unique constraint
+    console.log('Executing standard upsert...')
+    const { data, error } = await supabase
+      .from('chat_history')
+      .upsert({
+        scrap_id: scrapId,
+        user_id: userId,
+        messages: messagesForStorage,
+        updated_at: now
+      }, {
+        onConflict: 'scrap_id,user_id'
       })
+      .select()
+      .single()
 
     if (error) {
-      console.error('RPC upsert error:', error)
-      
-      // Fallback to standard upsert if RPC fails
-      console.log('Falling back to standard upsert...')
-      const { data: fallbackData, error: fallbackError } = await supabase
-        .from('chat_history')
-        .upsert({
-          scrap_id: scrapId,
-          user_id: userId,
-          messages: messagesForStorage,
-          updated_at: now
-        }, {
-          onConflict: 'scrap_id,user_id'
-        })
-        .select()
-        .single()
-
-      if (fallbackError) {
-        console.error('Fallback upsert error:', fallbackError)
-        return null
-      }
-
-      const result = fallbackData
-      console.log('Successfully upserted with fallback:', { 
-        id: result.id,
-        messageCount: Array.isArray(result.messages) ? result.messages.length : 0
-      })
-      
-      return {
-        id: result.id,
-        user_id: result.user_id || '',
-        scrap_id: result.scrap_id || '',
-        messages: deserializeMessages(result.messages as any[]),
-        created_at: result.created_at || now,
-        updated_at: result.updated_at || now
-      }
-    }
-
-    if (!data || !Array.isArray(data) || data.length === 0) {
-      console.error('Invalid RPC response:', data)
+      console.error('Upsert error:', error)
       return null
     }
 
-    const result = data[0]
-    console.log('Successfully upserted with RPC:', { 
+    const result = data
+    console.log('Successfully upserted:', { 
       id: result.id,
       messageCount: Array.isArray(result.messages) ? result.messages.length : 0
     })
