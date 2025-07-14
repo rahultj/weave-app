@@ -84,7 +84,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className={`fixed inset-4 sm:inset-8 md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-4 sm:p-6 max-h-[90vh] overflow-y-auto ${DEBUG_MODE ? 'debug-onboarding' : ''}`}
+        className={`fixed left-4 right-4 top-8 sm:left-8 sm:right-8 sm:top-12 md:inset-auto md:top-1/2 md:left-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 md:w-full md:max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-4 sm:p-6 max-h-[80vh] overflow-y-auto ${DEBUG_MODE ? 'debug-onboarding' : ''}`}
         style={DEBUG_MODE ? { border: '2px solid red' } : {}}
       >
         {/* Close button */}
