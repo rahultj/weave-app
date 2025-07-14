@@ -51,7 +51,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
       onUpdate(updatedScrap as Scrap)
       onClose()
     } catch (error) {
-      console.error('Failed to update observation:', error)
+      console.error('Failed to update scrap:', error)
     } finally {
       setIsLoading(false)
     }
@@ -97,7 +97,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
                 Cancel
               </motion.button>
               <h2 className="text-lg font-semibold text-neutral-text-primary">
-                Edit Observation
+                Edit Scrap
               </h2>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -111,75 +111,72 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
               </motion.button>
             </div>
 
-            {/* Form */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {/* Title Input (Cultural Artifact Name) */}
+            {/* Content */}
+            <div className="flex-1 p-4 space-y-4 overflow-y-auto">
+              {/* Title Input */}
               <div>
-                <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Cultural Artifact Name
+                <label htmlFor="title" className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                  Title (Optional)
                 </label>
                 <input
+                  id="title"
                   type="text"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Name of the book, film, artwork, etc."
-                  className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                />
-              </div>
-
-              {/* Medium Input */}
-              <div>
-                <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Medium
-                </label>
-                <input
-                  type="text"
-                  value={medium}
-                  onChange={(e) => setMedium(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Book, film, artwork, etc."
-                  className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
-                />
-              </div>
-
-              {/* Content Input (Observation) */}
-              <div>
-                <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Your Observation
-                </label>
-                <textarea
-                  ref={contentTextareaRef}
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder={scrap.type === 'text' ? 'Share your thoughts about this cultural artifact...' : 'Describe what you observe in this image...'}
-                  className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent min-h-[120px] max-h-60 resize-none"
-                  rows={4}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="Name of the cultural artifact..."
+                  className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none text-neutral-text-primary"
+                  onKeyDown={handleKeyPress}
                 />
               </div>
 
               {/* Creator Input */}
               <div>
-                <label className="block text-sm font-medium text-neutral-text-primary mb-2">
-                  Creator
+                <label htmlFor="creator" className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                  Creator (Optional)
                 </label>
                 <input
+                  id="creator"
                   type="text"
                   value={creator}
-                  onChange={(e) => setCreator(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Author, artist, director, etc."
-                  className="w-full px-4 py-3 bg-neutral-bg-card border border-neutral-border rounded-lg text-neutral-text-primary placeholder-neutral-text-muted focus:outline-none focus:ring-2 focus:ring-brand-primary focus:border-transparent"
+                  onChange={e => setCreator(e.target.value)}
+                  placeholder="Author, artist, director, etc..."
+                  className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none text-neutral-text-primary"
+                  onKeyDown={handleKeyPress}
                 />
               </div>
-            </div>
 
-            {/* Footer hint */}
-            <div className="p-4 border-t border-neutral-border">
-              <p className="text-xs text-neutral-text-muted text-center">
-                Press Cmd/Ctrl + Enter to save quickly
-              </p>
+              {/* Medium Input */}
+              <div>
+                <label htmlFor="medium" className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                  Medium (Optional)
+                </label>
+                <input
+                  id="medium"
+                  type="text"
+                  value={medium}
+                  onChange={e => setMedium(e.target.value)}
+                  placeholder="Book, film, artwork, etc..."
+                  className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none text-neutral-text-primary"
+                  onKeyDown={handleKeyPress}
+                />
+              </div>
+
+              {/* Content Input (Scrap) */}
+              <div>
+                <label htmlFor="content" className="block text-sm font-medium text-neutral-text-secondary mb-2">
+                  Your Scrap
+                </label>
+                <textarea
+                  ref={contentTextareaRef}
+                  id="content"
+                  value={content}
+                  onChange={e => setContent(e.target.value)}
+                  placeholder="Share your thoughts and reflections..."
+                  className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none text-neutral-text-primary resize-none min-h-[120px]"
+                  required
+                  onKeyDown={handleKeyPress}
+                />
+              </div>
             </div>
           </motion.div>
         </>

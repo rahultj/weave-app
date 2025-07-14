@@ -40,8 +40,7 @@ export default function HomeHeader({ search, setSearch }: HomeHeaderProps) {
             className="p-2 text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover rounded-lg transition-colors text-sm font-medium"
             aria-label="Feedback"
           >
-            <span className="hidden sm:inline">Feedback</span>
-            <span className="sm:hidden">💬</span>
+            Feedback
           </button>
         </div>
         <input

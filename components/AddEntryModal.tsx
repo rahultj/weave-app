@@ -118,7 +118,7 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
                   Cancel
                 </motion.button>
                 <h2 className="text-lg font-semibold text-neutral-text-primary">
-                  New Observation
+                  New Scrap
                 </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
