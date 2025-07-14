@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Tag, Brain, BookOpen } from 'lucide-react'
+import { Tag, Brain, BookOpen, Users } from 'lucide-react'
 
 const features = [
   {
@@ -18,6 +18,11 @@ const features = [
     icon: BookOpen,
     title: 'Build your exploration list',
     description: 'Turn insights into your next cultural discoveries'
+  },
+  {
+    icon: Users,
+    title: 'Create shared canvases',
+    description: 'Collaborate with friends on cultural discoveries together'
   }
 ]
 
