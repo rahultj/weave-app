@@ -35,8 +35,6 @@ export default function HomeHeader({ search, setSearch }: HomeHeaderProps) {
           </h1>
           <button
             data-tally-open="waJWrW"
-            data-tally-emoji-text="👋"
-            data-tally-emoji-animation="wave"
             className="p-2 text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover rounded-lg transition-colors text-sm font-medium"
             aria-label="Feedback"
           >
