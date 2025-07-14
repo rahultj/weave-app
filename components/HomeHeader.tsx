@@ -29,9 +29,21 @@ export default function HomeHeader({ search, setSearch }: HomeHeaderProps) {
   return (
     <header className="bg-neutral-bg-card border-b border-neutral-border sticky top-0 z-10">
       <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-neutral-text-primary">
-          weave
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-semibold text-neutral-text-primary">
+            weave
+          </h1>
+          <button
+            data-tally-open="waJWrW"
+            data-tally-emoji-text="👋"
+            data-tally-emoji-animation="wave"
+            className="p-2 text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover rounded-lg transition-colors text-sm font-medium"
+            aria-label="Feedback"
+          >
+            <span className="hidden sm:inline">Feedback</span>
+            <span className="sm:hidden">💬</span>
+          </button>
+        </div>
         <input
           type="text"
           value={input}

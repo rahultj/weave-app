@@ -87,7 +87,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-
+      <head>
+        <script async src="https://tally.so/widgets/embed.js"></script>
+      </head>
       <body className={inter.className}>
         <ErrorBoundary>
           <AuthProvider>
