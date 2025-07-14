@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import HomeHeader from '@/components/HomeHeader'
 import ScrapFeed from '@/components/ScrapFeed'
+import ComingSoon from '@/components/ComingSoon'
 import FloatingAddButton from '@/components/FloatingAddButton'
 import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
@@ -152,6 +153,7 @@ export default function HomeContent() {
         <ErrorBoundary FallbackComponent={FeedErrorFallback}>
           <ScrapFeed key={refreshKey} search={search} onAddClick={handleAddClick} />
         </ErrorBoundary>
+        <ComingSoon />
       </div>
       <FloatingAddButton onClick={handleAddClick} />
       
