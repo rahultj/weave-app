@@ -88,3 +88,10 @@ html {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Debug styles for onboarding modal layout issues */
+.debug-onboarding,
+.debug-onboarding * {
+  border: 1px solid red !important;
+  background-color: rgba(255, 0, 0, 0.1) !important;
+}
