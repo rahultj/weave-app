@@ -81,19 +81,19 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
-        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-6 max-h-[90vh] overflow-y-auto"
+        className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-1rem)] max-w-md bg-neutral-bg-main rounded-xl shadow-xl z-50 p-4 sm:p-6 max-h-[90vh] overflow-y-auto mx-2 sm:mx-0"
       >
         {/* Close button */}
         <button
           onClick={handleComplete}
-          className="absolute top-4 right-4 text-neutral-text-secondary hover:text-neutral-text-primary transition-colors"
+          className="absolute top-3 right-3 sm:top-4 sm:right-4 text-neutral-text-secondary hover:text-neutral-text-primary transition-colors"
           aria-label="Skip onboarding"
         >
           <X size={20} />
         </button>
 
         {/* Steps */}
-        <div className="mb-8 pt-6">
+        <div className="mb-6 sm:mb-8 pt-4 sm:pt-6">
           <AnimatePresence mode="wait">
             {ONBOARDING_STEPS.map((step, index) => (
               <OnboardingStep
@@ -108,7 +108,7 @@ export default function OnboardingModal({ isOpen, onClose }: OnboardingModalProp
         </div>
 
         {/* Progress dots */}
-        <div className="flex justify-center gap-2 mb-8">
+        <div className="flex justify-center gap-2 mb-6 sm:mb-8">
           {ONBOARDING_STEPS.map((_, index) => (
             <div
               key={index}
