@@ -71,37 +71,40 @@ export type Database = {
       }
       scraps: {
         Row: {
-          content: string | null
           created_at: string | null
+          creator: string | null
           id: string
           image_url: string | null
-          source: string | null
+          medium: string | null
+          observations: string | null
           tags: string[] | null
-          title: string | null
+          title: string
           type: string
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
-          content?: string | null
           created_at?: string | null
+          creator?: string | null
           id?: string
           image_url?: string | null
-          source?: string | null
+          medium?: string | null
+          observations?: string | null
           tags?: string[] | null
-          title?: string | null
+          title: string
           type: string
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
-          content?: string | null
           created_at?: string | null
+          creator?: string | null
           id?: string
           image_url?: string | null
-          source?: string | null
+          medium?: string | null
+          observations?: string | null
           tags?: string[] | null
-          title?: string | null
+          title?: string
           type?: string
           updated_at?: string | null
           user_id?: string | null

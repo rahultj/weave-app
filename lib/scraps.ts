@@ -5,8 +5,8 @@ export interface Scrap {
   id: string
   user_id?: string | null
   type: 'image' | 'text'
-  title?: string | null  // Name of the cultural artifact
-  content?: string | null  // User's observation/reflection
+  title: string  // Name of the cultural artifact (now required)
+  observations?: string | null  // User's observation/reflection (renamed from content)
   image_url?: string | null
   creator?: string | null  // Author, artist, director, etc.
   medium?: string | null  // Book, film, artwork, etc.
@@ -17,8 +17,8 @@ export interface Scrap {
 
 export interface CreateScrapData {
   type: 'text' | 'image'
-  title?: string | null  // Name of the cultural artifact
-  content?: string | null  // User's observation/reflection
+  title: string  // Name of the cultural artifact (now required)
+  observations?: string | null  // User's observation/reflection (renamed from content)
   image_url?: string | null
   creator?: string | null  // Author, artist, director, etc.
   medium?: string | null  // Book, film, artwork, etc.
@@ -71,7 +71,7 @@ export async function createScrap(data: CreateScrapData, imageFile?: File): Prom
         user_id: user.id,
         type: data.type,
         title: data.title,
-        content: data.content,
+        observations: data.observations,
         image_url: image_url,
         creator: data.creator,
         medium: data.medium,
