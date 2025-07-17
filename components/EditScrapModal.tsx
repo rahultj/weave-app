@@ -14,7 +14,7 @@ interface EditScrapModalProps {
 
 export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: EditScrapModalProps) {
   const [title, setTitle] = useState(scrap.title || '')
-  const [content, setContent] = useState(scrap.content || '')
+  const [content, setContent] = useState(scrap.observations || '')
   const [creator, setCreator] = useState(scrap.creator || '')
   const [medium, setMedium] = useState(scrap.medium || '')
   const [isLoading, setIsLoading] = useState(false)
@@ -23,7 +23,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
   // Reset form when scrap changes
   useEffect(() => {
     setTitle(scrap.title || '')
-    setContent(scrap.content || '')
+    setContent(scrap.observations || '')
     setCreator(scrap.creator || '')
     setMedium(scrap.medium || '')
   }, [scrap])
@@ -43,7 +43,7 @@ export default function EditScrapModal({ isOpen, onClose, scrap, onUpdate }: Edi
     try {
       const updatedScrap = await updateScrap(scrap.id, {
         title: title.trim() || undefined,
-        content: content.trim(),
+        observations: content.trim(),
         creator: creator.trim() || undefined,
         medium: medium.trim() || undefined
       })

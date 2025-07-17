@@ -12,7 +12,7 @@ interface AddEntryModalProps {
   onSave: (scrap: { 
     type: 'text' | 'image', 
     title?: string, 
-    content?: string, 
+    observations?: string, 
     creator?: string, 
     medium?: string,
     imageFile?: File 
@@ -57,7 +57,7 @@ export default function AddEntryModal({ isOpen, onClose, onSave, isSaving = fals
     await onSave({
       type: contentType,
       title: title.trim() || undefined,
-      content: content.trim() || undefined,
+      observations: content.trim() || undefined,
       creator: creator.trim() || undefined,
       medium: medium.trim() || undefined,
       imageFile: selectedImage || undefined

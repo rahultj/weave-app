@@ -300,7 +300,7 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                   {scrap.type === 'text' ? (
                     <div>
                       <p className="italic text-neutral-text-primary mb-2">
-                        &quot;{scrap.content}&quot;
+                        &quot;{scrap.observations}&quot;
                       </p>
                       {scrap.creator && (
                         <span className="text-neutral-text-muted">
@@ -313,9 +313,9 @@ export default function ChatModal({ isOpen, onClose, scrap }: ChatModalProps) {
                       <h3 className="font-medium text-neutral-text-primary mb-1">
                         {scrap.title}
                       </h3>
-                      {scrap.content && (
+                      {scrap.observations && (
                         <p className="text-neutral-text-secondary text-sm">
-                          {scrap.content}
+                          {scrap.observations}
                         </p>
                       )}
                     </div>

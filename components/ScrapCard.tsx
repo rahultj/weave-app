@@ -137,9 +137,9 @@ export default function ScrapCard({
               )}
               
               {/* Observation - Priority 3 */}
-              {scrap.content && (
+              {scrap.observations && (
                 <p className="text-xs text-neutral-text-secondary mb-2 line-clamp-3 leading-relaxed">
-                  {highlightedContent ?? scrap.content}
+                  {highlightedContent ?? scrap.observations}
                 </p>
               )}
               
@@ -177,10 +177,10 @@ export default function ScrapCard({
             )}
             
             {/* Observation - Priority 3 */}
-            {scrap.content && (
+            {scrap.observations && (
               <div className="mb-4">
                 <p className="text-base text-neutral-text-primary leading-relaxed line-clamp-3">
-                  {highlightedContent ?? scrap.content}
+                  {highlightedContent ?? scrap.observations}
                 </p>
               </div>
             )}

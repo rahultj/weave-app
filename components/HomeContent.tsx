@@ -62,7 +62,7 @@ export default function HomeContent() {
   const handleSaveScrap = async (scrapData: {
     type: 'text' | 'image'
     title?: string
-    content?: string
+    observations?: string
     creator?: string
     medium?: string
     imageFile?: File
@@ -72,8 +72,8 @@ export default function HomeContent() {
     setIsCreating(true)
     try {
       await createScrap({
-        title: scrapData.title,
-        content: scrapData.content,
+        title: scrapData.title || 'Untitled',
+        observations: scrapData.observations,
         creator: scrapData.creator,
         medium: scrapData.medium,
         type: scrapData.type

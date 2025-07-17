@@ -104,8 +104,9 @@ export async function POST(request: NextRequest) {
     const buildScrapContext = (scrap: {
       id: string
       title?: string | null
-      content?: string | null
-      source?: string | null
+      observations?: string | null
+      creator?: string | null
+      medium?: string | null
       tags?: string[] | null
       type: string
       image_url?: string | null
@@ -127,9 +128,14 @@ export async function POST(request: NextRequest) {
         parts.push(`Content Type: ${scrap.type}`)
       }
       
-      // Add source/creator information
-      if (scrap.source) {
-        parts.push(`Source/Creator: ${scrap.source}`)
+      // Add creator information
+      if (scrap.creator) {
+        parts.push(`Creator: ${scrap.creator}`)
+      }
+      
+      // Add medium information
+      if (scrap.medium) {
+        parts.push(`Medium: ${scrap.medium}`)
       }
       
       // Add tags/categories
@@ -137,14 +143,14 @@ export async function POST(request: NextRequest) {
         parts.push(`Categories: ${scrap.tags.join(', ')}`)
       }
       
-      // Add the actual content
-      if (scrap.content) {
+      // Add the actual observations
+      if (scrap.observations) {
         if (scrap.type === 'text') {
-          parts.push(`Quote/Content: "${scrap.content}"`)
+          parts.push(`Quote/Observations: "${scrap.observations}"`)
         } else if (scrap.type === 'image') {
-          parts.push(`Image Description: "${scrap.content}"`)
+          parts.push(`Image Observations: "${scrap.observations}"`)
         } else {
-          parts.push(`Content: "${scrap.content}"`)
+          parts.push(`Observations: "${scrap.observations}"`)
         }
       }
       

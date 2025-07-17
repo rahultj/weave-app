@@ -38,7 +38,7 @@ async function testStagingMigration() {
     // 2. Check current schema structure
     const { data: scraps, error: scrapsError } = await supabase
       .from('scraps')
-      .select('id, title, content, source, creator, medium, type, created_at')
+      .select('id, title, content, creator, medium, type, created_at')
       .limit(3)
     
     if (scrapsError) {

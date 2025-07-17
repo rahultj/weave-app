@@ -69,7 +69,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
     ? scraps.filter(scrap => {
         return (
           (scrap.title && scrap.title.toLowerCase().includes(searchTerm)) ||
-          (scrap.content && scrap.content.toLowerCase().includes(searchTerm)) ||
+          (scrap.observations && scrap.observations.toLowerCase().includes(searchTerm)) ||
           (scrap.creator && scrap.creator.toLowerCase().includes(searchTerm)) ||
           (scrap.tags && scrap.tags.some(tag => tag.toLowerCase().includes(searchTerm)))
         )
@@ -166,7 +166,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
               onUpdate={handleScrapUpdate}
               onDelete={handleScrapDelete}
               highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
-              highlightedContent={hasSearch && scrap.content ? highlight(scrap.content, searchTerm) : undefined}
+              highlightedContent={hasSearch && scrap.observations ? highlight(scrap.observations, searchTerm) : undefined}
               highlightedCreator={hasSearch && scrap.creator ? highlight(scrap.creator, searchTerm) : undefined}
               highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
             />
