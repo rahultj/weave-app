@@ -100,8 +100,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Build comprehensive context about the scrap
-    const buildScrapContext = (scrap: {
+    // Build clear artifact-focused context
+    const buildArtifactContext = (scrap: {
       id: string
       title?: string | null
       observations?: string | null
@@ -112,63 +112,24 @@ export async function POST(request: NextRequest) {
       image_url?: string | null
       created_at?: string | null
     }) => {
-      const parts = []
-      
-      // Start with the type and title
-      if (scrap.title) {
-        parts.push(`Title: "${scrap.title}"`)
-      }
-      
-      // Add content type information
-      if (scrap.type === 'text') {
-        parts.push(`Content Type: Text/Quote`)
-      } else if (scrap.type === 'image') {
-        parts.push(`Content Type: Image`)
-      } else {
-        parts.push(`Content Type: ${scrap.type}`)
-      }
-      
-      // Add creator information
-      if (scrap.creator) {
-        parts.push(`Creator: ${scrap.creator}`)
-      }
-      
-      // Add medium information
-      if (scrap.medium) {
-        parts.push(`Medium: ${scrap.medium}`)
-      }
-      
-      // Add tags/categories
-      if (scrap.tags && scrap.tags.length > 0) {
-        parts.push(`Categories: ${scrap.tags.join(', ')}`)
-      }
-      
-      // Add the actual observations
-      if (scrap.observations) {
-        if (scrap.type === 'text') {
-          parts.push(`Quote/Observations: "${scrap.observations}"`)
-        } else if (scrap.type === 'image') {
-          parts.push(`Image Observations: "${scrap.observations}"`)
-        } else {
-          parts.push(`Observations: "${scrap.observations}"`)
-        }
-      }
-      
-      // Add image URL info for image scraps
-      if (scrap.type === 'image' && scrap.image_url) {
-        parts.push(`Image URL: Available`)
-      }
-      
-      // Add creation date for context
-      if (scrap.created_at) {
-        const createdDate = new Date(scrap.created_at).toLocaleDateString()
-        parts.push(`Added to collection: ${createdDate}`)
-      }
-      
-      return parts.join('\n')
+      return `CULTURAL ARTIFACT:
+- Title: ${scrap.title || 'Untitled'}
+- Creator: ${scrap.creator || 'Unknown'}  
+- Medium: ${scrap.medium || 'Unspecified'}
+${scrap.image_url ? '- Visual artifact included' : ''}
+
+USER'S PERSONAL REFLECTIONS:
+${scrap.observations || 'No personal observations provided'}
+
+INSTRUCTIONS:
+- Focus responses on the CULTURAL ARTIFACT information above
+- The artifact (title, creator, medium) is the subject of discussion
+- Only reference user reflections if directly relevant to their question
+- Never attribute the user's thoughts to the original creator
+- Provide insights about the cultural work itself`
     }
 
-    const scrapContext = buildScrapContext(scrap)
+    const artifactContext = buildArtifactContext(scrap)
 
     // Build conversation history for Claude
     const conversationHistory = chatHistory.map((msg: { sender: string; content: string }) => {
@@ -183,13 +144,11 @@ When responding:
 - Focus on the most interesting or relevant point first
 - If suggesting related content, limit to 1-2 specific recommendations
 - Avoid abstract or overly academic language
-- Reference specific details from their saved item when relevant (title, creator, content type, etc.)
+- Reference specific details from the cultural artifact when relevant (title, creator, medium, etc.)
 
-The user is asking about this item from their collection:
+${artifactContext}
 
-${scrapContext}
-
-When they ask questions like "what is this about?", "tell me more about this", or "who created this?", use the specific information provided above to give detailed, contextual answers.
+When they ask questions like "what is this about?", "tell me more about this", or "who created this?", focus on the cultural artifact information and provide insights about the work itself.
 
 ${conversationHistory ? `Previous conversation:\n${conversationHistory}` : ''}
 
