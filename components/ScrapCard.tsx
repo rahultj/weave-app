@@ -57,16 +57,21 @@ export default function ScrapCard({
     }
   }
 
+  // Extract year from created_at for museum-style display
+  const getYear = () => {
+    return new Date(scrap.created_at).getFullYear()
+  }
+
   const ActionButtons = () => (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-1">
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={openEdit}
-        className="w-7 h-7 bg-neutral-bg-hover hover:bg-neutral-bg-hover/80 rounded-full flex items-center justify-center transition-colors group"
+        className="w-6 h-6 bg-transparent hover:bg-neutral-bg-hover rounded-full flex items-center justify-center transition-colors"
         aria-label="Edit scrap"
       >
-        <Edit3 size={14} className="text-neutral-text-secondary group-hover:text-brand-primary transition-colors" />
+        <Edit3 size={12} className="text-neutral-text-muted hover:text-neutral-text-secondary transition-colors" />
       </motion.button>
       
       <motion.button
@@ -74,28 +79,18 @@ export default function ScrapCard({
         whileTap={{ scale: 0.95 }}
         onClick={handleDelete}
         disabled={isDeleting}
-        className="w-7 h-7 bg-neutral-bg-hover hover:bg-red-50 rounded-full flex items-center justify-center transition-colors group disabled:opacity-50"
+        className="w-6 h-6 bg-transparent hover:bg-red-50 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
         aria-label="Delete scrap"
       >
-        <Trash2 size={14} className="text-neutral-text-secondary group-hover:text-red-600 transition-colors" />
-      </motion.button>
-      
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={openChat}
-        className="w-7 h-7 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors group"
-        aria-label="Explore this scrap"
-      >
-        <MessageCircle size={14} className="text-white group-hover:scale-110 transition-transform" />
+        <Trash2 size={12} className="text-neutral-text-muted hover:text-red-500 transition-colors" />
       </motion.button>
     </div>
   )
 
   if (!scrap) {
     return (
-      <div className="bg-neutral-bg-card rounded-lg p-4 border border-neutral-border">
-        <p className="text-neutral-text-muted">Loading observation...</p>
+      <div className="bg-neutral-bg-card rounded-card p-6 border border-neutral-border">
+        <p className="text-neutral-text-muted text-body">Loading artifact...</p>
       </div>
     )
   }
@@ -103,104 +98,86 @@ export default function ScrapCard({
   return (
     <>
       <motion.div
-        whileHover={{ y: -1 }}
-        className="group relative overflow-visible bg-neutral-bg-card rounded-lg border border-neutral-border hover:border-neutral-border/80 transition-colors"
+        whileHover={{ y: -2 }}
+        className="group relative bg-neutral-bg-card rounded-card border border-neutral-border hover:shadow-card-hover transition-all duration-200"
       >
-        {scrap.type === 'image' ? (
-          // Image Card Layout (Vertical with large image)
-          <div className="flex flex-col">
-            {/* Image Container */}
-            <div className="relative w-full aspect-[4/3] overflow-hidden rounded-t-lg">
-              <Image
-                src={scrap.image_url || '/placeholder.jpg'}
-                alt={scrap.title || 'Cultural artifact image'}
-                fill
-                className="object-cover"
-                unoptimized={true}
-              />
-            </div>
-            
-            {/* Content Container */}
-            <div className="p-4">
-              {/* Title (Cultural Artifact Name) - Priority 1 */}
-              {scrap.title && (
-                <h3 className="text-sm font-semibold text-neutral-text-primary mb-2 line-clamp-2">
+        <div className="p-6">
+          {/* Museum Label Header */}
+          <div className="mb-4">
+            {/* Title, Year - Large Primary Typography */}
+            <div className="mb-2">
+              {scrap.title ? (
+                <h2 className="text-h2 font-bold text-neutral-text-primary leading-tight">
                   {highlightedTitle ?? scrap.title}
-                </h3>
+                  <span className="text-neutral-text-muted font-normal">, {getYear()}</span>
+                </h2>
+              ) : (
+                <h2 className="text-h2 font-bold text-neutral-text-muted leading-tight">
+                  Untitled, {getYear()}
+                </h2>
               )}
-              
-              {/* Medium - Priority 2 */}
-              {scrap.medium && (
-                <p className="text-xs text-neutral-text-muted mb-2">
-                  {scrap.medium}
-                </p>
-              )}
-              
-              {/* Observation - Priority 3 */}
-              {scrap.observations && (
-                <p className="text-xs text-neutral-text-secondary mb-2 line-clamp-3 leading-relaxed">
-                  {highlightedContent ?? scrap.observations}
-                </p>
-              )}
-              
-              {/* Creator - Priority 4 */}
-              {scrap.creator && (
-                <p className="text-xs text-neutral-text-secondary font-medium mb-2">
-                  by {highlightedCreator ?? scrap.creator}
-                </p>
-              )}
-              
-              {/* Meta + Actions - Priority 5 */}
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-neutral-text-muted">
-                  {new Date(scrap.created_at).toLocaleDateString()}
-                </span>
-                <ActionButtons />
-              </div>
             </div>
-          </div>
-        ) : (
-          // Text Card Layout (Vertical with proper padding)
-          <div className="p-5">
-            {/* Title (Cultural Artifact Name) - Priority 1 */}
-            {scrap.title && (
-              <h3 className="text-base font-semibold text-neutral-text-primary mb-2 line-clamp-2">
-                {highlightedTitle ?? scrap.title}
-              </h3>
+
+            {/* Creator - Secondary Typography */}
+            {scrap.creator && (
+              <p className="text-h3 font-medium text-neutral-text-secondary mb-1">
+                {highlightedCreator ?? scrap.creator}
+              </p>
             )}
-            
-            {/* Medium - Priority 2 */}
+
+            {/* Medium - Technical Typography */}
             {scrap.medium && (
-              <p className="text-sm text-neutral-text-muted mb-3">
+              <p className="text-body text-neutral-text-muted font-normal">
                 {scrap.medium}
               </p>
             )}
-            
-            {/* Observation - Priority 3 */}
-            {scrap.observations && (
-              <div className="mb-4">
-                <p className="text-base text-neutral-text-primary leading-relaxed line-clamp-3">
-                  {highlightedContent ?? scrap.observations}
-                </p>
-              </div>
-            )}
-            
-            {/* Creator - Priority 4 */}
-            {scrap.creator && (
-              <p className="text-sm text-neutral-text-secondary font-medium mb-3">
-                by {highlightedCreator ?? scrap.creator}
-              </p>
-            )}
-            
-            {/* Meta + Actions - Priority 5 */}
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-neutral-text-muted">
-                {new Date(scrap.created_at).toLocaleDateString()}
-              </span>
-              <ActionButtons />
-            </div>
           </div>
-        )}
+
+          {/* Artifact Content */}
+          {scrap.type === 'image' && scrap.image_url && (
+            <div className="mb-4">
+              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-neutral-bg-hover">
+                <Image
+                  src={scrap.image_url}
+                  alt={scrap.title || 'Cultural artifact'}
+                  fill
+                  className="object-cover"
+                  unoptimized={true}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Visual Separator */}
+          {scrap.observations && (
+            <div className="border-t border-neutral-border my-4"></div>
+          )}
+
+          {/* User's Observations */}
+          {scrap.observations && (
+            <div className="mb-4">
+              <p className="text-body text-neutral-text-primary leading-relaxed">
+                {highlightedContent ?? scrap.observations}
+              </p>
+            </div>
+          )}
+
+          {/* Bottom Actions */}
+          <div className="flex items-center justify-between">
+            <ActionButtons />
+            
+            {/* AI Chat Button - Rabbit icon equivalent */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={openChat}
+              className="w-8 h-8 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors shadow-sm"
+              aria-label="Explore this artifact with AI"
+            >
+              <MessageCircle size={16} className="text-white" />
+            </motion.button>
+          </div>
+        </div>
       </motion.div>
 
       <ErrorBoundary FallbackComponent={ChatErrorFallback}>
