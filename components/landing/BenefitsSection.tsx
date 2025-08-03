@@ -4,29 +4,29 @@ export function BenefitsSection() {
   const testimonials = [
     {
       name: "Sarah Chen",
-      role: "Art Student",
-      content: "Weave helped me understand the connections between different artistic movements I was studying. The AI insights are incredibly thoughtful.",
+      role: "Gallerist",
+      content: "Weave helped me understand why I'm drawn to certain contemporary artists. The pattern recognition is incredible—it identified my attraction to liminal spaces across painting, photography, and sculpture.",
       rating: 5
     },
     {
       name: "Marcus Rodriguez",
-      role: "Film Enthusiast",
-      content: "I love how Weave tracks my evolving taste in cinema. It's like having a personal film critic who actually knows me.",
+      role: "Film Programmer",
+      content: "I use Weave to track my curatorial instincts. It's like having a conversation with my own taste—understanding not just what I like, but why I program certain films together.",
       rating: 5
     },
     {
       name: "Priya Patel",
-      role: "Literature Professor",
-      content: "As an educator, I use Weave to track cultural references across different texts. It's become indispensable for my research.",
+      role: "Design Director",
+      content: "Weave revealed connections between my vintage poster collection and my typography choices. It's not just organizing—it's developing aesthetic intelligence.",
       rating: 5
     }
   ];
 
   const stats = [
-    { label: "Cultural Moments Captured", value: "50K+" },
-    { label: "Active Users", value: "2,500+" },
-    { label: "AI Insights Generated", value: "125K+" },
-    { label: "Cultural Connections Made", value: "300K+" }
+    { label: "Aesthetic Moments Captured", value: "50K+" },
+    { label: "Cultural Enthusiasts", value: "2,500+" },
+    { label: "Taste Insights Generated", value: "125K+" },
+    { label: "Cultural Threads Discovered", value: "300K+" }
   ];
 
   return (
@@ -53,7 +53,7 @@ export function BenefitsSection() {
             Loved by Cultural Explorers
           </h2>
           <p className="text-xl text-[#6B6B6B] max-w-2xl mx-auto">
-            Join thousands of people who are discovering deeper meaning in their cultural interests
+            Join curators, artists, and cultural enthusiasts who are using AI to understand their aesthetic sensibility and discover their next cultural obsession
           </p>
         </div>
 

@@ -4,33 +4,33 @@ export function KeyFeaturesSection() {
   const features = [
     {
       icon: Calendar,
-      title: "Timeline View",
-      description: "See your cultural journey unfold chronologically with beautiful timeline visualization."
+      title: "Taste Evolution Timeline",
+      description: "See your cultural journey unfold chronologically and track how your aesthetic sensibility develops over time."
     },
     {
       icon: Share2,
-      title: "Smart Connections",
-      description: "AI automatically finds connections between your saved cultural moments."
+      title: "Aesthetic Pattern Detection",
+      description: "AI automatically finds connections between your cultural discoveries, revealing the deeper patterns in your taste."
     },
     {
       icon: TrendingUp,
-      title: "Growth Tracking",
-      description: "Monitor how your cultural interests evolve and expand over time."
+      title: "Cultural Sophistication Metrics",
+      description: "Monitor how your cultural interests evolve and expand as you develop more refined aesthetic intelligence."
     },
     {
       icon: Zap,
-      title: "Quick Capture",
-      description: "Save cultural moments instantly with our streamlined capture experience."
+      title: "Aesthetic Moment Capture",
+      description: "Save cultural discoveries instantly when something strikes you—from museum visits to film screenings to book passages."
     },
     {
       icon: Lock,
-      title: "Private & Secure",
-      description: "Your cultural journal is completely private and secure by design."
+      title: "Personal Taste Sanctuary",
+      description: "Your cultural discoveries and taste development journey are completely private and secure by design."
     },
     {
       icon: Smartphone,
-      title: "Cross-Platform",
-      description: "Access your cultural journal on any device, anywhere, anytime."
+      title: "Seamless Cultural Curation",
+      description: "Access your cultural journal and continue developing your taste on any device, anywhere, anytime."
     }
   ];
 

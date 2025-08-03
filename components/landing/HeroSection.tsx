@@ -35,7 +35,7 @@ export function HeroSection() {
               </h1>
               
               <p className="text-lg sm:text-xl text-[#6B6B6B] max-w-lg leading-relaxed">
-                Capture, explore, and understand the cultural moments that shape your world with AI-powered insights.
+                Transform fleeting cultural encounters into lasting taste. Weave helps you recognize patterns in what moves you and discover the threads that connect your aesthetic sensibility.
               </p>
             </div>
 

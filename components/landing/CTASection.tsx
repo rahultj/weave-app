@@ -36,7 +36,7 @@ export function CTASection() {
           </h2>
           
           <p className="text-lg sm:text-xl text-[#6B6B6B] max-w-2xl mx-auto px-4">
-            Join thousands of cultural explorers discovering deeper meaning in their interests
+            Join curators, artists, and cultural enthusiasts who are using AI to understand their aesthetic sensibility and discover their next cultural obsession
           </p>
 
           {/* Email Signup */}

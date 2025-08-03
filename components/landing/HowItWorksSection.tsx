@@ -6,8 +6,8 @@ export function HowItWorksSection() {
   const steps = [
     {
       number: "01",
-      title: "Save a cultural moment",
-      description: "Capture anything that resonates - a powerful quote, an inspiring artwork, or a meaningful cultural artifact.",
+      title: "Document aesthetic moments",
+      description: "Notice a striking film frame, an elegant book design, a powerful quote—save it to understand why it caught your eye.",
       icon: Plus,
       screenshot: "/landing/weave-cultural-feed.png",
       screenshotAlt: "Weave app feed showing Native American cultural artifacts and diverse cultural discoveries",
@@ -15,8 +15,8 @@ export function HowItWorksSection() {
     },
     {
       number: "02", 
-      title: "Ask Bobbin anything",
-      description: "Our AI companion helps you explore deeper meanings, make connections, and understand your cultural interests.",
+      title: "Explore cultural connections",
+      description: "Bobbin isn't just an AI assistant—it's a cultural companion that helps you understand aesthetic choices, artistic movements, and thematic connections.",
       icon: WeaveIcon,
       screenshot: "/landing/weave-bobbin-chat.png",
       screenshotAlt: "Chat with Bobbin AI exploring the history of American Indian foods and their global cultural impact",
@@ -24,8 +24,8 @@ export function HowItWorksSection() {
     },
     {
       number: "03",
-      title: "Discover your patterns",
-      description: "See how your cultural moments connect and evolve over time through beautiful thread visualizations.",
+      title: "Uncover your taste DNA",
+      description: "See how your cultural interests form patterns—the visual motifs, narrative themes, and aesthetic principles that define your unique sensibility.",
       icon: Network,
       comingSoon: true
     }

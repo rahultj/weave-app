@@ -4,18 +4,18 @@ export function WhatIsWeaveSection() {
   const features = [
     {
       icon: Brain,
-      title: "AI-Powered Insights",
-      description: "Get deeper understanding of your cultural interests with personalized AI analysis and recommendations."
+      title: "Aesthetic Intelligence",
+      description: "AI analysis reveals the deeper patterns in what captivates you—from color palettes to narrative structures to philosophical themes."
     },
     {
       icon: Palette,
-      title: "Beautiful Collections",
-      description: "Organize your cultural discoveries into stunning visual collections that tell your story."
+      title: "Cultural Threads",
+      description: "See how your love for Tarkovsky connects to your fascination with Japanese pottery. Weave finds the aesthetic threads that bind your interests."
     },
     {
       icon: Users,
-      title: "Personal Growth",
-      description: "Track how your cultural tastes evolve and discover patterns in your interests over time."
+      title: "Curated Discovery",
+      description: "Get recommendations that honor your existing sensibility while gently expanding your cultural horizons."
     }
   ];
 
@@ -33,7 +33,7 @@ export function WhatIsWeaveSection() {
             What is Weave?
           </h2>
           <p className="text-lg sm:text-xl text-[#6B6B6B] max-w-2xl mx-auto px-4">
-            Weave is a personal cultural journal that helps you capture, explore, and understand the cultural moments that shape your world.
+            Weave is a personal cultural journal that helps you understand why certain books, films, art, and ideas resonate with you—and discover what to explore next.
           </p>
         </div>
 
