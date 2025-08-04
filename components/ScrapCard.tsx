@@ -10,6 +10,16 @@ import { Scrap, deleteScrap } from '@/lib/scraps'
 import { ReactNode } from 'react'
 import ErrorBoundary, { ChatErrorFallback, ModalErrorFallback } from './ErrorBoundary'
 
+// Format date for metadata display
+const formatDate = (dateString: string) => {
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: 'numeric'
+  })
+}
+
 interface ScrapCardProps {
   scrap: Scrap
   onUpdate: (updatedScrap: Scrap) => void
@@ -57,35 +67,7 @@ export default function ScrapCard({
     }
   }
 
-  // Extract year from created_at for museum-style display
-  const getYear = () => {
-    return new Date(scrap.created_at).getFullYear()
-  }
 
-  const ActionButtons = () => (
-    <div className="flex items-center gap-1">
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={openEdit}
-        className="w-6 h-6 bg-transparent hover:bg-neutral-bg-hover rounded-full flex items-center justify-center transition-colors"
-        aria-label="Edit scrap"
-      >
-        <Edit3 size={12} className="text-neutral-text-muted hover:text-neutral-text-secondary transition-colors" />
-      </motion.button>
-      
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={handleDelete}
-        disabled={isDeleting}
-        className="w-6 h-6 bg-transparent hover:bg-red-50 rounded-full flex items-center justify-center transition-colors disabled:opacity-50"
-        aria-label="Delete scrap"
-      >
-        <Trash2 size={12} className="text-neutral-text-muted hover:text-red-500 transition-colors" />
-      </motion.button>
-    </div>
-  )
 
   if (!scrap) {
     return (
@@ -97,85 +79,95 @@ export default function ScrapCard({
 
   return (
     <>
+      {/* Substack-inspired clean card design */}
       <motion.div
         whileHover={{ y: -2 }}
-        className="group relative bg-neutral-bg-card rounded-card border border-neutral-border hover:shadow-card-hover transition-all duration-200"
+        className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 overflow-hidden group"
       >
-        <div className="p-6">
-          {/* Museum Label Header */}
-          <div className="mb-4">
-            {/* Title, Year - Large Primary Typography */}
-            <div className="mb-2">
-              {scrap.title ? (
-                <h2 className="text-h2 font-bold text-neutral-text-primary leading-tight">
-                  {highlightedTitle ?? scrap.title}
-                  <span className="text-neutral-text-muted font-normal">, {getYear()}</span>
-                </h2>
-              ) : (
-                <h2 className="text-h2 font-bold text-neutral-text-muted leading-tight">
-                  Untitled, {getYear()}
-                </h2>
-              )}
-            </div>
-
-            {/* Creator - Secondary Typography */}
-            {scrap.creator && (
-              <p className="text-h3 font-medium text-neutral-text-secondary mb-1">
-                {highlightedCreator ?? scrap.creator}
-              </p>
-            )}
-
-            {/* Medium - Technical Typography */}
-            {scrap.medium && (
-              <p className="text-body text-neutral-text-muted font-normal">
-                {scrap.medium}
-              </p>
-            )}
+        {/* Large hero image - much bigger like Substack */}
+        {scrap.type === 'image' && scrap.image_url && (
+          <div className="aspect-[16/10] overflow-hidden">
+            <Image
+              src={scrap.image_url}
+              alt={scrap.title || 'Cultural artifact'}
+              width={800}
+              height={500}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              unoptimized={true}
+            />
           </div>
+        )}
 
-          {/* Artifact Content */}
-          {scrap.type === 'image' && scrap.image_url && (
-            <div className="mb-4">
-              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-neutral-bg-hover">
-                <Image
-                  src={scrap.image_url}
-                  alt={scrap.title || 'Cultural artifact'}
-                  fill
-                  className="object-cover"
-                  unoptimized={true}
-                />
-              </div>
-            </div>
+        {/* Content with better spacing */}
+        <div className="p-6 space-y-4">
+          {/* Title - larger, more prominent */}
+          <h3 className="text-xl font-semibold text-gray-900 leading-tight line-clamp-2 text-content">
+            {highlightedTitle ?? (scrap.title || 'Untitled')}
+          </h3>
+
+          {/* Creator - if exists */}
+          {scrap.creator && (
+            <p className="text-base font-medium text-gray-700">
+              {highlightedCreator ?? scrap.creator}
+            </p>
           )}
 
-          {/* Visual Separator */}
+          {/* Description - more readable */}
           {scrap.observations && (
-            <div className="border-t border-neutral-border my-4"></div>
+            <p className="text-gray-600 text-base leading-relaxed line-clamp-3 text-content">
+              {highlightedContent ?? scrap.observations}
+            </p>
           )}
 
-          {/* User's Observations */}
-          {scrap.observations && (
-            <div className="mb-4">
-              <p className="text-body text-neutral-text-primary leading-relaxed">
-                {highlightedContent ?? scrap.observations}
-              </p>
+          {/* Medium - if exists */}
+          {scrap.medium && (
+            <p className="text-sm text-gray-500 font-medium">
+              {scrap.medium}
+            </p>
+          )}
+
+          {/* Metadata row */}
+          <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+            <div className="flex items-center space-x-3 text-sm text-gray-500">
+              <span>{formatDate(scrap.created_at)}</span>
             </div>
-          )}
 
-          {/* Bottom Actions */}
-          <div className="flex items-center justify-between">
-            <ActionButtons />
-            
-            {/* AI Chat Button - Rabbit icon equivalent */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={openChat}
-              className="w-8 h-8 bg-brand-primary hover:bg-brand-hover rounded-full flex items-center justify-center transition-colors shadow-sm"
-              aria-label="Explore this artifact with AI"
-            >
-              <MessageCircle size={16} className="text-white" />
-            </motion.button>
+            {/* Action buttons - much more subtle */}
+            <div className="flex items-center space-x-2">
+              {/* Edit button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openEdit}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-50 rounded-lg"
+                aria-label="Edit"
+              >
+                <Edit3 className="w-4 h-4" />
+              </motion.button>
+
+              {/* Delete button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="text-gray-400 hover:text-red-500 transition-colors p-2 hover:bg-red-50 rounded-lg disabled:opacity-50"
+                aria-label="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </motion.button>
+
+              {/* Chat button - minimal CTA */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={openChat}
+                className="text-[#C85A5A] hover:text-[#B64A4A] transition-colors p-2 hover:bg-red-50 rounded-lg"
+                aria-label="Explore with AI"
+              >
+                <MessageCircle className="w-5 h-5" />
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>

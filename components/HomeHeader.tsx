@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/contexts/AuthContext'
-import { LogOut } from 'lucide-react'
+import { LogOut, Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 type HomeHeaderProps = {
@@ -27,36 +27,40 @@ export default function HomeHeader({ search, setSearch }: HomeHeaderProps) {
   }
 
   return (
-    <header className="bg-neutral-bg-card border-b border-neutral-border sticky top-0 z-10">
-      <div className="max-w-2xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-neutral-text-primary">
-            weave
-          </h1>
+    <header className="bg-white border-b border-gray-100 sticky top-0 z-50 backdrop-blur-md bg-white/90">
+      <div className="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <h1 className="text-xl font-semibold text-gray-900">weave</h1>
           <button
             data-tally-open="waJWrW"
-            className="p-2 text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover rounded-lg transition-colors text-sm font-medium"
+            className="text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium"
             aria-label="Feedback"
           >
             Feedback
           </button>
         </div>
-        <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Search your scraps..."
-          className="w-full sm:w-64 p-2 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none text-neutral-text-primary text-sm"
-        />
-        <div className="flex items-center gap-4">
+        
+        <div className="flex items-center space-x-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Search..."
+              className="w-56 pl-10 pr-3 py-2 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-[#C85A5A] focus:bg-white outline-none text-gray-900 text-sm transition-all"
+            />
+          </div>
+          
           {user?.email && (
-            <span className="text-sm text-neutral-text-secondary hidden sm:block">
+            <span className="text-sm text-gray-500 hidden sm:block max-w-32 truncate">
               {user.email}
             </span>
           )}
+          
           <button
             onClick={handleSignOut}
-            className="p-2 text-neutral-text-secondary hover:text-neutral-text-primary hover:bg-neutral-bg-hover rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
             aria-label="Sign out"
           >
             <LogOut size={18} />

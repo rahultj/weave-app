@@ -93,10 +93,10 @@ export default function HomeContent() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-bg-main flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-neutral-text-muted">Loading Weave...</p>
+          <div className="w-8 h-8 border-2 border-[#C85A5A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading Weave...</p>
         </div>
       </div>
     )
@@ -105,28 +105,28 @@ export default function HomeContent() {
   // Show sign-in if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-bg-main">
+      <div className="min-h-screen bg-gray-50">
         <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
           <div className="text-center w-full max-w-md mx-auto">
             <div className="mb-6 sm:mb-8">
-              <h1 className="text-3xl sm:text-4xl font-bold text-neutral-text-primary mb-2">
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
                 weave
               </h1>
-              <p className="text-base sm:text-lg text-neutral-text-secondary px-2">
+              <p className="text-base sm:text-lg text-gray-600 px-2">
                 Your personal cultural journal
               </p>
             </div>
             
-            <div className="bg-neutral-bg-card rounded-xl p-6 sm:p-8 border border-neutral-border mx-2 sm:mx-0">
-              <h2 className="text-lg sm:text-xl font-semibold text-neutral-text-primary mb-4">
+            <div className="bg-white rounded-xl p-6 sm:p-8 border border-gray-100 mx-2 sm:mx-0 shadow-sm">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4">
                 Welcome to Weave
               </h2>
-              <p className="text-sm sm:text-base text-neutral-text-secondary mb-6 leading-relaxed">
+              <p className="text-sm sm:text-base text-gray-600 mb-6 leading-relaxed">
                 Save and explore the books, quotes, thoughts, and cultural discoveries that inspire you.
               </p>
               <button
                 onClick={() => setIsSignInModalOpen(true)}
-                className="w-full py-3 px-6 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors font-medium text-sm sm:text-base"
+                className="w-full py-3 px-6 bg-[#C85A5A] text-white rounded-lg hover:bg-[#B64A4A] transition-colors font-medium text-sm sm:text-base"
               >
                 Get Started
               </button>
@@ -147,13 +147,15 @@ export default function HomeContent() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-bg-main">
+    <main className="min-h-screen bg-gray-50">
       <HomeHeader search={search} setSearch={setSearch} />
-      <div className="max-w-2xl mx-auto px-4 py-6">
+      <div className="py-6">
         <ErrorBoundary FallbackComponent={FeedErrorFallback}>
           <ScrapFeed key={refreshKey} search={search} onAddClick={handleAddClick} />
         </ErrorBoundary>
-        <ComingSoon />
+        <div className="max-w-2xl mx-auto px-4">
+          <ComingSoon />
+        </div>
       </div>
       <FloatingAddButton onClick={handleAddClick} />
       

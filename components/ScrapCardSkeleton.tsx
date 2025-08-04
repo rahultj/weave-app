@@ -10,52 +10,38 @@ interface ScrapCardSkeletonProps {
 
 export default function ScrapCardSkeleton({ showImage = false, className = '' }: ScrapCardSkeletonProps) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`bg-neutral-bg-card rounded-xl p-6 shadow-sm border border-neutral-border w-full max-w-md mx-auto relative group ${className}`}
-    >
-      {/* Image Skeleton (conditionally shown) */}
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse ${className}`}>
+      {/* Large image skeleton - Substack style */}
       {showImage && (
-        <div className="mb-4">
-          <SkeletonImage 
-            aspectRatio="aspect-[3/4]" 
-            className="rounded-lg"
-          />
-        </div>
+        <div className="aspect-[16/10] bg-gray-200"></div>
       )}
-
-      {/* Title Skeleton */}
-      <div className="mb-3">
-        <SkeletonTitle />
-      </div>
-
-      {/* Content Skeleton */}
-      <div className="mb-4">
-        <SkeletonParagraph 
-          lines={2} 
-          className="text-base leading-relaxed"
-        />
-      </div>
-
-      {/* Source Skeleton */}
-      <div className="mb-4">
-        <Skeleton className="h-4 w-32" />
-      </div>
-
-      {/* Action Bar */}
-      <div className="flex items-center justify-between border-t border-neutral-border mt-4 pt-4">
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-3 w-20" />
+      
+      {/* Content with better spacing */}
+      <div className="p-6 space-y-4">
+        {/* Title skeleton */}
+        <div className="h-6 bg-gray-200 rounded-md w-3/4"></div>
+        
+        {/* Creator skeleton */}
+        <div className="h-4 bg-gray-200 rounded-md w-1/2"></div>
+        
+        {/* Description skeleton */}
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded-md w-full"></div>
+          <div className="h-4 bg-gray-200 rounded-md w-5/6"></div>
+          <div className="h-4 bg-gray-200 rounded-md w-4/6"></div>
         </div>
-        <div className="flex items-center gap-2">
-          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
-          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
-          <SkeletonButton size="sm" className="w-8 h-8 rounded-full" />
+        
+        {/* Metadata row skeleton */}
+        <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+          <div className="h-3 bg-gray-200 rounded-md w-20"></div>
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+            <div className="w-8 h-8 bg-gray-200 rounded-lg"></div>
+          </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }
 

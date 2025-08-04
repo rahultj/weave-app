@@ -19,24 +19,24 @@ export default function EmptyState({
   action,
   variant = 'default'
 }: EmptyStateProps) {
-  const bgColor = variant === 'error' ? 'bg-red-50' : 'bg-neutral-bg-hover'
-  const iconColor = variant === 'error' ? 'text-red-500' : 'text-neutral-text-muted'
-  const actionBgColor = variant === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-brand-primary hover:bg-brand-hover'
+  const bgColor = variant === 'error' ? 'bg-red-50' : 'bg-gray-50'
+  const iconColor = variant === 'error' ? 'text-red-500' : 'text-gray-400'
+  const actionBgColor = variant === 'error' ? 'bg-red-500 hover:bg-red-600' : 'bg-[#C85A5A] hover:bg-[#B64A4A]'
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="text-center py-12"
+      className="text-center py-16 max-w-2xl mx-auto px-4"
     >
-      <div className={`w-16 h-16 ${bgColor} rounded-full flex items-center justify-center mx-auto mb-4`}>
+      <div className={`w-16 h-16 ${bgColor} rounded-full flex items-center justify-center mx-auto mb-6`}>
         <Icon className={`w-8 h-8 ${iconColor}`} />
       </div>
-      <h3 className="text-lg font-semibold text-neutral-text-primary mb-2">
+      <h3 className="text-xl font-semibold text-gray-900 mb-3">
         {title}
       </h3>
-      <p className="text-neutral-text-secondary max-w-md mx-auto mb-6">
+      <p className="text-gray-600 max-w-md mx-auto mb-8 text-base leading-relaxed">
         {message}
       </p>
       {action && (
@@ -44,7 +44,7 @@ export default function EmptyState({
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={action.onClick}
-          className={`${actionBgColor} text-white px-6 py-2 rounded-lg transition-colors`}
+          className={`${actionBgColor} text-white px-8 py-3 rounded-xl transition-colors font-medium shadow-sm hover:shadow-md`}
         >
           {action.label}
         </motion.button>

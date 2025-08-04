@@ -78,7 +78,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4">
+      <div className="max-w-2xl mx-auto space-y-8 px-4">
         <ScrapCardSkeleton showImage={true} />
         <ScrapCardSkeleton showImage={true} />
         <ScrapCardSkeleton showImage={false} />
@@ -145,7 +145,7 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
 
   return (
     <motion.div
-      className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-4 py-4 pb-20 max-w-5xl mx-auto"
+      className="max-w-2xl mx-auto space-y-8 px-4 py-4 pb-20"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -153,24 +153,16 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
       {filteredScraps.map((scrap, i) => {
         const hasSearch = !!searchTerm
         return (
-          <motion.div
+          <ScrapCard
             key={scrap.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ delay: i * 0.05, duration: 0.24, ease: [0.4, 0, 0.2, 1] }}
-            layout
-          >
-            <ScrapCard
-              scrap={scrap}
-              onUpdate={handleScrapUpdate}
-              onDelete={handleScrapDelete}
-              highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
-              highlightedContent={hasSearch && scrap.observations ? highlight(scrap.observations, searchTerm) : undefined}
-              highlightedCreator={hasSearch && scrap.creator ? highlight(scrap.creator, searchTerm) : undefined}
-              highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
-            />
-          </motion.div>
+            scrap={scrap}
+            onUpdate={handleScrapUpdate}
+            onDelete={handleScrapDelete}
+            highlightedTitle={hasSearch && scrap.title ? highlight(scrap.title, searchTerm) : undefined}
+            highlightedContent={hasSearch && scrap.observations ? highlight(scrap.observations, searchTerm) : undefined}
+            highlightedCreator={hasSearch && scrap.creator ? highlight(scrap.creator, searchTerm) : undefined}
+            highlightedTags={hasSearch && scrap.tags ? scrap.tags.map(tag => highlight(tag, searchTerm)) : undefined}
+          />
         )
       })}
     </motion.div>
