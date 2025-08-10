@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import ChatHeader from '@/components/ChatHeader';
@@ -13,7 +13,7 @@ import { Message } from '@/lib/types/chat';
 import { parseChatParams } from '@/lib/navigation';
 import { createConversationScrap, updateConversationScrap, getScraps, Scrap } from '@/lib/scraps';
 
-export default function ChatPage() {
+function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading } = useAuth();
@@ -448,5 +448,23 @@ export default function ChatPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-bg-main flex flex-col">
+        <ChatHeader onBack={() => window.history.back()} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-brand-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-neutral-text-secondary">Loading chat...</p>
+          </div>
+        </div>
+      </div>
+    }>
+      <ChatPageContent />
+    </Suspense>
   );
 }
