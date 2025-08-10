@@ -41,7 +41,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
             className={`px-4 py-3 rounded-2xl relative ${
               isUser
                 ? 'bg-brand-primary text-white rounded-br-md'
-                : 'bg-neutral-bg-card border border-neutral-border text-neutral-text-primary rounded-bl-md'
+                : 'bg-white border border-gray-200 text-neutral-text-primary rounded-bl-md shadow-sm'
             }`}
           >
             {/* Loading state for Bobbin */}

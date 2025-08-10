@@ -17,7 +17,7 @@ export default function TypingIndicator() {
         </div>
         
         {/* Typing bubble */}
-        <div className="bg-neutral-bg-card border border-neutral-border rounded-2xl px-4 py-3 max-w-xs">
+                  <div className="bg-white border border-gray-200 rounded-2xl px-4 py-3 max-w-xs shadow-sm">
           <div className="flex items-center space-x-1">
             <div className="flex space-x-1">
               <motion.div

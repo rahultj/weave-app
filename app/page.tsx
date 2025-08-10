@@ -44,9 +44,9 @@ function ScrollToTop() {
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#FAF8F5]">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#FAF8F5]/90 backdrop-blur-xl border-b border-[#C85A5A]/10">
+          <div className="min-h-screen bg-white">
+        {/* Navigation */}
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

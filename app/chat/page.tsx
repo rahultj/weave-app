@@ -395,7 +395,7 @@ function ChatPageContent() {
   // Show loading state while loading conversation
   if (isLoadingConversation) {
     return (
-      <div className="min-h-screen bg-neutral-bg-main flex flex-col">
+              <div className="min-h-screen bg-white flex flex-col">
         <ChatHeader onBack={handleBack} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
@@ -408,7 +408,7 @@ function ChatPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-bg-main flex flex-col">
+            <div className="min-h-screen bg-white flex flex-col">
       {/* Header */}
       <ChatHeader onBack={handleBack} />
 
@@ -423,7 +423,7 @@ function ChatPageContent() {
       <ChatContainer messages={messages} isLoading={isLoadingConversation} isTyping={isTyping} />
 
       {/* Input Area */}
-      <div className="sticky bottom-0 bg-neutral-bg-main border-t border-neutral-border p-4 safe-bottom">
+              <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 safe-bottom">
         <ConversationalInput
           onSend={handleSendMessage}
           onCameraSelect={handleCameraSelect}
@@ -454,7 +454,7 @@ function ChatPageContent() {
 export default function ChatPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-neutral-bg-main flex flex-col">
+              <div className="min-h-screen bg-white flex flex-col">
         <ChatHeader onBack={() => window.history.back()} />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">

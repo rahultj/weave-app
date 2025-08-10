@@ -42,7 +42,7 @@ export default function HomeContent() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-bg-main flex items-center justify-center">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-[#C85A5A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading Weave...</p>
@@ -54,7 +54,7 @@ export default function HomeContent() {
   // Show sign-in if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-neutral-bg-main">
+      <div className="min-h-screen bg-white">
         <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
           <div className="text-center w-full max-w-md mx-auto">
             <div className="mb-6 sm:mb-8">
@@ -96,7 +96,7 @@ export default function HomeContent() {
   }
 
   return (
-    <main className="min-h-screen bg-neutral-bg-main">
+    <main className="min-h-screen bg-white">
       <HomeHeader search={search} setSearch={setSearch} />
       
       {/* Simple Input at Top of Feed */}

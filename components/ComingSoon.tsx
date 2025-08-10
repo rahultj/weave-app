@@ -34,7 +34,7 @@ export default function ComingSoon() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <div className="bg-neutral-bg-card border border-neutral-border rounded-lg p-6">
+      <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
         <div className="text-center mb-6">
           <h2 className="text-xl font-semibold text-neutral-text-primary mb-2">
             Coming Soon

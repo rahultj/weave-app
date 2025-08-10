@@ -106,7 +106,7 @@ export default function ScrapCard({
 
   if (!scrap) {
     return (
-      <div className="bg-neutral-bg-card rounded-card p-6 border border-neutral-border">
+      <div className="bg-white rounded-card p-6 border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
         <p className="text-neutral-text-muted text-body">Loading artifact...</p>
       </div>
     )

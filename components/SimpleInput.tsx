@@ -24,7 +24,7 @@ export default function SimpleInput({ placeholder = "What's on your mind?" }: Si
   }
 
   return (
-    <div className="bg-neutral-bg-main border-b border-neutral-border p-4">
+    <div className="bg-white border-b border-gray-200 p-4">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3">
           {/* Bobbin Avatar */}
@@ -38,14 +38,14 @@ export default function SimpleInput({ placeholder = "What's on your mind?" }: Si
             placeholder={placeholder}
             onClick={handleInputClick}
             readOnly
-            className="flex-1 bg-transparent text-lg placeholder-neutral-text-muted border-none outline-none cursor-pointer py-2 px-1 hover:bg-neutral-bg-card rounded-lg transition-colors"
+            className="flex-1 bg-transparent text-lg placeholder-neutral-text-muted border-none outline-none cursor-pointer py-2 px-1 hover:bg-gray-50 rounded-lg transition-colors"
           />
           
           {/* Action Buttons */}
           <div className="flex items-center gap-2">
             <button 
               onClick={handleCameraClick}
-              className="p-2 text-neutral-text-secondary hover:text-brand-primary hover:bg-neutral-bg-card rounded-lg transition-colors"
+              className="p-2 text-neutral-text-secondary hover:text-brand-primary hover:bg-gray-50 rounded-lg transition-colors"
               aria-label="Add photo"
             >
               <Camera size={20} />
@@ -53,7 +53,7 @@ export default function SimpleInput({ placeholder = "What's on your mind?" }: Si
             
             <button 
               onClick={handleVoiceClick}
-              className="p-2 text-neutral-text-secondary hover:text-brand-primary hover:bg-neutral-bg-card rounded-lg transition-colors"
+              className="p-2 text-neutral-text-secondary hover:text-brand-primary hover:bg-gray-50 rounded-lg transition-colors"
               aria-label="Record voice"
             >
               <Mic size={20} />
