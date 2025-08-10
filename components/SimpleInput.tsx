@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Camera, Mic } from 'lucide-react'
+import { BobbinIcon4 } from './BobbinIcon4'
 
 interface SimpleInputProps {
   placeholder?: string;
@@ -28,7 +29,7 @@ export default function SimpleInput({ placeholder = "What's on your mind?" }: Si
         <div className="flex items-center gap-3">
           {/* Bobbin Avatar */}
           <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center text-white flex-shrink-0">
-            <span className="text-lg">🐰</span>
+            <BobbinIcon4 size={20} className="text-white" />
           </div>
           
           {/* Input Field */}
