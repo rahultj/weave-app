@@ -17,14 +17,15 @@ export const BobbinIcon4: React.FC<BobbinIconProps> = ({
     className={className}
     xmlns="http://www.w3.org/2000/svg"
   >
-    {/* Clean rabbit head silhouette - profile facing right */}
-    <path d="M8 6c0-2.2 1.8-4 4-4s4 1.8 4 4c0 .5-.1 1-.3 1.4l1.8 1.8c.3.3.5.7.5 1.1v2.2c0 1.4-1.1 2.5-2.5 2.5h-7c-1.4 0-2.5-1.1-2.5-2.5V9.3c0-.4.2-.8.5-1.1L7.3 7.4C7.1 7 8 6.5 8 6z"/>
+    {/* Rabbit ears */}
+    <path d="M8 2C8 1.4 8.4 1 9 1C9.6 1 10 1.4 10 2V6C10 6.6 9.6 7 9 7C8.4 7 8 6.6 8 6V2Z"/>
+    <path d="M14 2C14 1.4 14.4 1 15 1C15.6 1 16 1.4 16 2V6C16 6.6 15.6 7 15 7C14.4 7 14 6.6 14 6V2Z"/>
     
-    {/* Left ear - long and upright */}
-    <path d="M10 1c-.6 0-1 .4-1 1v4c0 .6.4 1 1 1s1-.4 1-1V2c0-.6-.4-1-1-1z"/>
+    {/* Head/body */}
+    <path d="M6 8C6 6.9 6.9 6 8 6H16C17.1 6 18 6.9 18 8V16C18 18.2 16.2 20 14 20H10C7.8 20 6 18.2 6 16V8Z"/>
     
-    {/* Right ear - long and upright */}
-    <path d="M14 1c-.6 0-1 .4-1 1v4c0 .6.4 1 1 1s1-.4 1-1V2c0-.6-.4-1-1-1z"/>
+    {/* Nose/face detail */}
+    <circle cx="12" cy="12" r="1" fill="white" opacity="0.3"/>
   </svg>
 );
 
