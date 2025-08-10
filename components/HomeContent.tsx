@@ -11,7 +11,7 @@ import OnboardingModal from '@/components/OnboardingModal'
 import InstallPrompt from '@/components/InstallPrompt'
 import OfflineIndicator from '@/components/OfflineIndicator'
 import ErrorBoundary, { FeedErrorFallback, ModalErrorFallback } from '@/components/ErrorBoundary'
-import ConversationalInput from '@/components/ConversationalInput'
+import SimpleInput from '@/components/SimpleInput'
 
 export default function HomeContent() {
   const { user, loading } = useAuth()
@@ -42,7 +42,7 @@ export default function HomeContent() {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-neutral-bg-main flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-2 border-[#C85A5A] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Loading Weave...</p>
@@ -54,7 +54,7 @@ export default function HomeContent() {
   // Show sign-in if not authenticated
   if (!user) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-neutral-bg-main">
         <div className="flex flex-col items-center justify-center min-h-screen p-4 sm:p-6">
           <div className="text-center w-full max-w-md mx-auto">
             <div className="mb-6 sm:mb-8">
@@ -96,8 +96,12 @@ export default function HomeContent() {
   }
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-neutral-bg-main">
       <HomeHeader search={search} setSearch={setSearch} />
+      
+      {/* Simple Input at Top of Feed */}
+      <SimpleInput placeholder="What's on your mind?" />
+      
       <div className="py-6">
         <ErrorBoundary FallbackComponent={FeedErrorFallback}>
           <ScrapFeed key={refreshKey} search={search} onStartConversation={handleStartConversation} />
@@ -105,12 +109,6 @@ export default function HomeContent() {
         <div className="max-w-2xl mx-auto px-4">
           <ComingSoon />
         </div>
-      </div>
-      {/* Conversational Input - Fixed at bottom */}
-      <div className="fixed bottom-4 left-4 right-4 z-30 md:left-auto md:right-4 md:w-96">
-        <ConversationalInput
-          placeholder="Ask Bobbin anything or share what's on your mind..."
-        />
       </div>
 
       <ErrorBoundary FallbackComponent={ModalErrorFallback}>
