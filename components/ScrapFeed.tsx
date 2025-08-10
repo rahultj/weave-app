@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { FileText, Search, AlertCircle, Plus } from 'lucide-react'
+import { MessageCircle, Search, AlertCircle } from 'lucide-react'
 import ScrapCard from './ScrapCard'
 import { getScraps, Scrap } from '@/lib/scraps'
 import { useAuth } from '@/contexts/AuthContext'
@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface ScrapFeedProps {
   search: string
-  onAddClick?: () => void
+  onStartConversation?: () => void
 }
 
 function highlight(text: string | undefined, term: string): React.ReactNode {
@@ -22,7 +22,7 @@ function highlight(text: string | undefined, term: string): React.ReactNode {
   )
 }
 
-export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
+export default function ScrapFeed({ search, onStartConversation }: ScrapFeedProps) {
   const [scraps, setScraps] = useState<Scrap[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -104,12 +104,12 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
   if (!user) {
     return (
       <EmptyState
-        icon={FileText}
-        title="Sign in to view your scraps"
-        message="Create an account to start saving and organizing your cultural discoveries."
+        icon={MessageCircle}
+        title="Sign in to view your conversations"
+        message="Create an account to start having conversations with Bobbin about culture."
         action={{
           label: "Sign In",
-          onClick: onAddClick || (() => {})
+          onClick: onStartConversation || (() => {})
         }}
       />
     )
@@ -118,12 +118,12 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
   if (scraps.length === 0) {
     return (
       <EmptyState
-        icon={FileText}
-        title="No scraps yet"
-        message="Start building your cultural journal by adding your first scrap."
+        icon={MessageCircle}
+        title="No conversations yet"
+        message="Start building your cultural journal by having your first conversation with Bobbin."
         action={{
-          label: "Add Your First Scrap",
-          onClick: onAddClick || (() => {})
+          label: "Start Your First Conversation",
+          onClick: onStartConversation || (() => {})
         }}
       />
     )
@@ -133,11 +133,11 @@ export default function ScrapFeed({ search, onAddClick }: ScrapFeedProps) {
     return (
       <EmptyState
         icon={Search}
-        title="No matching scraps"
-        message={`No scraps found matching "${search}". Try a different search term or add a new scrap.`}
+        title="No matching conversations"
+        message={`No conversations found matching "${search}". Try a different search term or start a new conversation.`}
         action={{
-          label: "Add New Scrap",
-          onClick: onAddClick || (() => {})
+          label: "Start New Conversation",
+          onClick: onStartConversation || (() => {})
         }}
       />
     )

@@ -1,28 +1,24 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import HomeHeader from '@/components/HomeHeader'
 import ScrapFeed from '@/components/ScrapFeed'
 import ComingSoon from '@/components/ComingSoon'
-import FloatingAddButton from '@/components/FloatingAddButton'
-import AddEntryModal from '@/components/AddEntryModal'
 import SignInModal from '@/components/SignInModal'
 import OnboardingModal from '@/components/OnboardingModal'
 import InstallPrompt from '@/components/InstallPrompt'
 import OfflineIndicator from '@/components/OfflineIndicator'
-import Toast from '@/components/Toast'
-import { createScrap } from '@/lib/scraps'
 import ErrorBoundary, { FeedErrorFallback, ModalErrorFallback } from '@/components/ErrorBoundary'
+import ConversationalInput from '@/components/ConversationalInput'
 
 export default function HomeContent() {
   const { user, loading } = useAuth()
+  const router = useRouter()
   const [search, setSearch] = useState('')
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
-  const [isCreating, setIsCreating] = useState(false)
-  const [showToast, setShowToast] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
 
   // Check if we should show onboarding when user logs in
@@ -33,62 +29,15 @@ export default function HomeContent() {
     }
   }, [user, loading])
 
-  // Check for URL action parameter to auto-open add modal
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    if (urlParams.get('action') === 'add' && user) {
-      setIsAddModalOpen(true)
-    }
-  }, [user])
-
-  // Auto-hide toast after 2 seconds
-  useEffect(() => {
-    if (showToast) {
-      const timer = setTimeout(() => {
-        setShowToast(false)
-      }, 2000)
-      return () => clearTimeout(timer)
-    }
-  }, [showToast])
-
-  const handleAddClick = () => {
+  const handleStartConversation = () => {
     if (!user) {
       setIsSignInModalOpen(true)
     } else {
-      setIsAddModalOpen(true)
+      router.push('/chat')
     }
   }
 
-  const handleSaveScrap = async (scrapData: {
-    type: 'text' | 'image'
-    title?: string
-    observations?: string
-    creator?: string
-    medium?: string
-    imageFile?: File
-  }) => {
-    if (!user) return
 
-    setIsCreating(true)
-    try {
-      await createScrap({
-        title: scrapData.title || 'Untitled',
-        observations: scrapData.observations,
-        creator: scrapData.creator,
-        medium: scrapData.medium,
-        type: scrapData.type
-      }, scrapData.imageFile)
-      
-      setIsAddModalOpen(false)
-      setRefreshKey(prev => prev + 1)
-      setShowToast(true)
-    } catch (error) {
-      console.error('Error saving scrap:', error)
-      // Could add error toast here
-    } finally {
-      setIsCreating(false)
-    }
-  }
 
   // Show loading state
   if (loading) {
@@ -151,22 +100,18 @@ export default function HomeContent() {
       <HomeHeader search={search} setSearch={setSearch} />
       <div className="py-6">
         <ErrorBoundary FallbackComponent={FeedErrorFallback}>
-          <ScrapFeed key={refreshKey} search={search} onAddClick={handleAddClick} />
+          <ScrapFeed key={refreshKey} search={search} onStartConversation={handleStartConversation} />
         </ErrorBoundary>
         <div className="max-w-2xl mx-auto px-4">
           <ComingSoon />
         </div>
       </div>
-      <FloatingAddButton onClick={handleAddClick} />
-      
-      <ErrorBoundary FallbackComponent={ModalErrorFallback}>
-        <AddEntryModal
-          isOpen={isAddModalOpen}
-          onClose={() => setIsAddModalOpen(false)}
-          onSave={handleSaveScrap}
-          isSaving={isCreating}
+      {/* Conversational Input - Fixed at bottom */}
+      <div className="fixed bottom-4 left-4 right-4 z-30 md:left-auto md:right-4 md:w-96">
+        <ConversationalInput
+          placeholder="Ask Bobbin anything or share what's on your mind..."
         />
-      </ErrorBoundary>
+      </div>
 
       <ErrorBoundary FallbackComponent={ModalErrorFallback}>
         <SignInModal
@@ -181,12 +126,6 @@ export default function HomeContent() {
           onClose={() => setShowOnboarding(false)}
         />
       </ErrorBoundary>
-
-      <Toast
-        message="Scrap saved successfully!"
-        isVisible={showToast}
-        onClose={() => setShowToast(false)}
-      />
 
       {/* PWA Components */}
       <InstallPrompt />

@@ -103,6 +103,13 @@ html {
   overflow: hidden;
 }
 
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Debug styles for onboarding modal layout issues */
 .debug-onboarding,
 .debug-onboarding * {
