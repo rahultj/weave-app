@@ -111,7 +111,7 @@ export default function ConversationView({ conversation, artifact, user }: Conve
           <div className="space-y-4">
             {messages.map((message, index) => {
               const isUser = message.sender === 'user'
-              const isBobbin = message.sender === 'bobbin' || message.sender === 'assistant'
+              const isBobbin = !isUser
               
               return (
                 <motion.div
