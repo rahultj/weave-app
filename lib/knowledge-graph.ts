@@ -196,7 +196,7 @@ export async function getArtifactWithRelations(
 
   if (conceptsError) throw conceptsError
 
-  const concepts = artifactConcepts?.map(ac => ac.concepts).filter(Boolean) as Concept[] || []
+  const concepts = (artifactConcepts?.map(ac => ac.concepts).filter(Boolean) || []) as unknown as Concept[]
 
   return {
     ...artifact,

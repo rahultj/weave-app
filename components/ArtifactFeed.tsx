@@ -95,10 +95,8 @@ export default function ArtifactFeed() {
             <ArtifactCard
               key={artifact.id}
               artifact={artifact}
-              onClick={handleArtifactClick}
-              onEdit={handleEditArtifact}
-              onChat={handleChatAboutArtifact}
-              onDelete={handleDeleteArtifact}
+              onClick={() => handleArtifactClick(artifact.id)}
+              onDelete={async (id) => { handleDeleteArtifact(id) }}
             />
           ))}
         </div>

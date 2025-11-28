@@ -70,8 +70,7 @@ export default function ConnectionSuggestion({
         <div className="mb-md">
           <ArtifactCard
             artifact={sourceArtifact}
-            variant="compact"
-            onClick={onArtifactClick}
+            onClick={() => onArtifactClick?.(sourceArtifact.id)}
           />
         </div>
 
@@ -89,8 +88,7 @@ export default function ConnectionSuggestion({
         <div className="mb-lg">
           <ArtifactCard
             artifact={targetArtifact}
-            variant="compact"
-            onClick={onArtifactClick}
+            onClick={() => onArtifactClick?.(targetArtifact.id)}
           />
         </div>
 
