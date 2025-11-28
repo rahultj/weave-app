@@ -78,8 +78,7 @@ export async function POST(request: NextRequest) {
     const { message, scrap, chatHistory } = body
 
     // Get the authenticated user
-    const cookieStore = await cookies()
-    const supabase = createRouteHandlerClient({ cookies: () => cookieStore })
+    const supabase = createRouteHandlerClient({ cookies })
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
     if (authError || !user) {
