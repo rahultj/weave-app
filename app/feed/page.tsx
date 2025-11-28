@@ -21,7 +21,7 @@ export default async function FeedPage() {
   const user = session.user
 
   // Fetch user's artifacts
-  let artifacts = []
+  let artifacts: Awaited<ReturnType<typeof getUserArtifacts>> = []
   try {
     artifacts = await getUserArtifacts(user.id, supabase)
   } catch (error) {
