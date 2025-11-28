@@ -29,6 +29,9 @@ export interface ChatContainerProps {
 export interface ChatHeaderProps {
   onBack: () => void;
   title?: string;
+  onSave?: () => void;
+  isSaving?: boolean;
+  canSave?: boolean;
 }
 
 export interface MediaCaptureProps {

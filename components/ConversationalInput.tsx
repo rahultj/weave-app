@@ -92,13 +92,6 @@ export default function ConversationalInput({
     <div className={`bg-neutral-bg-card border border-neutral-border rounded-card p-4 ${className}`}>
       {/* Main Input Area */}
       <div className="flex gap-3 mb-3">
-        {/* Bobbin Avatar */}
-        <div className="flex-shrink-0">
-          <div className="w-10 h-10 bg-brand-primary rounded-full flex items-center justify-center">
-            <span className="text-white text-lg">🐰</span>
-          </div>
-        </div>
-
         {/* Textarea */}
         <div className="flex-1">
           <textarea

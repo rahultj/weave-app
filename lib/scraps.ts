@@ -1,5 +1,6 @@
 // lib/scraps.ts
 import { supabase } from './supabase'
+import { Message } from './types/chat'
 
 export interface Scrap {
   id: string
@@ -264,18 +265,104 @@ export async function updateConversationScrap(
 export async function getScrapsByConversation(conversationId: string): Promise<Scrap[]> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
-  
+
   const { data: scraps, error } = await supabase
     .from('scraps')
     .select('*')
     .eq('user_id', user.id)
     .eq('conversation_id', conversationId)
     .order('created_at', { ascending: false })
-  
+
   if (error) {
     console.error('Error fetching scraps by conversation:', error)
     return []
   }
-  
+
   return (scraps || []) as Scrap[]
+}
+
+/**
+ * Save a conversation as a scrap
+ */
+export async function saveConversationAsScrap(
+  messages: Message[],
+  customTitle?: string
+): Promise<Scrap | null> {
+  console.log('saveConversationAsScrap called with', messages.length, 'messages')
+
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+
+  if (authError) {
+    console.error('Auth error in saveConversationAsScrap:', authError)
+    return null
+  }
+
+  if (!user) {
+    console.error('No authenticated user')
+    return null
+  }
+
+  console.log('User authenticated:', user.id)
+
+  if (messages.length === 0) {
+    console.error('No messages to save')
+    return null
+  }
+
+  // Generate a title from the first user message if not provided
+  const firstUserMessage = messages.find(m => m.sender === 'user')
+  const defaultTitle = firstUserMessage?.content.slice(0, 100) || 'Conversation with Bobbin'
+  const title = customTitle || defaultTitle
+
+  console.log('Generated title:', title)
+
+  // Convert messages to a simple format for storage
+  const conversationData = messages.map(msg => ({
+    sender: msg.sender,
+    content: msg.content,
+    timestamp: msg.timestamp.toISOString(),
+    media: msg.media
+  }))
+
+  console.log('Conversation data prepared, inserting into database...')
+
+  const insertData = {
+    user_id: user.id,
+    type: 'conversation' as const,
+    title,
+    content: JSON.stringify(conversationData),
+    observations: null
+  }
+
+  console.log('Insert data:', insertData)
+  console.log('Content length:', insertData.content.length)
+
+  try {
+    const { data: scrap, error } = await supabase
+      .from('scraps')
+      .insert(insertData)
+      .select()
+      .single()
+
+    console.log('Insert result:', { data: scrap, error })
+
+    if (error) {
+      console.error('Supabase error saving conversation:', error)
+      console.error('Error JSON:', JSON.stringify(error, null, 2))
+      console.error('Error type:', typeof error)
+      console.error('Error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      })
+      return null
+    }
+
+    console.log('Conversation saved as scrap successfully:', scrap.id)
+    return scrap as Scrap
+  } catch (error) {
+    console.error('Unexpected error in saveConversationAsScrap:', error)
+    return null
+  }
 }

@@ -54,11 +54,6 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      'images.unsplash.com',
-      'unsplash.com',
-      'vaijrrodmzvbluytlnmw.supabase.co'
-    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -67,7 +62,7 @@ const nextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https', 
+        protocol: 'https',
         hostname: 'unsplash.com',
         port: '',
         pathname: '/**',
@@ -77,6 +72,24 @@ const nextConfig = {
         hostname: 'vaijrrodmzvbluytlnmw.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'ovhbjiqykoxtknadtfsc.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'upload.wikimedia.org',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images-na.ssl-images-amazon.com',
+        port: '',
+        pathname: '/**',
       }
     ]
   },

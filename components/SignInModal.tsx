@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Mail, Check, Lock, Eye, EyeOff } from 'lucide-react'
@@ -13,6 +14,7 @@ interface SignInModalProps {
 type View = 'signIn' | 'signUp' | 'forgotPassword' | 'resetSent'
 
 export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
+  const router = useRouter()
   const [view, setView] = useState<View>('signIn')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -63,8 +65,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
     setLoading(true)
     const { error } = await signInWithPassword(email.trim(), password, rememberMe)
     setLoading(false)
-    if (error) setError(error.message)
-    else handleClose()
+    if (error) {
+      setError(error.message)
+    } else {
+      handleClose()
+      // Redirect to feed after successful sign-in
+      router.push('/feed')
+    }
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -76,8 +83,13 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
     setLoading(true)
     const { error } = await signUpWithPassword(email.trim(), password, rememberMe)
     setLoading(false)
-    if (error) setError(error.message)
-    else handleClose()
+    if (error) {
+      setError(error.message)
+    } else {
+      handleClose()
+      // Redirect to feed after successful sign-up
+      router.push('/feed')
+    }
   }
 
   const handleForgotPassword = async (e: React.FormEvent) => {

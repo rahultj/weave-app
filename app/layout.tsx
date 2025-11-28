@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Cormorant_Garamond, DM_Sans } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/contexts/AuthContext'
 import ErrorBoundary from '@/components/ErrorBoundary'
@@ -8,7 +8,19 @@ import { validateEnv } from '@/lib/env'
 // Validate environment variables on app startup
 validateEnv()
 
-const inter = Inter({ subsets: ['latin'] })
+const cormorant = Cormorant_Garamond({
+  weight: ['400', '500'],
+  subsets: ['latin'],
+  variable: '--font-cormorant',
+  display: 'swap',
+})
+
+const dmSans = DM_Sans({
+  weight: ['400', '500'],
+  subsets: ['latin'],
+  variable: '--font-dm-sans',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Weave - Your Cultural Journal',
@@ -64,7 +76,7 @@ export const metadata: Metadata = {
     'apple-mobile-web-app-status-bar-style': 'default',
     'apple-mobile-web-app-title': 'Weave',
     'application-name': 'Weave',
-    'msapplication-TileColor': '#C85A5A',
+    'msapplication-TileColor': '#C9A227',
     'msapplication-config': '/browserconfig.xml',
   },
 }
@@ -76,7 +88,7 @@ export function generateViewport() {
     maximumScale: 1,
     userScalable: false,
     viewportFit: 'cover',
-    themeColor: '#C85A5A',
+    themeColor: '#C9A227',
   }
 }
 
@@ -86,14 +98,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${cormorant.variable} ${dmSans.variable}`}>
       <head>
         <script async src="https://tally.so/widgets/embed.js"></script>
       </head>
-      <body className={inter.className}>
+      <body className={dmSans.className}>
         <ErrorBoundary>
           <AuthProvider>
-            <div className="min-h-screen bg-neutral-bg-main">
+            <div className="min-h-screen" style={{ backgroundColor: '#FAF8F5' }}>
               {children}
             </div>
           </AuthProvider>

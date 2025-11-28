@@ -31,9 +31,6 @@ export default function ChatContainer({ messages, isLoading = false, isTyping = 
     return (
       <div className="flex-1 flex items-center justify-center px-4">
         <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-brand-primary rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-white text-2xl">🐰</span>
-          </div>
           <h2 className="text-h3 font-semibold text-neutral-text-primary mb-2">
             Start a conversation
           </h2>

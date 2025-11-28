@@ -31,6 +31,7 @@
     "workbox-webpack-plugin": "^7.1.0"
   },
   "devDependencies": {
+    "@babel/plugin-bugfix-firefox-class-in-computed-class-key": "^7.28.5",
     "@eslint/eslintrc": "^3",
     "@types/node": "^20.19.1",
     "@types/react": "^19",

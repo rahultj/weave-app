@@ -26,15 +26,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       className={`flex mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}
     >
       <div className={`flex max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
-        {/* Avatar for Bobbin */}
-        {isBobbin && (
-          <div className="flex-shrink-0 mr-3">
-            <div className="w-8 h-8 bg-brand-primary rounded-full flex items-center justify-center">
-              <span className="text-white text-sm">🐰</span>
-            </div>
-          </div>
-        )}
-
         {/* Message bubble */}
         <div className="flex flex-col">
           <div

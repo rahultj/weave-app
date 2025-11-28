@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import HomeHeader from '@/components/HomeHeader'
 import ScrapFeed from '@/components/ScrapFeed'
+import ArtifactFeed from '@/components/ArtifactFeed'
 import ComingSoon from '@/components/ComingSoon'
 import SignInModal from '@/components/SignInModal'
 import OnboardingModal from '@/components/OnboardingModal'
@@ -20,6 +21,7 @@ export default function HomeContent() {
   const [isSignInModalOpen, setIsSignInModalOpen] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
+  const [useNewFeed, setUseNewFeed] = useState(true) // Toggle for testing new UI
 
   // Check if we should show onboarding when user logs in
   useEffect(() => {
@@ -96,19 +98,35 @@ export default function HomeContent() {
   }
 
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-neutral-bg-main">
       <HomeHeader search={search} setSearch={setSearch} />
-      
+
       {/* Simple Input at Top of Feed */}
-      <SimpleInput placeholder="What's on your mind?" />
-      
+      <SimpleInput placeholder="What interests you?" />
+
+      {/* Toggle Button (for testing) */}
+      <div className="max-w-2xl mx-auto px-4 py-2">
+        <button
+          onClick={() => setUseNewFeed(!useNewFeed)}
+          className="text-caption text-neutral-text-muted hover:text-brand-primary transition-colors"
+        >
+          {useNewFeed ? '← Switch to old feed' : 'Switch to new feed →'}
+        </button>
+      </div>
+
       <div className="py-6">
         <ErrorBoundary FallbackComponent={FeedErrorFallback}>
-          <ScrapFeed key={refreshKey} search={search} onStartConversation={handleStartConversation} />
+          {useNewFeed ? (
+            <ArtifactFeed />
+          ) : (
+            <ScrapFeed key={refreshKey} search={search} onStartConversation={handleStartConversation} />
+          )}
         </ErrorBoundary>
-        <div className="max-w-2xl mx-auto px-4">
-          <ComingSoon />
-        </div>
+        {!useNewFeed && (
+          <div className="max-w-2xl mx-auto px-4">
+            <ComingSoon />
+          </div>
+        )}
       </div>
 
       <ErrorBoundary FallbackComponent={ModalErrorFallback}>
