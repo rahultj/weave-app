@@ -239,7 +239,7 @@ export default function WeaveChatPage() {
           title: extractedArtifact.title,
           messages: messages.map(m => ({
             id: m.id,
-            sender: m.role,
+            sender: m.role === 'assistant' ? 'bobbin' as const : 'user' as const,
             content: m.content,
             timestamp: m.timestamp.toISOString()
           }))
