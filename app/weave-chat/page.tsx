@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { Suspense, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import SaveArtifactModal from '@/components/SaveArtifactModal'
@@ -18,11 +18,30 @@ interface Message {
   timestamp: Date
 }
 
-export default function WeaveChatPage() {
+interface ExtractedArtifact {
+  title: string
+  creator: string | null
+  year: number | null
+  type: ArtifactType
+  medium: string | null
+  imageUrl: string | null
+  insight: string
+  concepts: string[]
+}
+
+interface Recommendation {
+  id: string
+  title: string
+  creator?: string
+  type?: string
+  reason?: string
+}
+
+function WeaveChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClientComponentClient()
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
@@ -31,10 +50,10 @@ export default function WeaveChatPage() {
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null)
   const [isExtracting, setIsExtracting] = useState(false)
   const [hasSaved, setHasSaved] = useState(false)
-  const [extractedArtifact, setExtractedArtifact] = useState<any>(null)
+  const [extractedArtifact, setExtractedArtifact] = useState<ExtractedArtifact | null>(null)
   const [patternContext, setPatternContext] = useState<string | null>(null)
   const [showRecommendationsModal, setShowRecommendationsModal] = useState(false)
-  const [extractedRecommendations, setExtractedRecommendations] = useState<any[]>([])
+  const [extractedRecommendations, setExtractedRecommendations] = useState<Recommendation[]>([])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const hasInitializedPattern = useRef(false)
 
@@ -44,6 +63,38 @@ export default function WeaveChatPage() {
       setUser(user)
     }
     getUser()
+  }, [supabase.auth])
+
+  // Separate function to send the pattern exploration message
+  const sendPatternExplorationMessage = useCallback(async (message: string) => {
+    setIsLoading(true)
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: message,
+          scrap: { id: 'general-chat', title: 'Pattern Exploration' },
+          chatHistory: []
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: data.response,
+          timestamp: new Date()
+        }
+        setMessages(prev => [...prev, assistantMessage])
+      }
+    } catch (error) {
+      console.error('Error sending pattern exploration message:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }, [])
 
   // Handle pattern exploration or topic from query params
@@ -91,39 +142,7 @@ export default function WeaveChatPage() {
         sendPatternExplorationMessage(topicMessage)
       }, 100)
     }
-  }, [searchParams])
-
-  // Separate function to send the pattern exploration message
-  const sendPatternExplorationMessage = async (message: string) => {
-    setIsLoading(true)
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: message,
-          scrap: { id: 'general-chat', title: 'Pattern Exploration' },
-          chatHistory: []
-        })
-      })
-
-      const data = await response.json()
-
-      if (data.success) {
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: data.response,
-          timestamp: new Date()
-        }
-        setMessages(prev => [...prev, assistantMessage])
-      }
-    } catch (error) {
-      console.error('Error sending pattern exploration message:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [searchParams, sendPatternExplorationMessage])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -215,7 +234,7 @@ export default function WeaveChatPage() {
           medium: artifact.medium,
           imageUrl: artifact.image_url,
           insight: insight,
-          concepts: data.extraction.concepts?.map((c: any) => c.name) || []
+          concepts: data.extraction.concepts?.map((c: { name: string }) => c.name) || []
         })
         setShowSaveModal(true)
       } else {
@@ -367,7 +386,7 @@ export default function WeaveChatPage() {
           medium: artifact.medium,
           imageUrl: artifact.image_url,
           insight: insight,
-          concepts: data.extraction.concepts?.map((c: any) => c.name) || []
+          concepts: data.extraction.concepts?.map((c: { name: string }) => c.name) || []
         })
         
         // Close leave modal and show save modal
@@ -413,10 +432,10 @@ export default function WeaveChatPage() {
   }
 
   // Save recommendations to localStorage
-  const handleSaveRecommendations = (recommendations: any[]) => {
+  const handleSaveRecommendations = (recommendations: Recommendation[]) => {
     // Get existing recommendations
     const existing = localStorage.getItem('weave-to-explore')
-    let toExplore: any[] = []
+    let toExplore: Recommendation[] = []
     if (existing) {
       try {
         toExplore = JSON.parse(existing)
@@ -426,7 +445,7 @@ export default function WeaveChatPage() {
     }
 
     // Add new recommendations (avoid duplicates by title)
-    const existingTitles = new Set(toExplore.map((r: any) => r.title.toLowerCase()))
+    const existingTitles = new Set(toExplore.map((r) => r.title.toLowerCase()))
     const newRecs = recommendations.filter(r => !existingTitles.has(r.title.toLowerCase()))
     toExplore = [...newRecs, ...toExplore]
 
@@ -574,10 +593,10 @@ export default function WeaveChatPage() {
           }}
           artifact={{
             title: extractedArtifact.title,
-            creator: extractedArtifact.creator,
-            year: extractedArtifact.year,
+            creator: extractedArtifact.creator ?? undefined,
+            year: extractedArtifact.year ?? undefined,
             type: extractedArtifact.type,
-            imageUrl: extractedArtifact.imageUrl,
+            imageUrl: extractedArtifact.imageUrl ?? undefined,
             insight: extractedArtifact.insight
           }}
           conversationDate={new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -610,5 +629,35 @@ export default function WeaveChatPage() {
         isSaving={false}
       />
     </div>
+  )
+}
+
+// Loading fallback for Suspense
+function ChatLoading() {
+  return (
+    <div
+      className="min-h-screen max-w-[480px] mx-auto flex flex-col"
+      style={{ backgroundColor: '#FAF8F5' }}
+    >
+      <header className="sticky top-0 z-10 flex justify-between items-center px-4 py-3 border-b border-[#E8E5E0] bg-[#FAF8F5]">
+        <div className="w-9 h-9 bg-[#E8E5E0] rounded animate-pulse" />
+        <div className="w-16 h-5 bg-[#E8E5E0] rounded animate-pulse" />
+        <div className="w-7 h-7 bg-[#E8E5E0] rounded-full animate-pulse" />
+      </header>
+      <div className="flex-1 flex items-center justify-center">
+        <p className="text-[#888]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+          Loading...
+        </p>
+      </div>
+    </div>
+  )
+}
+
+// Main page component with Suspense boundary
+export default function WeaveChatPage() {
+  return (
+    <Suspense fallback={<ChatLoading />}>
+      <WeaveChatContent />
+    </Suspense>
   )
 }
