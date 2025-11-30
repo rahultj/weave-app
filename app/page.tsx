@@ -4,9 +4,110 @@ import { useState, useEffect } from 'react'
 import SignInModal from '@/components/SignInModal'
 import { AuthProvider } from '@/contexts/AuthContext'
 
+// Scenario data for the features section
+const scenarios = [
+  {
+    id: 'memory',
+    label: 'Memory & Time',
+    chat: {
+      question: "Why does Eternal Sunshine feel so disorienting in the best way?",
+      answer: "Gondry structures it like memory itself, fragmenting time. It's inspired by Resnais' Last Year at Marienbad. Both trust you to feel before you understand. What moment hit you hardest?"
+    },
+    journal: [
+      { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Eternal Sunshine of the Spotless Mind', meta: 'Michel Gondry · Film · 2004', insight: '"Memory as identity. We are what we choose to remember."' },
+      { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'Slaughterhouse-Five', meta: 'Kurt Vonnegut · Novel · 1969', insight: '"So it goes. Time is not a line but a landscape."' }
+    ],
+    pattern: {
+      text: "You're drawn to non-linear narratives that mirror how memory actually works",
+      tags: ['Eternal Sunshine', 'Arrival', 'Slaughterhouse-Five', 'The Sense of an Ending']
+    },
+    discovery: {
+      intro: "Based on your love of fractured timelines:",
+      items: [
+        { color: 'bg-gradient-to-br from-[#2D6A4F] to-[#1E4D38]', title: 'Memento', meta: 'Christopher Nolan · Film' },
+        { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'The Sense of an Ending', meta: 'Julian Barnes · Novel' }
+      ],
+      reason: "Because you process experience through memory, not chronology"
+    }
+  },
+  {
+    id: 'newwave',
+    label: 'New Wave',
+    chat: {
+      question: "What makes Before Sunrise feel so different from other romance films?",
+      answer: "Linklater inherited the French New Wave's gift for making talk feel like action. Godard, Rohmer, they proved conversation could be cinema. Have you seen Chungking Express? Same DNA."
+    },
+    journal: [
+      { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Before Sunrise', meta: 'Richard Linklater · Film · 1995', insight: '"Love as a single night. Time as the enemy and the gift."' },
+      { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'Breathless', meta: 'Jean-Luc Godard · Film · 1960', insight: '"Cinema can breathe. Rules are for breaking."' }
+    ],
+    pattern: {
+      text: "You keep returning to the French New Wave and its descendants",
+      tags: ['Breathless', 'Before Sunrise', 'Chungking Express', 'Frances Ha']
+    },
+    discovery: {
+      intro: "Based on your love of New Wave sensibility:",
+      items: [
+        { color: 'bg-gradient-to-br from-[#2D6A4F] to-[#1E4D38]', title: 'Fallen Angels', meta: 'Wong Kar-wai · Film' },
+        { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Cléo from 5 to 7', meta: 'Agnès Varda · Film' }
+      ],
+      reason: "Because you love naturalistic dialogue and handheld intimacy"
+    }
+  },
+  {
+    id: 'unreliable',
+    label: 'Unreliable Narrators',
+    chat: {
+      question: "I just finished Gone Girl. Why can't I stop thinking about it?",
+      answer: "Flynn weaponizes the unreliable narrator. Like Nabokov in Lolita, she makes you complicit. You believed, then felt foolish. That discomfort is the point. Ready for Atonement?"
+    },
+    journal: [
+      { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Gone Girl', meta: 'Gillian Flynn · Novel · 2012', insight: '"Marriage as performance. Truth as the first casualty."' },
+      { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'Atonement', meta: 'Ian McEwan · Novel · 2001', insight: '"The story rewrites itself. Fiction as guilt, as penance."' }
+    ],
+    pattern: {
+      text: "You're fascinated by unreliable narrators who make you question the story itself",
+      tags: ['Gone Girl', 'Atonement', 'The Remains of the Day', 'Lolita']
+    },
+    discovery: {
+      intro: "Based on your love of stories that deceive:",
+      items: [
+        { color: 'bg-gradient-to-br from-[#2D6A4F] to-[#1E4D38]', title: 'We Need to Talk About Kevin', meta: 'Lionel Shriver · Novel' },
+        { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'The Usual Suspects', meta: 'Bryan Singer · Film' }
+      ],
+      reason: "Because you love when stories question their own telling"
+    }
+  },
+  {
+    id: 'worlds',
+    label: 'Enclosed Worlds',
+    chat: {
+      question: "Why does Never Let Me Go feel so haunting even though nothing 'happens'?",
+      answer: "Ishiguro builds Hailsham as a closed system with unspoken rules. Like The Lobster or The Truman Show, the horror is in acceptance. The students never rebel. That's the devastation."
+    },
+    journal: [
+      { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Never Let Me Go', meta: 'Kazuo Ishiguro · Novel · 2005', insight: '"The quiet horror of accepting a life not fully yours"' },
+      { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'The Lobster', meta: 'Yorgos Lanthimos · Film · 2015', insight: '"Love as mandate. Individuality as crime."' }
+    ],
+    pattern: {
+      text: "You gravitate toward enclosed worlds with their own unspoken rules",
+      tags: ['Never Let Me Go', 'The Lobster', 'The Truman Show', 'Station Eleven']
+    },
+    discovery: {
+      intro: "Based on your love of systemic worlds:",
+      items: [
+        { color: 'bg-gradient-to-br from-[#2D6A4F] to-[#1E4D38]', title: 'The Handmaid\'s Tale', meta: 'Margaret Atwood · Novel' },
+        { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'Platform', meta: 'Galder Gaztelu-Urrutia · Film' }
+      ],
+      reason: "Because you're drawn to how systems shape identity"
+    }
+  }
+]
+
 function LandingPageContent() {
   const [scrolled, setScrolled] = useState(false)
   const [showSignIn, setShowSignIn] = useState(false)
+  const [activeScenario, setActiveScenario] = useState(0)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,6 +116,16 @@ function LandingPageContent() {
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Auto-rotate scenarios
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveScenario((prev) => (prev + 1) % scenarios.length)
+    }, 8000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const currentScenario = scenarios[activeScenario]
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] text-[#2A2A2A] font-sans overflow-x-hidden">
@@ -184,7 +295,7 @@ function LandingPageContent() {
       {/* Features + Vignettes */}
       <section id="features" className="py-[120px] px-6 bg-[#FAF8F5] scroll-mt-20">
         <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-20">
+          <div className="text-center mb-12">
             <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-4 font-medium">
               What you&apos;ll do
             </div>
@@ -194,6 +305,24 @@ function LandingPageContent() {
             >
               Reflect. Learn. Discover.
             </h2>
+          </div>
+
+          {/* Scenario Switcher */}
+          <div className="flex justify-center gap-2 mb-16">
+            {scenarios.map((scenario, i) => (
+              <button
+                key={scenario.id}
+                onClick={() => setActiveScenario(i)}
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all duration-300 ${
+                  activeScenario === i
+                    ? 'bg-[#2A2A2A] text-white'
+                    : 'bg-[#F5F2ED] text-[#666] hover:bg-[#E8E5E0]'
+                }`}
+                style={{ fontFamily: 'var(--font-dm-sans)' }}
+              >
+                {scenario.label}
+              </button>
+            ))}
           </div>
 
           {/* Feature 1: Reflect with Bobbin */}
@@ -207,21 +336,24 @@ function LandingPageContent() {
                 Bobbin asks the questions that help you articulate why something resonates, and teaches you about the influences, techniques, and stories behind the work.
               </p>
             </div>
-            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] min-h-[200px]">
               <div className="text-[10px] tracking-[0.1em] uppercase text-[#8B8578] mb-4 pb-3 border-b border-[#E0DCD4]">
                 Conversation with Bobbin
               </div>
-              <div className="space-y-3">
+              <div 
+                key={currentScenario.id + '-chat'} 
+                className="space-y-3 animate-fadeIn"
+              >
                 <div className="flex gap-2.5 items-start flex-row-reverse">
                   <div className="w-7 h-7 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center text-[11px] font-medium flex-shrink-0">R</div>
                   <div className="bg-[#2A2A2A] text-white px-3.5 py-3 rounded-[14px] rounded-br-[4px] text-[13px] leading-relaxed max-w-[85%]">
-                    What influenced Rosalía&apos;s sound on this?
+                    {currentScenario.chat.question}
                   </div>
                 </div>
                 <div className="flex gap-2.5 items-start">
                   <div className="w-7 h-7 rounded-full bg-[#2A2A2A] text-white flex items-center justify-center text-[11px] font-medium flex-shrink-0">B</div>
                   <div className="bg-[#FAF8F5] border border-[#E0DCD4] px-3.5 py-3 rounded-[14px] rounded-bl-[4px] text-[13px] leading-relaxed max-w-[85%]">
-                    She draws from flamenco&apos;s emotional intensity, think Camarón de la Isla, but filters it through hyperpop production like Arca. What draws you to that fusion?
+                    {currentScenario.chat.answer}
                   </div>
                 </div>
               </div>
@@ -239,15 +371,15 @@ function LandingPageContent() {
                 Each journal entry holds your personal reflection from the moment of discovery. What you felt, what you learned, why it matters to you.
               </p>
             </div>
-            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:order-1">
+            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:order-1 min-h-[220px]">
               <div className="text-[10px] tracking-[0.1em] uppercase text-[#8B8578] mb-4 pb-3 border-b border-[#E0DCD4]">
                 Journal entry
               </div>
-              <div className="space-y-4">
-                {[
-                  { color: 'bg-gradient-to-br from-[#A4243B] to-[#7A1A2B]', title: 'MOTOMAMI', meta: 'Rosalía · Album · 2022', insight: '"Experimental blend that challenges genre boundaries while remaining deeply personal"' },
-                  { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'The Dispossessed', meta: 'Ursula K. Le Guin · Novel · 1974', insight: '"Utopia as a question, not an answer"' }
-                ].map((item, i) => (
+              <div 
+                key={currentScenario.id + '-journal'} 
+                className="space-y-4 animate-fadeIn"
+              >
+                {currentScenario.journal.map((item, i) => (
                   <div key={i} className="flex gap-3.5">
                     <div className={`w-14 h-[72px] rounded-md flex-shrink-0 ${item.color}`} />
                     <div>
@@ -272,17 +404,20 @@ function LandingPageContent() {
                 Over time, threads emerge across your journal. Themes you&apos;re drawn to. Ideas that keep appearing. A map of your inner landscape.
               </p>
             </div>
-            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)]">
+            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] min-h-[180px]">
               <div className="text-[10px] tracking-[0.1em] uppercase text-[#8B8578] mb-4 pb-3 border-b border-[#E0DCD4]">
                 Pattern discovered
               </div>
-              <div className="text-center">
+              <div 
+                key={currentScenario.id + '-pattern'} 
+                className="text-center animate-fadeIn"
+              >
                 <div className="text-xl text-[#C9A227] mb-3.5">✦</div>
                 <h4 className="text-[18px] font-normal leading-snug mb-4" style={{ fontFamily: 'var(--font-cormorant)' }}>
-                  You&apos;re drawn to works that challenge conventions while honoring tradition
+                  {currentScenario.pattern.text}
                 </h4>
                 <div className="flex flex-wrap gap-2 justify-center">
-                  {['MOTOMAMI', 'The Dispossessed', 'In the Mood for Love'].map((tag, i) => (
+                  {currentScenario.pattern.tags.map((tag, i) => (
                     <span key={i} className="text-[11px] px-3 py-1.5 bg-[#C9A227]/10 rounded-full text-[#A8861E]">
                       {tag}
                     </span>
@@ -303,29 +438,31 @@ function LandingPageContent() {
                 New recommendations emerge from the shape of your curiosity. Works that feel meant for you, not served by an algorithm.
               </p>
             </div>
-            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:order-1">
+            <div className="bg-[#F5F2ED] border border-[#E0DCD4] rounded-2xl p-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] md:order-1 min-h-[200px]">
               <div className="text-[10px] tracking-[0.1em] uppercase text-[#8B8578] mb-4 pb-3 border-b border-[#E0DCD4]">
                 Suggested for you
               </div>
-              <h4 className="text-[15px] text-[#8B8578] mb-3.5" style={{ fontFamily: 'var(--font-cormorant)' }}>
-                Based on your interest in tradition-breaking artists:
-              </h4>
-              <div className="space-y-3">
-                {[
-                  { color: 'bg-gradient-to-br from-[#2D6A4F] to-[#1E4D38]', title: 'Blonde', meta: 'Frank Ocean · Album' },
-                  { color: 'bg-gradient-to-br from-[#1E3A5F] to-[#152A45]', title: 'The Left Hand of Darkness', meta: 'Ursula K. Le Guin · Novel' }
-                ].map((item, i) => (
-                  <div key={i} className="flex gap-3 items-center">
-                    <div className={`w-11 h-11 rounded-md flex-shrink-0 ${item.color}`} />
-                    <div>
-                      <h5 className="text-sm font-medium mb-0.5">{item.title}</h5>
-                      <span className="text-xs text-[#8B8578]">{item.meta}</span>
+              <div 
+                key={currentScenario.id + '-discovery'} 
+                className="animate-fadeIn"
+              >
+                <h4 className="text-[15px] text-[#8B8578] mb-3.5" style={{ fontFamily: 'var(--font-cormorant)' }}>
+                  {currentScenario.discovery.intro}
+                </h4>
+                <div className="space-y-3">
+                  {currentScenario.discovery.items.map((item, i) => (
+                    <div key={i} className="flex gap-3 items-center">
+                      <div className={`w-11 h-11 rounded-md flex-shrink-0 ${item.color}`} />
+                      <div>
+                        <h5 className="text-sm font-medium mb-0.5">{item.title}</h5>
+                        <span className="text-xs text-[#8B8578]">{item.meta}</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-              <div className="text-xs text-[#A8861E] mt-3 pt-3 border-t border-[#E0DCD4] italic">
-                Because you love genre-defying work with emotional depth
+                  ))}
+                </div>
+                <div className="text-xs text-[#A8861E] mt-3 pt-3 border-t border-[#E0DCD4] italic">
+                  {currentScenario.discovery.reason}
+                </div>
               </div>
             </div>
           </div>
@@ -383,6 +520,13 @@ function LandingPageContent() {
         }
         .animate-float {
           animation: float 4s ease-in-out infinite;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.4s ease-out;
         }
       `}</style>
     </div>
