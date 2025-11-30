@@ -28,7 +28,7 @@ function LandingPageContent() {
 
       {/* Navigation */}
       <nav 
-        className={`fixed top-0 left-0 right-0 py-5 z-50 transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 py-4 z-50 transition-all duration-300 ${
           scrolled 
             ? 'bg-[#FAF8F5]/90 backdrop-blur-lg border-b border-[#E0DCD4]' 
             : 'bg-[#FAF8F5]/90 backdrop-blur-lg border-b border-transparent'
@@ -38,9 +38,36 @@ function LandingPageContent() {
           <a href="#" className="font-serif text-[26px] font-medium text-[#2A2A2A] tracking-tight" style={{ fontFamily: 'var(--font-cormorant)' }}>
             weave
           </a>
+          
+          {/* Desktop nav links */}
+          <div className="hidden md:flex items-center gap-8">
+            <a 
+              href="#idea" 
+              className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              The Idea
+            </a>
+            <a 
+              href="#how-it-works" 
+              className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              How It Works
+            </a>
+            <a 
+              href="#features" 
+              className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              Features
+            </a>
+          </div>
+
           <button 
             onClick={() => setShowSignIn(true)}
             className="bg-[#2A2A2A] text-[#FAF8F5] px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#4A4A4A] transition-all hover:-translate-y-0.5"
+            style={{ fontFamily: 'var(--font-dm-sans)' }}
           >
             Begin your journal
           </button>
@@ -84,7 +111,7 @@ function LandingPageContent() {
       </section>
 
       {/* The Idea */}
-      <section className="py-[120px] px-6 bg-gradient-to-b from-[#FAF8F5] to-[#F5F2ED]">
+      <section id="idea" className="py-[120px] px-6 bg-gradient-to-b from-[#FAF8F5] to-[#F5F2ED] scroll-mt-20">
         <div className="max-w-[680px] mx-auto text-center">
           <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-6 font-medium">
             The idea
@@ -110,7 +137,7 @@ function LandingPageContent() {
       </section>
 
       {/* How It Works */}
-      <section className="py-[120px] px-6 bg-[#F5F2ED]">
+      <section id="how-it-works" className="py-[120px] px-6 bg-[#F5F2ED] scroll-mt-20">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-20">
             <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-4 font-medium">
@@ -155,7 +182,7 @@ function LandingPageContent() {
       </section>
 
       {/* Features + Vignettes */}
-      <section className="py-[120px] px-6 bg-[#FAF8F5]">
+      <section id="features" className="py-[120px] px-6 bg-[#FAF8F5] scroll-mt-20">
         <div className="max-w-[1200px] mx-auto">
           <div className="text-center mb-20">
             <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-4 font-medium">
