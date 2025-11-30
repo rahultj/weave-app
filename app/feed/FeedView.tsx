@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
@@ -19,6 +19,7 @@ interface FeedViewProps {
 export default function FeedView({ artifacts: initialArtifacts, user }: FeedViewProps) {
   const router = useRouter()
   const supabase = createClientComponentClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [artifacts, setArtifacts] = useState<Artifact[]>(initialArtifacts)
   const [patterns, setPatterns] = useState<DetectedPattern[]>([])
   const [patternsLoading, setPatternsLoading] = useState(false)
@@ -30,6 +31,39 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
   const [toExplore, setToExplore] = useState<any[]>([])
   const [showToExplore, setShowToExplore] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Handle image selection from feed
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB')
+      return
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      // Store in localStorage temporarily
+      localStorage.setItem('weave-pending-image', base64)
+      // Navigate to chat
+      router.push('/weave-chat?withImage=true')
+    }
+    reader.readAsDataURL(file)
+    
+    // Reset the input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   // Handle sign out
   const handleSignOut = async () => {
@@ -220,22 +254,38 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
         </div>
       </header>
 
+      {/* Hidden file input for image upload */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleImageSelect}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* Input Bar */}
-      <button
+      <div
         className="mx-5 my-4 p-[14px] px-4 bg-[#F7F5F1] border border-[#E8E5E0] rounded-xl flex justify-between items-center cursor-pointer transition-all duration-200 w-[calc(100%-40px)] hover:shadow-sm"
         onClick={handleOpenChat}
       >
         <span className="text-[#888] text-[15px]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
           What interests you?
         </span>
-        <div className="flex gap-2">
+        <button
+          className="p-1 -m-1 hover:bg-[#E8E5E0] rounded-lg transition-colors"
+          onClick={(e) => {
+            e.stopPropagation()
+            fileInputRef.current?.click()
+          }}
+          title="Add image"
+        >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
             <rect x="3" y="3" width="18" height="18" rx="2"/>
             <circle cx="8.5" cy="8.5" r="1.5"/>
             <path d="m21 15-5-5L5 21"/>
           </svg>
-        </div>
-      </button>
+        </button>
+      </div>
 
       {/* NEW: Patterns Section - Surfaced at the Top */}
       <AnimatePresence>

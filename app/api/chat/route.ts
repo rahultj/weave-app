@@ -75,7 +75,7 @@ function isRateLimited(userId: string): boolean {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { message, scrap, chatHistory } = body
+    const { message, scrap, chatHistory, image } = body
 
     // Get the authenticated user
     const supabase = createRouteHandlerClient({ cookies })
@@ -240,7 +240,61 @@ A:`
     // Pattern exploration gets the most tokens for rich recommendations
     // Discovery mode gets medium tokens for encyclopedic info
     // Reflection mode gets fewer tokens for focused responses
-    const maxTokens = isPatternExploration ? 800 : isDiscoveryMode ? 500 : 300
+    // Image analysis gets more tokens to describe visual content
+    const maxTokens = image ? 800 : isPatternExploration ? 800 : isDiscoveryMode ? 500 : 300
+
+    // Build message content - text only or with image
+    let messageContent: Anthropic.MessageParam['content']
+    
+    if (image) {
+      // Extract base64 data and media type from data URL
+      const matches = image.match(/^data:(.+);base64,(.+)$/)
+      if (!matches) {
+        return NextResponse.json(
+          { error: 'Invalid image format', success: false },
+          { status: 400 }
+        )
+      }
+      
+      const mediaType = matches[1] as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
+      const base64Data = matches[2]
+      
+      // Image analysis prompt
+      const imagePrompt = `You are Bobbin, a knowledgeable cultural companion. The user has shared an image with you.
+
+ANALYZE THE IMAGE:
+- If it's a book page or text: Identify the work if possible, discuss its themes, style, and significance
+- If it's artwork: Describe the style, movement, possible artist, and cultural context
+- If it's a film still: Identify the film if recognizable, discuss its visual style and significance
+- If it's an album cover: Identify the album/artist, discuss the visual design and its relation to the music
+- If it's something else cultural: Provide relevant cultural context and insights
+
+YOUR RESPONSE SHOULD:
+1. Identify what you're seeing (be specific about the work if you recognize it)
+2. Provide interesting cultural context or background
+3. Ask a thoughtful follow-up question to engage the user
+
+${message !== 'What can you tell me about this image?' ? `The user also said: "${message}"` : ''}
+
+Be conversational and insightful, like a knowledgeable friend at a museum or bookstore.`
+
+      messageContent = [
+        {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: mediaType,
+            data: base64Data
+          }
+        },
+        {
+          type: 'text',
+          text: imagePrompt
+        }
+      ]
+    } else {
+      messageContent = prompt
+    }
 
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
@@ -248,7 +302,7 @@ A:`
       messages: [
         {
           role: 'user',
-          content: prompt
+          content: messageContent
         }
       ]
     })

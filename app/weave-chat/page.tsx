@@ -16,6 +16,7 @@ interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  image?: string // base64 image data
 }
 
 interface ExtractedArtifact {
@@ -54,8 +55,46 @@ function WeaveChatContent() {
   const [patternContext, setPatternContext] = useState<string | null>(null)
   const [showRecommendationsModal, setShowRecommendationsModal] = useState(false)
   const [extractedRecommendations, setExtractedRecommendations] = useState<Recommendation[]>([])
+  const [selectedImage, setSelectedImage] = useState<string | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const hasInitializedPattern = useRef(false)
+
+  // Handle image selection
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB')
+      return
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      const base64 = reader.result as string
+      setSelectedImage(base64)
+      setImagePreview(base64)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  // Clear selected image
+  const clearImage = () => {
+    setSelectedImage(null)
+    setImagePreview(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
 
   useEffect(() => {
     async function getUser() {
@@ -144,22 +183,40 @@ function WeaveChatContent() {
     }
   }, [searchParams, sendPatternExplorationMessage])
 
+  // Handle withImage parameter - load pending image from localStorage
+  useEffect(() => {
+    const withImage = searchParams.get('withImage')
+    if (withImage === 'true') {
+      const pendingImage = localStorage.getItem('weave-pending-image')
+      if (pendingImage) {
+        setSelectedImage(pendingImage)
+        setImagePreview(pendingImage)
+        // Clear from localStorage
+        localStorage.removeItem('weave-pending-image')
+      }
+    }
+  }, [searchParams])
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   const sendMessage = async () => {
-    if (!inputValue.trim() || isLoading) return
+    if ((!inputValue.trim() && !selectedImage) || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
-      content: inputValue,
-      timestamp: new Date()
+      content: inputValue || (selectedImage ? 'What can you tell me about this?' : ''),
+      timestamp: new Date(),
+      image: selectedImage || undefined
     }
 
     setMessages(prev => [...prev, userMessage])
+    const messageText = inputValue
+    const imageData = selectedImage
     setInputValue('')
+    clearImage()
     setIsLoading(true)
 
     try {
@@ -167,7 +224,8 @@ function WeaveChatContent() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: inputValue,
+          message: messageText || 'What can you tell me about this image?',
+          image: imageData,
           scrap: { id: 'general-chat', title: 'General Conversation' },
           chatHistory: messages.map(m => ({ sender: m.role, content: m.content }))
         })
@@ -530,6 +588,13 @@ function WeaveChatContent() {
               }`}
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
+              {message.image && (
+                <img 
+                  src={message.image} 
+                  alt="Uploaded" 
+                  className="max-w-full rounded-lg mb-2 max-h-[200px] object-contain"
+                />
+              )}
               {message.role === 'assistant' ? (
                 <FormattedMessage content={message.content} />
               ) : (
@@ -544,10 +609,27 @@ function WeaveChatContent() {
 
       {/* Input */}
       <div className="px-4 pb-6 pt-3 border-t border-[#E8E5E0] bg-[#FAF8F5]">
+        {/* Image Preview */}
+        {imagePreview && (
+          <div className="mb-3 relative inline-block">
+            <img 
+              src={imagePreview} 
+              alt="Preview" 
+              className="max-h-[120px] rounded-lg border border-[#E8E5E0]"
+            />
+            <button
+              onClick={clearImage}
+              className="absolute -top-2 -right-2 w-6 h-6 bg-[#2A2A2A] text-white rounded-full flex items-center justify-center text-xs hover:bg-[#444]"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+        
         <div className="flex items-center bg-[#F7F5F1] border border-[#E8E5E0] rounded-[24px] px-4 py-1">
           <input
             type="text"
-            placeholder="What interests you?"
+            placeholder={selectedImage ? "Ask about this image..." : "What interests you?"}
             className="flex-1 border-none bg-transparent text-sm outline-none"
             style={{ fontFamily: 'var(--font-dm-sans)', color: '#2A2A2A' }}
             value={inputValue}
@@ -560,17 +642,29 @@ function WeaveChatContent() {
             }}
           />
           <div className="flex items-center gap-1">
-            <button className="p-2 bg-transparent border-none cursor-pointer flex items-center">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" strokeWidth="2">
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageSelect}
+              accept="image/*"
+              className="hidden"
+            />
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className={`p-2 bg-transparent border-none cursor-pointer flex items-center transition-colors ${selectedImage ? 'text-[#C9A227]' : 'text-[#999] hover:text-[#666]'}`}
+              title="Add image"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
                 <circle cx="8.5" cy="8.5" r="1.5"/>
                 <path d="m21 15-5-5L5 21"/>
               </svg>
             </button>
             <button
-              className="w-9 h-9 rounded-full bg-[#C9A227] border-none flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-[#B89220]"
+              className="w-9 h-9 rounded-full bg-[#C9A227] border-none flex items-center justify-center cursor-pointer transition-colors duration-200 hover:bg-[#B89220] disabled:opacity-50"
               onClick={sendMessage}
-              disabled={isLoading || !inputValue.trim()}
+              disabled={isLoading || (!inputValue.trim() && !selectedImage)}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
                 <path d="m22 2-7 20-4-9-9-4 20-7z"/>
