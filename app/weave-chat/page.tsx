@@ -8,6 +8,7 @@ import SaveBeforeLeavingModal from '@/components/SaveBeforeLeavingModal'
 import SaveRecommendationsModal from '@/components/SaveRecommendationsModal'
 import ThinkingIndicator from '@/components/ThinkingIndicator'
 import FormattedMessage from '@/components/FormattedMessage'
+import BobbinIcon from '@/components/BobbinIcon'
 import { createArtifact, createConversation, findOrCreateConcept, linkArtifactToConcept } from '@/lib/knowledge-graph'
 import type { ArtifactType } from '@/lib/types/knowledge-graph'
 
@@ -573,11 +574,8 @@ function WeaveChatContent() {
             className={`mb-4 ${message.role === 'user' ? 'flex justify-end' : 'flex justify-start gap-[10px]'}`}
           >
             {message.role === 'assistant' && (
-              <div
-                className="w-7 h-7 rounded-full bg-[#2A2A2A] text-white flex items-center justify-center text-[11px] font-medium flex-shrink-0"
-                style={{ fontFamily: 'var(--font-dm-sans)' }}
-              >
-                B
+              <div className="flex-shrink-0">
+                <BobbinIcon size={28} />
               </div>
             )}
             <div

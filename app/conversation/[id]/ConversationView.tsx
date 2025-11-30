@@ -6,6 +6,7 @@ import type { Conversation, Artifact, ConversationMessage } from '@/lib/types/kn
 import type { User } from '@supabase/supabase-js'
 import { getTypeColor, getTypeIcon } from '@/lib/design'
 import FormattedMessage from '@/components/FormattedMessage'
+import BobbinIcon from '@/components/BobbinIcon'
 
 interface ConversationViewProps {
   conversation: Conversation
@@ -126,11 +127,8 @@ export default function ConversationView({ conversation, artifact, user }: Conve
                   className={`flex ${isUser ? 'justify-end' : 'justify-start gap-[10px]'}`}
                 >
                   {isBobbin && (
-                    <div
-                      className="w-7 h-7 rounded-full bg-[#2A2A2A] text-white flex items-center justify-center text-[11px] font-medium flex-shrink-0"
-                      style={{ fontFamily: 'var(--font-dm-sans)' }}
-                    >
-                      B
+                    <div className="flex-shrink-0">
+                      <BobbinIcon size={28} />
                     </div>
                   )}
                   <div
