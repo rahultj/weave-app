@@ -29,6 +29,13 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
   const [showPatternModal, setShowPatternModal] = useState(false)
   const [toExplore, setToExplore] = useState<any[]>([])
   const [showToExplore, setShowToExplore] = useState(false)
+  const [showUserMenu, setShowUserMenu] = useState(false)
+
+  // Handle sign out
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
+  }
 
   // Handle artifact deletion
   const handleDeleteArtifact = async (artifactId: string) => {
@@ -163,11 +170,52 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
               <path d="m21 21-4.35-4.35"/>
             </svg>
           </button>
-          <div
-            className="w-8 h-8 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center text-[13px] font-medium"
-            style={{ fontFamily: 'var(--font-dm-sans)' }}
-          >
-            {getInitials()}
+          <div className="relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-8 h-8 rounded-full bg-[#1E3A5F] text-white flex items-center justify-center text-[13px] font-medium border-none cursor-pointer"
+              style={{ fontFamily: 'var(--font-dm-sans)' }}
+            >
+              {getInitials()}
+            </button>
+            
+            {/* User dropdown menu */}
+            <AnimatePresence>
+              {showUserMenu && (
+                <>
+                  {/* Click outside to close menu */}
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowUserMenu(false)}
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-0 top-10 bg-white border border-[#E8E5E0] rounded-lg shadow-lg py-2 min-w-[160px] z-50"
+                  >
+                    <div className="px-3 py-2 border-b border-[#E8E5E0]">
+                      <p className="text-xs text-[#888] truncate" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {user.email}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full px-3 py-2 text-left text-sm text-[#666] hover:bg-[#F7F5F1] transition-colors flex items-center gap-2"
+                      style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                      </svg>
+                      Sign out
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </header>

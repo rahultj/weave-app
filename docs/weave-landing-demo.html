@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weave: A journal for everything that moves you</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #FAF8F5;
+      --cream-dark: #F5F2ED;
+      --parchment: #EDE8E0;
+      --gold: #C9A227;
+      --gold-light: #D4B84A;
+      --gold-dark: #A8861E;
+      --charcoal: #2A2A2A;
+      --charcoal-light: #4A4A4A;
+      --warm-gray: #8B8578;
+      --border: #E0DCD4;
+      --indigo: #1E3A5F;
+      --crimson: #A4243B;
+      --forest: #2D6A4F;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background-color: var(--cream);
+      color: var(--charcoal);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Texture overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      z-index: 1000;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Navigation */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 20px 0;
+      background: rgba(250, 248, 245, 0.9);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.3s ease;
+    }
+
+    nav.scrolled {
+      border-color: var(--border);
+    }
+
+    nav .container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--charcoal);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-cta {
+      background: var(--charcoal);
+      color: var(--cream);
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .nav-cta:hover {
+      background: var(--charcoal-light);
+      transform: translateY(-1px);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+    }
+
+    .hero-content {
+      max-width: 720px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201, 162, 39, 0.1);
+      border: 1px solid rgba(201, 162, 39, 0.2);
+      padding: 8px 16px;
+      border-radius: 100px;
+      font-size: 13px;
+      color: var(--gold-dark);
+      margin-bottom: 32px;
+    }
+
+    .hero-badge svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(48px, 8vw, 72px);
+      font-weight: 400;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 24px;
+      color: var(--charcoal);
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      color: var(--gold-dark);
+    }
+
+    .hero-sub {
+      font-size: 20px;
+      color: var(--charcoal-light);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .hero-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: white;
+      padding: 16px 32px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 20px rgba(201, 162, 39, 0.3);
+    }
+
+    .hero-cta:hover {
+      background: var(--gold-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(201, 162, 39, 0.35);
+    }
+
+    .hero-cta svg {
+      width: 18px;
+      height: 18px;
+      transition: transform 0.2s ease;
+    }
+
+    .hero-cta:hover svg {
+      transform: translateX(3px);
+    }
+
+    /* The Idea Section */
+    .idea-section {
+      padding: 120px 24px;
+      background: linear-gradient(180deg, var(--cream) 0%, var(--cream-dark) 100%);
+    }
+
+    .idea-content {
+      max-width: 680px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .idea-content .section-label {
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+
+    .idea-content h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 400;
+      line-height: 1.4;
+      margin-bottom: 32px;
+      color: var(--charcoal);
+    }
+
+    .idea-content p {
+      font-size: 17px;
+      color: var(--charcoal-light);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    /* How It Works */
+    .how-section {
+      padding: 120px 24px;
+      background: var(--cream-dark);
+    }
+
+    .how-section .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .how-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 400;
+      color: var(--charcoal);
+    }
+
+    .how-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 48px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 768px) {
+      .how-steps {
+        grid-template-columns: 1fr;
+        gap: 64px;
+      }
+    }
+
+    .how-step {
+      text-align: center;
+    }
+
+    .step-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--cream);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      color: var(--gold);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    .step-number {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: var(--warm-gray);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .how-step h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--charcoal);
+    }
+
+    .how-step p {
+      font-size: 15px;
+      color: var(--charcoal-light);
+      line-height: 1.7;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+
+    /* Connecting line between steps */
+    .how-steps-wrapper {
+      position: relative;
+    }
+
+    .connecting-thread {
+      display: none;
+    }
+
+    @media (min-width: 769px) {
+      .connecting-thread {
+        display: block;
+        position: absolute;
+        top: 36px;
+        left: calc(16.66% + 36px);
+        right: calc(16.66% + 36px);
+        height: 1px;
+        background: linear-gradient(90deg, 
+          transparent 0%, 
+          var(--border) 10%, 
+          var(--border) 90%, 
+          transparent 100%
+        );
+      }
+    }
+
+    /* Combined Features + Vignettes */
+    .features-section {
+      padding: 120px 24px;
+      background: var(--cream);
+    }
+
+    .features-section .section-header {
+      text-align: center;
+      margin-bottom: 80px;
+    }
+
+    .features-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(32px, 5vw, 42px);
+      font-weight: 400;
+      color: var(--charcoal);
+    }
+
+    .feature-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 48px;
+      align-items: center;
+      max-width: 1000px;
+      margin: 0 auto 80px;
+    }
+
+    .feature-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .feature-row.reverse {
+      direction: rtl;
+    }
+
+    .feature-row.reverse > * {
+      direction: ltr;
+    }
+
+    @media (max-width: 768px) {
+      .feature-row {
+        grid-template-columns: 1fr;
+        gap: 32px;
+      }
+      
+      .feature-row.reverse {
+        direction: ltr;
+      }
+    }
+
+    .feature-text {
+      padding: 20px 0;
+    }
+
+    .feature-label {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+
+    .feature-label.gold { color: var(--gold); }
+    .feature-label.indigo { color: var(--indigo); }
+    .feature-label.forest { color: var(--forest); }
+    .feature-label.crimson { color: var(--crimson); }
+
+    .feature-text h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 500;
+      margin-bottom: 14px;
+      color: var(--charcoal);
+      line-height: 1.3;
+    }
+
+    .feature-text p {
+      font-size: 16px;
+      color: var(--charcoal-light);
+      line-height: 1.7;
+    }
+
+    /* Vignette cards */
+    .vignette {
+      background: var(--cream-dark);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.04);
+    }
+
+    .vignette-header {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--warm-gray);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Chat vignette */
+    .chat-exchange {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-msg {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .chat-msg.user {
+      flex-direction: row-reverse;
+    }
+
+    .chat-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+
+    .chat-avatar.user {
+      background: var(--indigo);
+      color: white;
+    }
+
+    .chat-avatar.bobbin {
+      background: var(--charcoal);
+      color: white;
+    }
+
+    .chat-bubble {
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      max-width: 85%;
+    }
+
+    .chat-msg.user .chat-bubble {
+      background: var(--charcoal);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-msg.bobbin .chat-bubble {
+      background: var(--cream);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Journal vignette */
+    .journal-card {
+      display: flex;
+      gap: 14px;
+    }
+
+    .journal-cover {
+      width: 56px;
+      height: 72px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .journal-cover.music { background: linear-gradient(135deg, var(--crimson), #7A1A2B); }
+    .journal-cover.book { background: linear-gradient(135deg, var(--indigo), #152A45); }
+
+    .journal-details h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 17px;
+      font-weight: 500;
+      margin-bottom: 3px;
+    }
+
+    .journal-details .meta {
+      font-size: 12px;
+      color: var(--warm-gray);
+      margin-bottom: 10px;
+    }
+
+    .journal-details .insight {
+      font-size: 13px;
+      font-style: italic;
+      color: var(--charcoal-light);
+      line-height: 1.5;
+    }
+
+    /* Pattern vignette */
+    .pattern-card {
+      text-align: center;
+    }
+
+    .pattern-icon {
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 14px;
+    }
+
+    .pattern-card h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.4;
+      margin-bottom: 16px;
+      color: var(--charcoal);
+    }
+
+    .pattern-evidence {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .pattern-tag {
+      font-size: 11px;
+      padding: 5px 12px;
+      background: rgba(201, 162, 39, 0.12);
+      border-radius: 100px;
+      color: var(--gold-dark);
+    }
+
+    /* Discovery vignette */
+    .discovery-card h4 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--warm-gray);
+      margin-bottom: 14px;
+    }
+
+    .discovery-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .discovery-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .discovery-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .discovery-thumb.one { background: linear-gradient(135deg, var(--forest), #1E4D38); }
+    .discovery-thumb.two { background: linear-gradient(135deg, var(--indigo), #152A45); }
+
+    .discovery-info h5 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .discovery-info span {
+      font-size: 12px;
+      color: var(--warm-gray);
+    }
+
+    .discovery-reason {
+      font-size: 12px;
+      color: var(--gold-dark);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+      font-style: italic;
+    }
+
+    /* Final CTA */
+    .cta-section {
+      padding: 140px 24px;
+      background: var(--charcoal);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    }
+
+    .cta-content {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .cta-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(36px, 6vw, 52px);
+      font-weight: 400;
+      color: var(--cream);
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .cta-section p {
+      font-size: 18px;
+      color: rgba(250, 248, 245, 0.7);
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--gold);
+      color: white;
+      padding: 18px 36px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 17px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 24px rgba(201, 162, 39, 0.4);
+    }
+
+    .cta-button:hover {
+      background: var(--gold-light);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(201, 162, 39, 0.5);
+    }
+
+    .cta-button svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--charcoal);
+      border-top: 1px solid rgba(250, 248, 245, 0.1);
+      padding: 40px 24px;
+      text-align: center;
+    }
+
+    footer .logo {
+      color: var(--cream);
+      opacity: 0.8;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+
+    footer p {
+      font-size: 13px;
+      color: rgba(250, 248, 245, 0.4);
+    }
+
+    /* Subtle animations */
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .hero-badge {
+      animation: float 4s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="container">
+      <a href="#" class="logo">weave</a>
+      <a href="#start" class="nav-cta">Begin your journal</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+        </svg>
+        A cultural journal
+      </div>
+      <h1>A journal for everything that <em>moves</em> you</h1>
+      <p class="hero-sub">
+        Reflect on the books, films, and music that stay with you. 
+        Learn their histories, influences, and hidden depths. Discover why certain works shape how you see the world.
+      </p>
+      <a href="#start" class="hero-cta">
+        Start reflecting
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- The Idea -->
+  <section class="idea-section">
+    <div class="idea-content">
+      <div class="section-label">The idea</div>
+      <h2>Some things don't just entertain you. They change you.</h2>
+      <p>
+        A novel that rewired how you think about love. An album that became the soundtrack to a difficult year. A film that gave you language for something you'd always felt but never named.
+      </p>
+      <p>
+        Weave is a space to hold these moments, and to go deeper. Explore the influences behind a work, the historical moment that shaped it, the artistic lineage it belongs to. Understanding where something comes from often reveals why it resonates.
+      </p>
+      <p>
+        It's not about cataloging or rating. It's about tracing the thread between what moves you, what it carries, and who you're becoming.
+      </p>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">How it works</div>
+        <h2>Three moments of discovery</h2>
+      </div>
+      <div class="how-steps-wrapper">
+        <div class="connecting-thread"></div>
+        <div class="how-steps">
+          <div class="how-step">
+            <div class="step-icon">✦</div>
+            <div class="step-number">One</div>
+            <h3>Reflect & learn</h3>
+            <p>Explore a work through conversation. Bobbin helps you articulate what moved you, and illuminates the influences, history, and craft behind it.</p>
+          </div>
+          <div class="how-step">
+            <div class="step-icon">◇</div>
+            <div class="step-number">Two</div>
+            <h3>Discover patterns</h3>
+            <p>Over time, threads emerge. Themes you're drawn to. Ideas that keep appearing. A map of your inner landscape.</p>
+          </div>
+          <div class="how-step">
+            <div class="step-icon">→</div>
+            <div class="step-number">Three</div>
+            <h3>Find what's next</h3>
+            <p>New works surface from your patterns. Not from an algorithm, but from the shape of your own curiosity.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features + Vignettes Combined -->
+  <section class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">What you'll do</div>
+        <h2>Reflect. Learn. Discover.</h2>
+      </div>
+
+      <!-- Feature 1: Reflect with Bobbin -->
+      <div class="feature-row">
+        <div class="feature-text">
+          <div class="feature-label gold">Reflect</div>
+          <h3>Have real conversations about what moves you</h3>
+          <p>Bobbin asks the questions that help you articulate why something resonates, and teaches you about the influences, techniques, and stories behind the work.</p>
+        </div>
+        <div class="vignette">
+          <div class="vignette-header">Conversation with Bobbin</div>
+          <div class="chat-exchange">
+            <div class="chat-msg user">
+              <div class="chat-avatar user">R</div>
+              <div class="chat-bubble">What influenced Rosalía's sound on this?</div>
+            </div>
+            <div class="chat-msg bobbin">
+              <div class="chat-avatar bobbin">B</div>
+              <div class="chat-bubble">She draws from flamenco's emotional intensity, think Camarón de la Isla, but filters it through hyperpop production like Arca. What draws you to that fusion?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 2: Your Journal -->
+      <div class="feature-row reverse">
+        <div class="feature-text">
+          <div class="feature-label indigo">Capture</div>
+          <h3>Your insights, not just metadata</h3>
+          <p>Each journal entry holds your personal reflection from the moment of discovery. What you felt, what you learned, why it matters to you.</p>
+        </div>
+        <div class="vignette">
+          <div class="vignette-header">Journal entry</div>
+          <div class="journal-card">
+            <div class="journal-cover music"></div>
+            <div class="journal-details">
+              <h4>MOTOMAMI</h4>
+              <div class="meta">Rosalía · Album · 2022</div>
+              <div class="insight">"Experimental blend that challenges genre boundaries while remaining deeply personal"</div>
+            </div>
+          </div>
+          <div style="height: 16px"></div>
+          <div class="journal-card">
+            <div class="journal-cover book"></div>
+            <div class="journal-details">
+              <h4>The Dispossessed</h4>
+              <div class="meta">Ursula K. Le Guin · Novel · 1974</div>
+              <div class="insight">"Utopia as a question, not an answer"</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 3: Pattern Discovery -->
+      <div class="feature-row">
+        <div class="feature-text">
+          <div class="feature-label forest">Patterns</div>
+          <h3>See connections you hadn't noticed</h3>
+          <p>Over time, threads emerge across your journal. Themes you're drawn to. Ideas that keep appearing. A map of your inner landscape.</p>
+        </div>
+        <div class="vignette">
+          <div class="vignette-header">Pattern discovered</div>
+          <div class="pattern-card">
+            <div class="pattern-icon">✦</div>
+            <h4>You're drawn to works that challenge conventions while honoring tradition</h4>
+            <div class="pattern-evidence">
+              <span class="pattern-tag">MOTOMAMI</span>
+              <span class="pattern-tag">The Dispossessed</span>
+              <span class="pattern-tag">In the Mood for Love</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feature 4: Guided Discovery -->
+      <div class="feature-row reverse">
+        <div class="feature-text">
+          <div class="feature-label crimson">Discover</div>
+          <h3>Find what's next, from your patterns</h3>
+          <p>New recommendations emerge from the shape of your curiosity. Works that feel meant for you, not served by an algorithm.</p>
+        </div>
+        <div class="vignette">
+          <div class="vignette-header">Suggested for you</div>
+          <div class="discovery-card">
+            <h4>Based on your interest in tradition-breaking artists:</h4>
+            <div class="discovery-items">
+              <div class="discovery-item">
+                <div class="discovery-thumb one"></div>
+                <div class="discovery-info">
+                  <h5>Blonde</h5>
+                  <span>Frank Ocean · Album</span>
+                </div>
+              </div>
+              <div class="discovery-item">
+                <div class="discovery-thumb two"></div>
+                <div class="discovery-info">
+                  <h5>The Left Hand of Darkness</h5>
+                  <span>Ursula K. Le Guin · Novel</span>
+                </div>
+              </div>
+            </div>
+            <div class="discovery-reason">Because you love genre-defying work with emotional depth</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="cta-section" id="start">
+    <div class="cta-content">
+      <h2>Begin your journal</h2>
+      <p>
+        Start with anything that moved you recently. A book, an album, a film. 
+        Let the conversation unfold from there.
+      </p>
+      <a href="#" class="cta-button">
+        Start reflecting
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <a href="#" class="logo">weave</a>
+    <p>A cultural journal for everything that moves you</p>
+  </footer>
+
+  <script>
+    // Navbar scroll effect
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
+
+</body>
+</html>

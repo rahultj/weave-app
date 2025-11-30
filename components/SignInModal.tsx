@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mail, Check, Lock, Eye, EyeOff } from 'lucide-react'
+import { Check, Eye, EyeOff } from 'lucide-react'
 
 interface SignInModalProps {
   isOpen: boolean
@@ -23,7 +23,6 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [rememberMe, setRememberMe] = useState(true)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
   const [passwordStrength, setPasswordStrength] = useState(0)
   const { signInWithPassword, signUpWithPassword, resetPassword } = useAuth()
 
@@ -46,7 +45,6 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
     setPassword('')
     setConfirmPassword('')
     setError(null)
-    setSuccess(null)
     setPasswordStrength(0)
     setView('signIn')
   }
@@ -69,7 +67,6 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
       setError(error.message)
     } else {
       handleClose()
-      // Redirect to feed after successful sign-in
       router.push('/feed')
     }
   }
@@ -87,7 +84,6 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
       setError(error.message)
     } else {
       handleClose()
-      // Redirect to feed after successful sign-up
       router.push('/feed')
     }
   }
@@ -112,303 +108,354 @@ export default function SignInModal({ isOpen, onClose }: SignInModalProps) {
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.95 }}
-        className="bg-neutral-bg-main rounded-xl p-6 w-full max-w-md border border-neutral-border"
-      >
-        <AnimatePresence mode="wait">
-          {view === 'signIn' && (
-            <motion.div
-              key="signIn"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h2 className="text-xl font-semibold text-neutral-text-primary mb-2">Sign In</h2>
-              <p className="text-neutral-text-secondary mb-6">Sign in to your Weave account</p>
-              <form onSubmit={handleSignIn} className="space-y-4">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none pr-10"
-                    required
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-text-secondary"
-                    onClick={() => setShowPassword(s => !s)}
-                    tabIndex={-1}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-neutral-text-secondary text-sm">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={e => setRememberMe(e.target.checked)}
-                      className="accent-brand-primary"
-                      disabled={loading}
-                    />
-                    Remember me
-                  </label>
-                  <button
-                    type="button"
-                    className="text-brand-primary text-sm hover:underline"
-                    onClick={() => { setView('forgotPassword'); setError(null); }}
-                    disabled={loading}
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-                {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="flex-1 py-3 px-4 text-neutral-text-secondary border border-neutral-border rounded-lg hover:bg-neutral-bg-hover transition-colors"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 px-4 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Lock size={16} />
-                    )}
-                    {loading ? 'Signing in...' : 'Sign In'}
-                  </button>
-                </div>
-              </form>
-              <div className="text-center mt-6 text-sm">
-                Don't have an account?{' '}
-                <button
-                  className="text-brand-primary hover:underline font-medium"
-                  onClick={() => { setView('signUp'); setError(null); }}
-                  disabled={loading}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          onClick={handleClose}
+        >
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            transition={{ duration: 0.2 }}
+            className="bg-[#FAF8F5] rounded-2xl p-8 w-full max-w-[400px] border border-[#E0DCD4] shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <AnimatePresence mode="wait">
+              {view === 'signIn' && (
+                <motion.div
+                  key="signIn"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  Sign Up
-                </button>
-              </div>
-            </motion.div>
-          )}
-          {view === 'signUp' && (
-            <motion.div
-              key="signUp"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h2 className="text-xl font-semibold text-neutral-text-primary mb-2">Sign Up</h2>
-              <p className="text-neutral-text-secondary mb-6">Create your Weave account</p>
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={e => handlePasswordChange(e.target.value)}
-                    placeholder="Password"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none pr-10"
-                    required
-                    disabled={loading}
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-text-secondary"
-                    onClick={() => setShowPassword(s => !s)}
-                    tabIndex={-1}
+                  <h2 
+                    className="text-2xl font-normal text-[#2A2A2A] mb-2"
+                    style={{ fontFamily: 'var(--font-cormorant)' }}
                   >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                <div>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onChange={e => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                {/* Password strength bar */}
-                <div className="h-2 w-full bg-neutral-bg-card rounded mb-2">
-                  <div
-                    className={`h-2 rounded transition-all ${
-                      passwordStrength === 0
-                        ? 'bg-neutral-border w-1/6'
-                        : passwordStrength === 1
-                        ? 'bg-red-400 w-1/3'
-                        : passwordStrength === 2
-                        ? 'bg-yellow-400 w-2/3'
-                        : 'bg-green-500 w-full'
-                    }`}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <label className="flex items-center gap-2 text-neutral-text-secondary text-sm">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={e => setRememberMe(e.target.checked)}
-                      className="accent-brand-primary"
-                      disabled={loading}
-                    />
-                    Remember me
-                  </label>
-                </div>
-                {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={handleClose}
-                    className="flex-1 py-3 px-4 text-neutral-text-secondary border border-neutral-border rounded-lg hover:bg-neutral-bg-hover transition-colors"
-                    disabled={loading}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 px-4 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Mail size={16} />
+                    Welcome back
+                  </h2>
+                  <p className="text-[#666] text-sm mb-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Sign in to continue your cultural journal
+                  </p>
+                  
+                  <form onSubmit={handleSignIn} className="space-y-4">
+                    <div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={e => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all pr-12"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] transition-colors"
+                        onClick={() => setShowPassword(s => !s)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-[#666] text-sm cursor-pointer" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={e => setRememberMe(e.target.checked)}
+                          className="w-4 h-4 rounded border-[#E0DCD4] text-[#C9A227] focus:ring-[#C9A227]/30"
+                          disabled={loading}
+                        />
+                        Remember me
+                      </label>
+                      <button
+                        type="button"
+                        className="text-[#C9A227] text-sm hover:text-[#A8861E] transition-colors"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        onClick={() => { setView('forgotPassword'); setError(null); }}
+                        disabled={loading}
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                    
+                    {error && (
+                      <div className="text-[#A4243B] text-sm bg-[#A4243B]/10 px-3 py-2 rounded-lg" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {error}
+                      </div>
                     )}
-                    {loading ? 'Signing up...' : 'Sign Up'}
-                  </button>
-                </div>
-              </form>
-              <div className="text-center mt-6 text-sm">
-                Already have an account?{' '}
-                <button
-                  className="text-brand-primary hover:underline font-medium"
-                  onClick={() => { setView('signIn'); setError(null); }}
-                  disabled={loading}
+                    
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-[#C9A227] text-white rounded-xl font-medium hover:bg-[#A8861E] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_2px_12px_rgba(201,162,39,0.25)]"
+                      style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    >
+                      {loading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Signing in...
+                        </>
+                      ) : (
+                        'Sign In'
+                      )}
+                    </button>
+                  </form>
+                  
+                  <div className="text-center mt-6 text-sm text-[#666]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Don&apos;t have an account?{' '}
+                    <button
+                      className="text-[#C9A227] hover:text-[#A8861E] font-medium transition-colors"
+                      onClick={() => { setView('signUp'); setError(null); }}
+                      disabled={loading}
+                    >
+                      Sign Up
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {view === 'signUp' && (
+                <motion.div
+                  key="signUp"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.15 }}
                 >
-                  Sign In
-                </button>
-              </div>
-            </motion.div>
-          )}
-          {view === 'forgotPassword' && (
-            <motion.div
-              key="forgotPassword"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.2 }}
-            >
-              <h2 className="text-xl font-semibold text-neutral-text-primary mb-2">Reset Password</h2>
-              <p className="text-neutral-text-secondary mb-6">Enter your email to receive a password reset link.</p>
-              <form onSubmit={handleForgotPassword} className="space-y-4">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full p-3 bg-neutral-bg-card border border-neutral-border rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary outline-none"
-                    required
-                    disabled={loading}
-                  />
-                </div>
-                {error && <div className="text-red-600 text-sm mb-2">{error}</div>}
-                <div className="flex gap-3">
+                  <h2 
+                    className="text-2xl font-normal text-[#2A2A2A] mb-2"
+                    style={{ fontFamily: 'var(--font-cormorant)' }}
+                  >
+                    Begin your journal
+                  </h2>
+                  <p className="text-[#666] text-sm mb-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Create an account to start reflecting
+                  </p>
+                  
+                  <form onSubmit={handleSignUp} className="space-y-4">
+                    <div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                        onChange={e => handlePasswordChange(e.target.value)}
+                        placeholder="Password"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all pr-12"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#999] hover:text-[#666] transition-colors"
+                        onClick={() => setShowPassword(s => !s)}
+                        tabIndex={-1}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    <div>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={e => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm Password"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    
+                    {/* Password strength bar */}
+                    <div className="h-1.5 w-full bg-[#E0DCD4] rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${
+                          passwordStrength === 0
+                            ? 'bg-[#E0DCD4] w-0'
+                            : passwordStrength === 1
+                            ? 'bg-[#A4243B] w-1/3'
+                            : passwordStrength === 2
+                            ? 'bg-[#C9A227] w-2/3'
+                            : 'bg-[#2D6A4F] w-full'
+                        }`}
+                      />
+                    </div>
+                    <p className="text-xs text-[#999]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                      Use 8+ characters with uppercase and numbers
+                    </p>
+                    
+                    {error && (
+                      <div className="text-[#A4243B] text-sm bg-[#A4243B]/10 px-3 py-2 rounded-lg" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {error}
+                      </div>
+                    )}
+                    
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3.5 bg-[#C9A227] text-white rounded-xl font-medium hover:bg-[#A8861E] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_2px_12px_rgba(201,162,39,0.25)]"
+                      style={{ fontFamily: 'var(--font-dm-sans)' }}
+                    >
+                      {loading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Creating account...
+                        </>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </button>
+                  </form>
+                  
+                  <div className="text-center mt-6 text-sm text-[#666]" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Already have an account?{' '}
+                    <button
+                      className="text-[#C9A227] hover:text-[#A8861E] font-medium transition-colors"
+                      onClick={() => { setView('signIn'); setError(null); }}
+                      disabled={loading}
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {view === 'forgotPassword' && (
+                <motion.div
+                  key="forgotPassword"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <h2 
+                    className="text-2xl font-normal text-[#2A2A2A] mb-2"
+                    style={{ fontFamily: 'var(--font-cormorant)' }}
+                  >
+                    Reset password
+                  </h2>
+                  <p className="text-[#666] text-sm mb-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    Enter your email and we&apos;ll send you a reset link
+                  </p>
+                  
+                  <form onSubmit={handleForgotPassword} className="space-y-4">
+                    <div>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="Email"
+                        className="w-full p-3.5 bg-white border border-[#E0DCD4] rounded-xl text-[#2A2A2A] placeholder-[#999] focus:ring-2 focus:ring-[#C9A227]/30 focus:border-[#C9A227] outline-none transition-all"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        required
+                        disabled={loading}
+                      />
+                    </div>
+                    
+                    {error && (
+                      <div className="text-[#A4243B] text-sm bg-[#A4243B]/10 px-3 py-2 rounded-lg" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                        {error}
+                      </div>
+                    )}
+                    
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setView('signIn'); setError(null); }}
+                        className="flex-1 py-3.5 text-[#666] border border-[#E0DCD4] rounded-xl hover:bg-[#F5F2ED] transition-colors"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                        disabled={loading}
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex-1 py-3.5 bg-[#C9A227] text-white rounded-xl font-medium hover:bg-[#A8861E] transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                        style={{ fontFamily: 'var(--font-dm-sans)' }}
+                      >
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            Sending...
+                          </>
+                        ) : (
+                          'Send Link'
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </motion.div>
+              )}
+
+              {view === 'resetSent' && (
+                <motion.div
+                  key="resetSent"
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.15 }}
+                  className="text-center"
+                >
+                  <div className="w-14 h-14 bg-[#2D6A4F]/10 rounded-full flex items-center justify-center mx-auto mb-5">
+                    <Check size={28} className="text-[#2D6A4F]" />
+                  </div>
+                  <h2 
+                    className="text-2xl font-normal text-[#2A2A2A] mb-2"
+                    style={{ fontFamily: 'var(--font-cormorant)' }}
+                  >
+                    Check your email
+                  </h2>
+                  <p className="text-[#666] text-sm mb-6" style={{ fontFamily: 'var(--font-dm-sans)' }}>
+                    We&apos;ve sent a reset link to <strong className="text-[#2A2A2A]">{email}</strong>
+                  </p>
                   <button
-                    type="button"
                     onClick={() => { setView('signIn'); setError(null); }}
-                    className="flex-1 py-3 px-4 text-neutral-text-secondary border border-neutral-border rounded-lg hover:bg-neutral-bg-hover transition-colors"
-                    disabled={loading}
+                    className="w-full py-3.5 bg-[#C9A227] text-white rounded-xl font-medium hover:bg-[#A8861E] transition-all"
+                    style={{ fontFamily: 'var(--font-dm-sans)' }}
                   >
-                    Back
+                    Back to Sign In
                   </button>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex-1 py-3 px-4 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <Mail size={16} />
-                    )}
-                    {loading ? 'Sending...' : 'Send Link'}
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          )}
-          {view === 'resetSent' && (
-            <motion.div
-              key="resetSent"
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Check size={24} className="text-green-600" />
-                </div>
-                <h2 className="text-xl font-semibold text-neutral-text-primary mb-2">
-                  Check your email!
-                </h2>
-                <p className="text-neutral-text-secondary mb-6">
-                  We've sent a password reset link to <strong>{email}</strong>.<br />
-                  Please follow the instructions to reset your password.
-                </p>
-                <button
-                  onClick={() => { setView('signIn'); setError(null); setSuccess(null); }}
-                  className="w-full py-3 px-4 bg-brand-primary text-white rounded-lg hover:bg-brand-hover transition-colors"
-                >
-                  Back to Sign In
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.div>
-    </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
