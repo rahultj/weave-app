@@ -1,0 +1,29 @@
+interface BobbinEarsIconProps {
+  size?: number
+  className?: string
+}
+
+export default function BobbinEarsIcon({ size = 32, className = '' }: BobbinEarsIconProps) {
+  return (
+    <svg 
+      viewBox="0 0 80 80" 
+      xmlns="http://www.w3.org/2000/svg" 
+      fill="none"
+      width={size}
+      height={size}
+      className={className}
+    >
+      {/* Hole shadow/rim */}
+      <ellipse cx="40" cy="58" rx="28" ry="10" fill="#E8E5E0"/>
+      {/* Hole opening */}
+      <ellipse cx="40" cy="56" rx="22" ry="7" fill="#1E3A5F"/>
+      {/* Left ear */}
+      <ellipse cx="32" cy="42" rx="6" ry="16" fill="#1E3A5F"/>
+      <ellipse cx="32" cy="42" rx="3" ry="10" fill="#E8E5E0"/>
+      {/* Right ear (same size) */}
+      <ellipse cx="48" cy="42" rx="6" ry="16" fill="#1E3A5F"/>
+      <ellipse cx="48" cy="42" rx="3" ry="10" fill="#E8E5E0"/>
+    </svg>
+  )
+}
+

@@ -575,7 +575,7 @@ function WeaveChatContent() {
           >
             {message.role === 'assistant' && (
               <div className="flex-shrink-0">
-                <BobbinIcon size={28} />
+                <BobbinIcon size={72} />
               </div>
             )}
             <div

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import SignInModal from '@/components/SignInModal'
-import BobbinIcon from '@/components/BobbinIcon'
+import BobbinEarsIcon from '@/components/BobbinEarsIcon'
 import { AuthProvider } from '@/contexts/AuthContext'
 
 // Scenario data for the features section
@@ -148,7 +148,7 @@ function LandingPageContent() {
       >
         <div className="max-w-[1200px] mx-auto px-6 flex justify-between items-center">
           <a href="#" className="flex items-center gap-2">
-            <BobbinIcon size={32} />
+            <BobbinEarsIcon size={76} />
             <span className="font-serif text-[26px] font-medium text-[#2A2A2A] tracking-tight" style={{ fontFamily: 'var(--font-cormorant)' }}>
               weave
             </span>
