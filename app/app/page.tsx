@@ -6,8 +6,7 @@ import HomeContent from '@/components/HomeContent'
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+  const supabase = createServerComponentClient({ cookies })
   
   const { data: { session } } = await supabase.auth.getSession()
 

@@ -7,8 +7,7 @@ import type { Artifact } from '@/lib/types/knowledge-graph'
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+  const supabase = createServerComponentClient({ cookies })
   
   const { data: { session }, error: authError } = await supabase.auth.getSession()
 

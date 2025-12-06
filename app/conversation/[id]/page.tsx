@@ -11,8 +11,7 @@ interface PageProps {
 
 export default async function ConversationPage({ params }: PageProps) {
   const { id } = await params
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+  const supabase = createServerComponentClient({ cookies })
   
   const { data: { session }, error: authError } = await supabase.auth.getSession()
 
@@ -50,4 +49,5 @@ export default async function ConversationPage({ params }: PageProps) {
     />
   )
 }
+
 
