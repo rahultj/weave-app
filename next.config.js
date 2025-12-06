@@ -119,6 +119,10 @@ const nextConfig = {
   experimental: {
     webpackBuildWorker: true,
   },
+  // Use webpack for production builds (next-pwa requires webpack)
+  webpack: (config, { isServer }) => {
+    return config
+  },
 }
 
 module.exports = withPWA(nextConfig)
