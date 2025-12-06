@@ -3,6 +3,7 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { saveChatHistory } from '@/lib/chat-history'
+import { getUserArtifacts } from '@/lib/knowledge-graph'
 import { getEnv } from '@/lib/env'
 
 const anthropic = new Anthropic({
@@ -104,6 +105,44 @@ export async function POST(request: NextRequest) {
     const isPatternExploration = scrap.title === 'Pattern Exploration'
     const isDiscoveryMode = (scrap.id === 'general-chat' || scrap.title === 'General Conversation') && !isPatternExploration
 
+    // Fetch user's collection for context (only in discovery mode)
+    let userCollectionContext = ''
+    if (isDiscoveryMode) {
+      try {
+        const artifacts = await getUserArtifacts(user.id, supabase)
+        if (artifacts && artifacts.length > 0) {
+          const collectionSummary = artifacts
+            .slice(0, 20) // Limit to most recent 20 to avoid token limits
+            .map(a => {
+              const parts = [a.title]
+              if (a.creator) parts.push(`by ${a.creator}`)
+              if (a.year) parts.push(`(${a.year})`)
+              parts.push(`[${a.type}]`)
+              if (a.user_notes) parts.push(`- Note: "${a.user_notes}"`)
+              return `- ${parts.join(' ')}`
+            })
+            .join('\n')
+          
+          userCollectionContext = `\n\nUSER'S CULTURAL COLLECTION:
+The user has saved ${artifacts.length} cultural works in their collection. Here are their most recent entries:
+
+${collectionSummary}
+
+Use this context to:
+- Understand their taste and preferences
+- Make personalized recommendations based on what they've already explored
+- Draw connections between works they're asking about and works in their collection
+- Reference their previous interests when relevant
+- If they ask "would I like X?", compare it to their collection and give an informed opinion
+
+IMPORTANT: You have access to this information - use it! Don't say you don't have access to their preferences.`
+        }
+      } catch (error) {
+        console.error('Error fetching user artifacts for context:', error)
+        // Continue without context if fetch fails
+      }
+    }
+
     // Build conversation history for Claude
     const conversationHistory = chatHistory.map((msg: { sender: string; content: string }) => {
       return `${msg.sender === 'user' ? 'Human' : 'Assistant'}: ${msg.content}\n\n`
@@ -155,14 +194,18 @@ Your role:
 - Suggest connections between different works when relevant
 - Help users understand WHY they might be interested in something
 - Be enthusiastic and curious about culture
+- Use the user's collection context to give personalized recommendations
 
 When responding:
 - Keep explanations concise and engaging (2-3 short paragraphs max)
 - Use simple, accessible language
 - Focus on what makes the work interesting or significant
 - Mention key themes, style, or notable aspects
-- If relevant, suggest 1-2 related works they might enjoy
+- If relevant, suggest 1-2 related works they might enjoy based on their collection
+- Reference works from their collection when making comparisons or recommendations
 - Be conversational and warm, like a knowledgeable friend
+
+${userCollectionContext}
 
 IMPORTANT - Handling works you don't know:
 - Your knowledge has a cutoff date, so you may not know about very recent releases (2024 onwards)
