@@ -1,18 +1,17 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import HomeContent from '@/components/HomeContent'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
 export default async function Home() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient()
   
-  const { data: { session } } = await supabase.auth.getSession()
+  const { data: { user } } = await supabase.auth.getUser()
 
   // If logged in, redirect to new feed UI
   // Note: This is a backup - middleware should handle this redirect
-  if (session) {
+  if (user) {
     redirect('/feed')
   }
 

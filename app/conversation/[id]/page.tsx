@@ -1,7 +1,6 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { redirect, notFound } from 'next/navigation'
 import ConversationView from './ConversationView'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,15 +10,13 @@ interface PageProps {
 
 export default async function ConversationPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient()
   
-  const { data: { session }, error: authError } = await supabase.auth.getSession()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
-  if (authError || !session) {
+  if (authError || !user) {
     redirect('/app')
   }
-
-  const user = session.user
 
   // Fetch the conversation
   const { data: conversation, error: convError } = await supabase
@@ -49,5 +46,3 @@ export default async function ConversationPage({ params }: PageProps) {
     />
   )
 }
-
-

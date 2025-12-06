@@ -1,23 +1,20 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import FeedView from './FeedView'
+import { createClient } from '@/lib/supabase/server'
 import type { Artifact } from '@/lib/types/knowledge-graph'
 
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const supabase = await createClient()
   
-  const { data: { session }, error: authError } = await supabase.auth.getSession()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   // If not logged in, redirect to app (which has auth)
   // Note: This is a backup - middleware should handle this redirect
-  if (authError || !session) {
+  if (authError || !user) {
     redirect('/app')
   }
-
-  const user = session.user
 
   // Fetch user's artifacts directly from database
   let artifacts: Artifact[] = []

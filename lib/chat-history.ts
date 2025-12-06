@@ -73,7 +73,14 @@ export async function getChatHistory(scrapId: string, userId: string): Promise<C
       return null
     }
 
-    const chatData = data[0]
+    const chatData = data[0] as {
+      id: string
+      user_id: string
+      scrap_id: string
+      messages: any[]
+      created_at: string
+      updated_at: string
+    }
     console.log('Processing chat data:', { 
       id: chatData.id, 
       messageCount: Array.isArray(chatData.messages) ? chatData.messages.length : 'not array' 

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteClient } from '@/lib/supabase/route'
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +9,7 @@ export async function POST(request: NextRequest) {
     console.log('API: save-conversation called with', messages?.length, 'messages')
 
     // Get the authenticated user
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createRouteClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {

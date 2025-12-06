@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createRouteClient } from '@/lib/supabase/route'
 import { getEnv } from '@/lib/env'
 
 const anthropic = new Anthropic({
@@ -19,7 +18,7 @@ export async function POST(request: NextRequest) {
     const { messages } = body
 
     // Get the authenticated user
-    const supabase = createRouteHandlerClient({ cookies })
+    const supabase = await createRouteClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
 
     if (authError || !user) {
