@@ -2,7 +2,7 @@ import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import FeedView from './FeedView'
-import { getUserArtifacts } from '@/lib/knowledge-graph'
+import type { Artifact } from '@/lib/types/knowledge-graph'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,12 +20,23 @@ export default async function FeedPage() {
 
   const user = session.user
 
-  // Fetch user's artifacts
-  let artifacts: Awaited<ReturnType<typeof getUserArtifacts>> = []
+  // Fetch user's artifacts directly from database
+  let artifacts: Artifact[] = []
   try {
-    artifacts = await getUserArtifacts(user.id, supabase)
+    const { data, error } = await supabase
+      .from('artifacts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      console.error('Error fetching artifacts:', error)
+    } else {
+      artifacts = data || []
+    }
   } catch (error) {
-    console.error('Error fetching artifacts:', error)
+    console.error('Error in FeedPage:', error)
+    // Continue with empty artifacts array - don't crash the page
   }
 
   return <FeedView artifacts={artifacts} user={user} />
