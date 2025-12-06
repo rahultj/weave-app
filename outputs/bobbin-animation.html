@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bobbin Animation</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #FAF8F5;
+      color: #2A2A2A;
+      padding: 48px 24px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    h1 { font-size: 24px; font-weight: 500; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 48px; font-size: 14px; }
+
+    .stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 32px;
+      margin-bottom: 48px;
+    }
+
+    .bobbin-container {
+      width: 120px;
+      height: 120px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bobbin {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      transition: transform 0.15s ease-out;
+    }
+
+    .hole {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 24px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .hole-outer { fill: #E8E5E0; }
+    .hole-inner { fill: #1E3A5F; }
+
+    /* Idle */
+    .bobbin-container.idle .bobbin {
+      animation: idle-bob 3s ease-in-out infinite;
+    }
+    .bobbin-container.idle .ear-left {
+      animation: ear-twitch-left 4s ease-in-out infinite;
+    }
+    .bobbin-container.idle .ear-right {
+      animation: ear-twitch-right 4s ease-in-out infinite 0.5s;
+    }
+
+    @keyframes idle-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+    @keyframes ear-twitch-left {
+      0%, 90%, 100% { transform: rotate(0deg); }
+      93% { transform: rotate(-3deg); }
+      96% { transform: rotate(2deg); }
+    }
+    @keyframes ear-twitch-right {
+      0%, 85%, 100% { transform: rotate(0deg); }
+      88% { transform: rotate(4deg); }
+      91% { transform: rotate(-2deg); }
+    }
+
+    /* Anticipation */
+    .bobbin-container.anticipation .bobbin {
+      animation: anticipate 0.2s ease-out forwards;
+    }
+    .bobbin-container.anticipation .hole { opacity: 1; }
+
+    @keyframes anticipate {
+      0% { transform: translateY(0) scaleY(1); }
+      100% { transform: translateY(8px) scaleY(0.85); }
+    }
+
+    /* Diving */
+    .bobbin-container.diving .bobbin {
+      animation: dive 0.5s ease-in forwards;
+    }
+    .bobbin-container.diving .hole { opacity: 1; }
+
+    @keyframes dive {
+      0% { transform: translateY(8px) scaleY(0.85); opacity: 1; }
+      30% { transform: translateY(-20px) scaleY(1.15); opacity: 1; }
+      100% { transform: translateY(60px) scaleY(0.9); opacity: 0; }
+    }
+
+    /* Searching */
+    .bobbin-container.searching .bobbin { opacity: 0; }
+    .bobbin-container.searching .hole { opacity: 1; }
+    .bobbin-container.searching .search-rings { opacity: 1; }
+    .bobbin-container.searching .peek-ears { opacity: 1; animation: ears-peek 2s ease-in-out infinite; }
+
+    .search-rings {
+      position: absolute;
+      bottom: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .search-rings ellipse { animation: pulse-ring 1.5s ease-in-out infinite; }
+    .search-rings ellipse:nth-child(2) { animation-delay: 0.3s; }
+    .search-rings ellipse:nth-child(3) { animation-delay: 0.6s; }
+
+    @keyframes pulse-ring {
+      0%, 100% { opacity: 0.2; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.05); }
+    }
+
+    .peek-ears {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    @keyframes ears-peek {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      25% { transform: translateX(-50%) translateY(-4px); }
+      50% { transform: translateX(-50%) translateY(0); }
+      75% { transform: translateX(-50%) translateY(-2px); }
+    }
+
+    /* Emerging */
+    .bobbin-container.emerging .bobbin {
+      animation: emerge 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    .bobbin-container.emerging .hole {
+      opacity: 1;
+      animation: hole-fade 0.4s ease-out 0.3s forwards;
+    }
+    .bobbin-container.emerging .peek-ears { opacity: 0; }
+    .bobbin-container.emerging .search-rings { opacity: 0; }
+    .bobbin-container.emerging .glint {
+      animation: glint 0.3s ease-out 0.25s forwards;
+    }
+
+    @keyframes emerge {
+      0% { transform: translateY(60px) scaleY(0.9); opacity: 0; }
+      50% { transform: translateY(-10px) scaleY(1.1); opacity: 1; }
+      100% { transform: translateY(0) scaleY(1); opacity: 1; }
+    }
+    @keyframes hole-fade { to { opacity: 0; } }
+
+    .glint {
+      position: absolute;
+      top: 42px;
+      right: 24px;
+      opacity: 0;
+    }
+    @keyframes glint {
+      0% { opacity: 0; transform: scale(0.5); }
+      50% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(1); }
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    button {
+      padding: 12px 24px;
+      border: 1px solid #E8E5E0;
+      border-radius: 8px;
+      background: white;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      border-color: #C9A227;
+      background: #FFFDF8;
+    }
+    button.primary {
+      background: #C9A227;
+      border-color: #C9A227;
+      color: white;
+    }
+    button.primary:hover { background: #B8922A; }
+
+    /* Chat Demo */
+    .chat-demo {
+      background: white;
+      border: 1px solid #E8E5E0;
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 48px;
+    }
+    .chat-demo h3 {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      color: #888;
+    }
+    .message {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+    .message-avatar {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    .message-bubble {
+      background: #F5F2ED;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 320px;
+    }
+    .typing-indicator {
+      display: flex;
+      gap: 4px;
+      padding: 4px 0;
+    }
+    .typing-indicator span {
+      width: 6px;
+      height: 6px;
+      background: #888;
+      border-radius: 50%;
+      animation: typing-dot 1.2s ease-in-out infinite;
+    }
+    .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing-dot {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-4px); }
+    }
+    .chat-input {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #E8E5E0;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid #E8E5E0;
+      border-radius: 24px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    .chat-input input:focus { border-color: #C9A227; }
+    .chat-input button { border-radius: 24px; }
+
+    /* Code */
+    .code-section {
+      margin-top: 48px;
+      background: #2A2A2A;
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .code-section h3 {
+      color: #888;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+    pre {
+      color: #E8E5E0;
+      font-size: 13px;
+      line-height: 1.6;
+      font-family: 'Monaco', 'Consolas', monospace;
+    }
+    .comment { color: #6A9955; }
+    .keyword { color: #C586C0; }
+    .string { color: #CE9178; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Bobbin Dive Animation</h1>
+    <p class="subtitle">Click buttons to see each state, or try the chat demo below</p>
+
+    <div class="stage">
+      <div class="bobbin-container idle" id="bobbin">
+        <svg class="bobbin" viewBox="0 0 80 80" fill="none">
+          <ellipse class="ear-left" cx="32" cy="28" rx="6" ry="14" fill="#1E3A5F" style="transform-origin: 32px 42px"/>
+          <ellipse cx="32" cy="28" rx="3" ry="9" fill="#E8E5E0"/>
+          <ellipse class="ear-right" cx="48" cy="28" rx="6" ry="14" fill="#1E3A5F" style="transform-origin: 48px 42px"/>
+          <ellipse cx="48" cy="28" rx="3" ry="9" fill="#E8E5E0"/>
+          <circle cx="40" cy="50" r="16" fill="#1E3A5F"/>
+          <circle cx="35" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="1.5"/>
+          <circle cx="45" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="1.5"/>
+          <path d="M38 48 L42 48" stroke="#C9A227" stroke-width="1"/>
+          <circle cx="35" cy="48" r="1.5" fill="white"/>
+          <circle cx="45" cy="48" r="1.5" fill="white"/>
+          <ellipse cx="40" cy="56" rx="2.5" ry="1.5" fill="#C9A227"/>
+        </svg>
+
+        <svg class="hole" viewBox="0 0 90 24" fill="none">
+          <ellipse class="hole-outer" cx="45" cy="14" rx="42" ry="10"/>
+          <ellipse class="hole-inner" cx="45" cy="12" rx="34" ry="7"/>
+        </svg>
+
+        <svg class="search-rings" width="70" height="20" viewBox="0 0 70 20" fill="none">
+          <ellipse cx="35" cy="10" rx="30" ry="6" fill="none" stroke="#C9A227" stroke-width="1"/>
+          <ellipse cx="35" cy="10" rx="22" ry="4" fill="none" stroke="#C9A227" stroke-width="1"/>
+          <ellipse cx="35" cy="10" rx="14" ry="3" fill="none" stroke="#C9A227" stroke-width="1"/>
+        </svg>
+
+        <svg class="peek-ears" width="40" height="24" viewBox="0 0 40 24" fill="none">
+          <ellipse cx="12" cy="12" rx="5" ry="12" fill="#1E3A5F"/>
+          <ellipse cx="12" cy="12" rx="2.5" ry="8" fill="#E8E5E0"/>
+          <ellipse cx="28" cy="12" rx="5" ry="12" fill="#1E3A5F"/>
+          <ellipse cx="28" cy="12" rx="2.5" ry="8" fill="#E8E5E0"/>
+        </svg>
+
+        <svg class="glint" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 0 L7 5 L12 6 L7 7 L6 12 L5 7 L0 6 L5 5 Z" fill="#C9A227"/>
+        </svg>
+      </div>
+
+      <div class="controls">
+        <button onclick="setState('idle')">Idle</button>
+        <button onclick="setState('anticipation')">Anticipate</button>
+        <button onclick="setState('diving')">Dive</button>
+        <button onclick="setState('searching')">Searching</button>
+        <button onclick="setState('emerging')">Emerge</button>
+        <button class="primary" onclick="runFullSequence()">Full Sequence</button>
+      </div>
+    </div>
+
+    <div class="chat-demo">
+      <h3>Try it in context</h3>
+      <div id="chat-messages">
+        <div class="message">
+          <svg class="message-avatar" viewBox="0 0 80 80" fill="none">
+            <ellipse cx="32" cy="28" rx="6" ry="14" fill="#1E3A5F"/>
+            <ellipse cx="48" cy="28" rx="6" ry="14" fill="#1E3A5F"/>
+            <circle cx="40" cy="50" r="16" fill="#1E3A5F"/>
+            <circle cx="35" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="2"/>
+            <circle cx="45" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="2"/>
+          </svg>
+          <div class="message-bubble">
+            Hello! I'm Bobbin. Ask me about any cultural work and I'll dive in to explore it with you.
+          </div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="chat-input" placeholder="Ask about a book, album, or film..." />
+        <button class="primary" onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <div class="code-section">
+      <h3>Usage</h3>
+      <pre><code><span class="comment">// Trigger states with class changes</span>
+<span class="keyword">const</span> bobbin = document.getElementById(<span class="string">'bobbin'</span>);
+
+<span class="comment">// When user sends a message</span>
+bobbin.className = <span class="string">'bobbin-container anticipation'</span>;
+setTimeout(() => bobbin.className = <span class="string">'bobbin-container diving'</span>, 200);
+setTimeout(() => bobbin.className = <span class="string">'bobbin-container searching'</span>, 700);
+
+<span class="comment">// When response starts streaming</span>
+bobbin.className = <span class="string">'bobbin-container emerging'</span>;
+setTimeout(() => bobbin.className = <span class="string">'bobbin-container idle'</span>, 500);</code></pre>
+    </div>
+  </div>
+
+  <script>
+    const bobbin = document.getElementById('bobbin');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatInput = document.getElementById('chat-input');
+
+    function setState(state) {
+      bobbin.className = 'bobbin-container ' + state;
+    }
+
+    function runFullSequence() {
+      setState('anticipation');
+      setTimeout(() => setState('diving'), 200);
+      setTimeout(() => setState('searching'), 700);
+      setTimeout(() => setState('emerging'), 2500);
+      setTimeout(() => setState('idle'), 3000);
+    }
+
+    function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'message';
+      userMsg.style.justifyContent = 'flex-end';
+      userMsg.innerHTML = `<div class="message-bubble" style="background: #1E3A5F; color: white;">${text}</div>`;
+      chatMessages.appendChild(userMsg);
+      chatInput.value = '';
+
+      runFullSequence();
+
+      const thinkingMsg = document.createElement('div');
+      thinkingMsg.className = 'message';
+      thinkingMsg.id = 'thinking';
+      thinkingMsg.innerHTML = `
+        <svg class="message-avatar" viewBox="0 0 80 80" fill="none">
+          <ellipse cx="40" cy="58" rx="28" ry="10" fill="#E8E5E0"/>
+          <ellipse cx="40" cy="56" rx="22" ry="7" fill="#1E3A5F"/>
+          <ellipse cx="32" cy="42" rx="6" ry="16" fill="#1E3A5F"/>
+          <ellipse cx="48" cy="42" rx="6" ry="16" fill="#1E3A5F"/>
+        </svg>
+        <div class="message-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>
+      `;
+      chatMessages.appendChild(thinkingMsg);
+
+      setTimeout(() => {
+        document.getElementById('thinking')?.remove();
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message';
+        botMsg.innerHTML = `
+          <svg class="message-avatar" viewBox="0 0 80 80" fill="none">
+            <ellipse cx="32" cy="28" rx="6" ry="14" fill="#1E3A5F"/>
+            <ellipse cx="48" cy="28" rx="6" ry="14" fill="#1E3A5F"/>
+            <circle cx="40" cy="50" r="16" fill="#1E3A5F"/>
+            <circle cx="35" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="2"/>
+            <circle cx="45" cy="48" r="5" fill="none" stroke="#C9A227" stroke-width="2"/>
+          </svg>
+          <div class="message-bubble">Great question! Let me share what I found. This work draws from fascinating influences and has an interesting history...</div>
+        `;
+        chatMessages.appendChild(botMsg);
+      }, 2500);
+    }
+
+    chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+  </script>
+</body>
+</html>

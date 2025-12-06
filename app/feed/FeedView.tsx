@@ -7,6 +7,7 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import ArtifactCard from '@/components/ArtifactCard'
 import InsightCard from '@/components/InsightCard'
 import PatternExploreModal from '@/components/PatternExploreModal'
+import BobbinEarsIcon from '@/components/BobbinEarsIcon'
 import { deleteArtifact } from '@/lib/knowledge-graph'
 import type { Artifact, DetectedPattern } from '@/lib/types/knowledge-graph'
 import type { User } from '@supabase/supabase-js'
@@ -191,12 +192,15 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
     >
       {/* Header */}
       <header className="sticky top-0 z-10 flex justify-between items-center px-5 py-4 border-b border-[#E8E5E0] bg-[#FAF8F5]">
-        <h1
-          className="text-[22px] font-normal m-0 tracking-tight"
-          style={{ fontFamily: 'var(--font-cormorant)', letterSpacing: '-0.02em' }}
-        >
-          weave
-        </h1>
+        <div className="flex items-center gap-2">
+          <BobbinEarsIcon size={28} />
+          <h1
+            className="text-[22px] font-normal m-0 tracking-tight"
+            style={{ fontFamily: 'var(--font-cormorant)', letterSpacing: '-0.02em' }}
+          >
+            weave
+          </h1>
+        </div>
         <div className="flex items-center gap-3">
           <button className="p-2 bg-transparent border-none cursor-pointer text-[#2A2A2A] rounded-lg flex items-center justify-center">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

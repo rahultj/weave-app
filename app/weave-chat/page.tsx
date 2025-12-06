@@ -108,6 +108,7 @@ function WeaveChatContent() {
   // Separate function to send the pattern exploration message
   const sendPatternExplorationMessage = useCallback(async (message: string) => {
     setIsLoading(true)
+    
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',

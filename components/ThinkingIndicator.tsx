@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import BobbinIcon from '@/components/BobbinIcon'
+import BobbinAnimated from '@/components/BobbinAnimated'
 
 const thinkingPhrases = [
   'Pondering...',
@@ -43,8 +43,8 @@ export default function ThinkingIndicator() {
 
   return (
     <div className="flex justify-start gap-[10px] mb-4">
-      <div className="flex-shrink-0 animate-pulse">
-        <BobbinIcon size={72} />
+      <div className="flex-shrink-0">
+        <BobbinAnimated size={72} />
       </div>
       <div 
         className="px-4 py-3 bg-[#F7F5F1] border border-[#E8E5E0] rounded-[18px] rounded-bl-[4px] min-w-[140px]"
