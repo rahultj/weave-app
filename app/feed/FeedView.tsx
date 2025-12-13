@@ -619,8 +619,10 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
                 <ArtifactCard
                   artifact={artifact}
                   onClick={() => {
-                    // TODO: Navigate to artifact detail
-                    console.log('View artifact:', artifact.id)
+                    // Navigate to conversation if available
+                    if (artifact.discovered_via) {
+                      handleViewConversation(artifact.discovered_via)
+                    }
                   }}
                   onViewConversation={() => {
                     if (artifact.discovered_via) {
