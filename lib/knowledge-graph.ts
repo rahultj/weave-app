@@ -1,5 +1,5 @@
 // Database helper functions for knowledge graph operations
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type {
   Artifact,
@@ -29,7 +29,7 @@ import type {
 function getSupabaseClient() {
   // Try to get client component version first
   if (typeof window !== 'undefined') {
-    return createClientComponentClient()
+    return createClient()
   }
   // Fallback to server version
   return null
@@ -77,7 +77,7 @@ export async function updateArtifact(
   artifactId: string,
   data: UpdateArtifactData
 ): Promise<Artifact> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data: artifact, error } = await supabase
     .from('artifacts')
@@ -123,7 +123,7 @@ export async function findArtifactByTitleAndCreator(
   creator: string | null | undefined,
   userId: string
 ): Promise<Artifact | null> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const query = supabase
     .from('artifacts')
@@ -164,7 +164,7 @@ export async function getUserArtifacts(userId: string, supabaseClient?: Supabase
 export async function getArtifactWithRelations(
   artifactId: string
 ): Promise<ArtifactWithRelations | null> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   // Get the artifact
   const { data: artifact, error: artifactError } = await supabase
@@ -285,7 +285,7 @@ export async function createConnection(
   data: CreateConnectionData,
   userId: string
 ): Promise<Connection> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data: connection, error } = await supabase
     .from('connections')
@@ -315,7 +315,7 @@ export async function updateConnection(
   connectionId: string,
   data: UpdateConnectionData
 ): Promise<Connection> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data: connection, error } = await supabase
     .from('connections')
@@ -346,7 +346,7 @@ export async function rejectConnection(connectionId: string): Promise<Connection
  * Get pending connection suggestions for a user
  */
 export async function getPendingSuggestions(userId: string): Promise<ConnectionSuggestion[]> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data, error } = await supabase
     .from('connections')
@@ -421,7 +421,7 @@ export async function updateConversation(
   conversationId: string,
   data: UpdateConversationData
 ): Promise<Conversation> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data: conversation, error } = await supabase
     .from('conversations')
@@ -438,7 +438,7 @@ export async function updateConversation(
  * Get a conversation by ID
  */
 export async function getConversation(conversationId: string): Promise<Conversation | null> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data, error } = await supabase
     .from('conversations')
@@ -454,7 +454,7 @@ export async function getConversation(conversationId: string): Promise<Conversat
  * Get all conversations for a user
  */
 export async function getUserConversations(userId: string): Promise<Conversation[]> {
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
 
   const { data, error } = await supabase
     .from('conversations')

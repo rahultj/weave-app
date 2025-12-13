@@ -1,5 +1,4 @@
 import { supabase } from './supabase'
-import { Database } from './database.types'
 
 export interface ChatMessage {
   id: string

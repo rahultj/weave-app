@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase'
 import ArtifactCard from '@/components/ArtifactCard'
 import InsightCard from '@/components/InsightCard'
 import PatternExploreModal from '@/components/PatternExploreModal'
@@ -19,7 +19,7 @@ interface FeedViewProps {
 
 export default function FeedView({ artifacts: initialArtifacts, user }: FeedViewProps) {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [artifacts, setArtifacts] = useState<Artifact[]>(initialArtifacts)
   const [patterns, setPatterns] = useState<DetectedPattern[]>([])

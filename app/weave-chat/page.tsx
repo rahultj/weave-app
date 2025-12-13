@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useRef, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@/lib/supabase'
 import SaveArtifactModal from '@/components/SaveArtifactModal'
 import SaveBeforeLeavingModal from '@/components/SaveBeforeLeavingModal'
 import SaveRecommendationsModal from '@/components/SaveRecommendationsModal'
@@ -42,7 +42,7 @@ interface Recommendation {
 function WeaveChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClientComponentClient()
+  const supabase = createClient()
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null)
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
