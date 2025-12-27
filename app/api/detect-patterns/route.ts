@@ -16,11 +16,23 @@ export interface DetectedPattern {
   artifact_titles: string[]
   confidence: number
   pattern_type: 'thematic' | 'stylistic' | 'temporal' | 'creator' | 'medium' | 'personal'
+  explored?: boolean
+}
+
+// Helper to create stable hash from pattern content
+function createPatternHash(pattern: string, titles: string[]): string {
+  const content = pattern.toLowerCase() + titles.sort().join(',').toLowerCase()
+  let hash = 0
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash
+  }
+  return `pattern-${Math.abs(hash).toString(36)}`
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the authenticated user
     const supabase = await createRouteClient()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     
@@ -30,6 +42,10 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+
+    // Check if force refresh is requested
+    const body = await request.json().catch(() => ({}))
+    const forceRefresh = body.forceRefresh === true
 
     // Fetch user's artifacts
     const { data: artifacts, error: artifactsError } = await supabase
@@ -47,11 +63,52 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         patterns: [],
+        cached: false,
         message: 'Need at least 3 artifacts to detect patterns'
       })
     }
 
-    // Prepare artifact summaries for Claude
+    // Check cache validity
+    const { data: cacheMeta } = await supabase
+      .from('pattern_cache_meta')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+
+    const cacheIsValid = cacheMeta && 
+      cacheMeta.artifact_count_at_compute === artifacts.length &&
+      !forceRefresh
+
+    // If cache is valid, return cached patterns
+    if (cacheIsValid) {
+      const { data: cachedPatterns } = await supabase
+        .from('cached_patterns')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('confidence', { ascending: false })
+
+      if (cachedPatterns && cachedPatterns.length > 0) {
+        const patterns: DetectedPattern[] = cachedPatterns.map(p => ({
+          id: p.id,
+          pattern: p.pattern,
+          description: p.description || p.pattern,
+          artifact_ids: p.artifact_ids || [],
+          artifact_titles: p.artifact_titles || [],
+          confidence: parseFloat(p.confidence),
+          pattern_type: p.pattern_type,
+          explored: p.explored
+        }))
+
+        return NextResponse.json({
+          success: true,
+          patterns,
+          cached: true,
+          artifact_count: artifacts.length
+        })
+      }
+    }
+
+    // Cache miss or invalid - generate new patterns with Claude
     const artifactSummaries = artifacts.map((a: Artifact) => ({
       id: a.id,
       title: a.title,
@@ -124,7 +181,6 @@ Important:
     // Extract JSON from response
     let parsedPatterns: any = { patterns: [] }
     try {
-      // Try to find JSON in the response
       const jsonMatch = aiText.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
         parsedPatterns = JSON.parse(jsonMatch[0])
@@ -134,25 +190,18 @@ Important:
       return NextResponse.json({
         success: true,
         patterns: [],
+        cached: false,
         message: 'Could not parse pattern analysis'
       })
     }
 
-    // Helper to create stable ID from pattern content
-    const createStableId = (pattern: string, titles: string[]) => {
-      // Create a simple hash from pattern text and artifact titles
-      const content = pattern.toLowerCase() + titles.sort().join(',').toLowerCase()
-      let hash = 0
-      for (let i = 0; i < content.length; i++) {
-        const char = content.charCodeAt(i)
-        hash = ((hash << 5) - hash) + char
-        hash = hash & hash // Convert to 32bit integer
-      }
-      return `pattern-${Math.abs(hash).toString(36)}`
+    // Internal type for patterns with hash
+    interface PatternWithHash extends DetectedPattern {
+      pattern_hash: string
     }
 
     // Map artifact titles to IDs and create final pattern objects
-    const patterns: DetectedPattern[] = parsedPatterns.patterns
+    const patterns: PatternWithHash[] = parsedPatterns.patterns
       .filter((p: any) => p.confidence >= 0.6 && p.artifact_titles?.length >= 2)
       .map((p: any) => {
         const matchedArtifacts = artifacts.filter((a: Artifact) =>
@@ -163,22 +212,78 @@ Important:
         )
 
         const artifactTitles = matchedArtifacts.map((a: Artifact) => a.title)
+        const artifactIds = matchedArtifacts.map((a: Artifact) => a.id)
+        const hash = createPatternHash(p.pattern, artifactTitles)
 
         return {
-          id: createStableId(p.pattern, artifactTitles),
+          id: hash,
           pattern: p.pattern,
           description: p.description || p.pattern,
-          artifact_ids: matchedArtifacts.map((a: Artifact) => a.id),
+          artifact_ids: artifactIds,
           artifact_titles: artifactTitles,
           confidence: p.confidence,
-          pattern_type: p.pattern_type || 'thematic'
+          pattern_type: p.pattern_type || 'thematic',
+          pattern_hash: hash
         }
       })
-      .filter((p: DetectedPattern) => p.artifact_ids.length >= 2) // Ensure we have matched artifacts
+      .filter((p: PatternWithHash) => p.artifact_ids.length >= 2)
+
+    // Clear old cached patterns for this user
+    await supabase
+      .from('cached_patterns')
+      .delete()
+      .eq('user_id', user.id)
+
+    // Insert new patterns into cache
+    if (patterns.length > 0) {
+      const patternsToInsert = patterns.map(p => ({
+        user_id: user.id,
+        pattern: p.pattern,
+        description: p.description,
+        artifact_ids: p.artifact_ids,
+        artifact_titles: p.artifact_titles,
+        confidence: p.confidence,
+        pattern_type: p.pattern_type,
+        pattern_hash: p.pattern_hash,
+        explored: false
+      }))
+
+      await supabase
+        .from('cached_patterns')
+        .insert(patternsToInsert)
+    }
+
+    // Update cache metadata
+    await supabase
+      .from('pattern_cache_meta')
+      .upsert({
+        user_id: user.id,
+        last_computed_at: new Date().toISOString(),
+        artifact_count_at_compute: artifacts.length
+      })
+
+    // Fetch the inserted patterns to get their UUIDs
+    const { data: insertedPatterns } = await supabase
+      .from('cached_patterns')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('confidence', { ascending: false })
+
+    const finalPatterns: DetectedPattern[] = (insertedPatterns || []).map(p => ({
+      id: p.id,
+      pattern: p.pattern,
+      description: p.description || p.pattern,
+      artifact_ids: p.artifact_ids || [],
+      artifact_titles: p.artifact_titles || [],
+      confidence: parseFloat(p.confidence),
+      pattern_type: p.pattern_type,
+      explored: p.explored
+    }))
 
     return NextResponse.json({
       success: true,
-      patterns,
+      patterns: finalPatterns,
+      cached: false,
       artifact_count: artifacts.length
     })
 
@@ -190,4 +295,3 @@ Important:
     )
   }
 }
-

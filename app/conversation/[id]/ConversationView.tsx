@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import type { Conversation, Artifact, ConversationMessage } from '@/lib/types/knowledge-graph'
@@ -7,6 +8,7 @@ import type { User } from '@supabase/supabase-js'
 import { getTypeColor, getTypeIcon } from '@/lib/design'
 import FormattedMessage from '@/components/FormattedMessage'
 import BobbinIcon from '@/components/BobbinIcon'
+import BottomNav from '@/components/BottomNav'
 
 interface ConversationViewProps {
   conversation: Conversation
@@ -16,6 +18,19 @@ interface ConversationViewProps {
 
 export default function ConversationView({ conversation, artifact, user }: ConversationViewProps) {
   const router = useRouter()
+  const [toExplore, setToExplore] = useState<any[]>([])
+
+  // Load "to explore" list from localStorage for badge count
+  useEffect(() => {
+    const saved = localStorage.getItem('weave-to-explore')
+    if (saved) {
+      try {
+        setToExplore(JSON.parse(saved))
+      } catch (e) {
+        console.error('Error loading to-explore list:', e)
+      }
+    }
+  }, [])
 
   const getInitials = () => {
     const email = user.email || ''
@@ -153,7 +168,7 @@ export default function ConversationView({ conversation, artifact, user }: Conve
       </div>
 
       {/* Bottom action */}
-      <div className="px-4 pb-6 pt-3 border-t border-[#E8E5E0] bg-[#FAF8F5]">
+      <div className="px-4 pb-24 pt-3 border-t border-[#E8E5E0] bg-[#FAF8F5]">
         <button
           className="w-full p-3 bg-[#F7F5F1] border border-[#E8E5E0] rounded-xl text-sm text-[#666] transition-colors hover:bg-[#F0EDE8]"
           style={{ fontFamily: 'var(--font-dm-sans)' }}
@@ -162,6 +177,9 @@ export default function ConversationView({ conversation, artifact, user }: Conve
           Start a new conversation
         </button>
       </div>
+
+      {/* Bottom Navigation */}
+      <BottomNav exploreBadge={toExplore.length} />
     </motion.div>
   )
 }
