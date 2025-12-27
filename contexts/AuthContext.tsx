@@ -85,8 +85,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const resetPassword = async (email: string) => {
     setLoading(true)
+    // Use current origin for redirect URL (works for localhost, staging, and production)
+    const redirectTo = `${window.location.origin}/auth/callback?next=/reset-password`
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://weave-app-alpha.vercel.app/reset-password',
+      redirectTo,
     })
     setLoading(false)
     return { error }

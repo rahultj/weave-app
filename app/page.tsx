@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import SignInModal from '@/components/SignInModal'
 import BobbinEarsIcon from '@/components/BobbinEarsIcon'
 import { AuthProvider } from '@/contexts/AuthContext'
@@ -106,9 +107,20 @@ const scenarios = [
 ]
 
 function LandingPageContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [scrolled, setScrolled] = useState(false)
   const [showSignIn, setShowSignIn] = useState(false)
   const [activeScenario, setActiveScenario] = useState(0)
+
+  // Handle auth codes that land on the root URL (password reset, etc.)
+  useEffect(() => {
+    const code = searchParams.get('code')
+    if (code) {
+      // Redirect to auth callback to exchange the code for a session
+      router.replace(`/auth/callback?code=${code}&next=/reset-password`)
+    }
+  }, [searchParams, router])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -138,7 +150,7 @@ function LandingPageContent() {
         }}
       />
 
-      {/* Navigation */}
+        {/* Navigation */}
       <nav 
         className={`fixed top-0 left-0 right-0 py-4 z-50 transition-all duration-300 ${
           scrolled 
@@ -155,29 +167,29 @@ function LandingPageContent() {
           </a>
           
           {/* Desktop nav links */}
-          <div className="hidden md:flex items-center gap-8">
-            <a 
+            <div className="hidden md:flex items-center gap-8">
+              <a 
               href="#idea" 
               className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
               The Idea
-            </a>
-            <a 
-              href="#how-it-works" 
+              </a>
+              <a 
+                href="#how-it-works" 
               className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
               How It Works
-            </a>
-            <a 
+              </a>
+              <a 
               href="#features" 
               className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
               Features
-            </a>
-          </div>
+              </a>
+            </div>
 
           <button 
             onClick={() => setShowSignIn(true)}
@@ -199,8 +211,8 @@ function LandingPageContent() {
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
             A cultural journal
-          </div>
-          
+            </div>
+
           <h1 
             className="text-[clamp(48px,8vw,72px)] font-normal leading-[1.1] tracking-tight mb-6"
             style={{ fontFamily: 'var(--font-cormorant)' }}
@@ -541,7 +553,9 @@ function LandingPageContent() {
 export default function LandingPage() {
   return (
     <AuthProvider>
-      <LandingPageContent />
+      <Suspense fallback={<div className="min-h-screen bg-[#FAF8F5]" />}>
+        <LandingPageContent />
+      </Suspense>
     </AuthProvider>
   )
 }

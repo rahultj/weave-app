@@ -96,7 +96,7 @@ export default function ArtifactFeed() {
               key={artifact.id}
               artifact={artifact}
               onClick={() => handleArtifactClick(artifact.id)}
-              onDelete={async (id) => { handleDeleteArtifact(id) }}
+              onDelete={async () => { handleDeleteArtifact(artifact.id) }}
             />
           ))}
         </div>
