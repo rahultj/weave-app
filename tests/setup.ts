@@ -16,15 +16,24 @@ vi.mock('next/navigation', () => ({
 }))
 
 // Mock framer-motion to avoid animation issues in tests
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-    button: ({ children, ...props }: any) => <button {...props}>{children}</button>,
-    article: ({ children, ...props }: any) => <article {...props}>{children}</article>,
-  },
-  AnimatePresence: ({ children }: any) => children,
-}))
+vi.mock('framer-motion', () => {
+  const createMotionComponent = (tag: string) => {
+    return ({ children, ...props }: any) => {
+      const { createElement } = require('react')
+      return createElement(tag, props, children)
+    }
+  }
+  
+  return {
+    motion: {
+      div: createMotionComponent('div'),
+      span: createMotionComponent('span'),
+      button: createMotionComponent('button'),
+      article: createMotionComponent('article'),
+    },
+    AnimatePresence: ({ children }: any) => children,
+  }
+})
 
 // Mock Supabase client
 vi.mock('@/lib/supabase', () => ({
