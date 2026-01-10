@@ -1,6 +1,7 @@
 -- Migration: Pattern Caching Tables
 -- Required for: Pattern detection and caching feature
 -- Run this on production Supabase before deploying
+-- Created: January 2026
 
 -- Table: pattern_cache_meta
 -- Tracks when patterns were last computed for each user
