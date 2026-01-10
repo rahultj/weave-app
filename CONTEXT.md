@@ -1,6 +1,6 @@
 # Weave App - Development Context
 
-> **Last Updated:** December 27, 2024  
+> **Last Updated:** January 10, 2026  
 > **Purpose:** Context file for resuming development with AI assistance
 
 ## 🎯 Project Overview
@@ -70,9 +70,15 @@ Bottom navigation bar (`components/BottomNav.tsx`) appears on all authenticated 
 - `playwright.config.ts` - E2E test configuration
 - `.github/workflows/test.yml` - CI/CD workflow
 
-## 🔄 Recent Changes (December 2024)
+## 🔄 Recent Changes
 
-### Major Refactors
+### January 2026
+1. **Branch Protection** - Production (`main`) now requires PRs with passing CI checks
+2. **Improved Error Handling** - API routes now show user-friendly error messages instead of silent failures
+3. **CI on Production** - Tests now run on both `staging` and `main` pushes
+4. **Lazy Anthropic Client** - API key validated at runtime with clear error messages
+
+### December 2024
 1. **Bottom Navigation UX Refactor** - Separated feed, patterns, explore, and chat into distinct sections
 2. **Pattern Caching** - Implemented database-backed caching for AI-generated patterns (improves load times)
 3. **Testing Infrastructure** - Set up Vitest + Playwright with GitHub Actions CI
@@ -86,6 +92,8 @@ Bottom navigation bar (`components/BottomNav.tsx`) appears on all authenticated 
 - ✅ Unit tests setup (BottomNav component tested)
 - ✅ E2E tests setup (landing page, navigation)
 - ✅ CI/CD workflow configured
+- ✅ Branch protection on `main` (tests gate production)
+- ✅ User-friendly error handling in chat/API
 - ⚠️ Lint step temporarily disabled in CI (Next.js lint command bug)
 
 ## 🗄️ Database Schema
@@ -147,10 +155,11 @@ npm run test:e2e:ui
 ```
 
 ### CI/CD
-- Runs on push to `staging` branch
+- Runs on push to `staging` and `main` branches
 - Runs on PRs to `main` and `staging`
 - Steps: Type-check → Unit tests → E2E tests → Build
 - Lint step currently disabled
+- **Branch Protection:** PRs to `main` require passing status checks before merge
 
 ## 🔐 Authentication Flow
 
@@ -171,11 +180,22 @@ npm run test:e2e:ui
 - **Production:** `https://theweave.app` (Vercel)
 - **Staging:** `https://weave-app-git-staging-rahultjs-projects.vercel.app`
 
-### Workflow
-1. Develop locally
-2. Push to `staging` branch → auto-deploys to staging
+### Workflow (Protected Production)
+1. Develop locally on `main` branch
+2. Push to `staging` branch → CI tests run → auto-deploys to staging
 3. Test on staging
-4. Merge to `main` → auto-deploys to production
+4. Create PR: `staging` → `main`
+5. CI tests must pass before merge is allowed (branch protection)
+6. Merge PR → auto-deploys to production
+
+**Important:** Direct pushes to `main` are blocked. All production deployments go through PRs.
+
+### When Asking AI to "Push to Prod"
+The AI assistant will:
+1. Push changes to `staging`
+2. Create a PR from `staging` → `main`
+3. Wait for CI checks to pass
+4. You (or AI) merge the PR to deploy
 
 ### Environment Variables Required
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -195,11 +215,13 @@ npm run lint       # ESLint (currently has bug)
 ```
 
 ### Making Changes
-1. Create feature branch
+1. Make changes locally on `main`
 2. Test locally
 3. Push to `staging` → CI runs → deploys to staging
 4. Test on staging
-5. Merge to `main` → deploys to production
+5. Create PR: `staging` → `main` (via GitHub)
+6. CI checks must pass
+7. Merge PR → deploys to production
 
 ## 🔑 Key Decisions & Patterns
 
