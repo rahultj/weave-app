@@ -39,6 +39,27 @@ interface Recommendation {
   reason?: string
 }
 
+// Error toast component
+function ErrorToast({ message, onDismiss }: { message: string; onDismiss: () => void }) {
+  return (
+    <div className="fixed bottom-24 left-4 right-4 max-w-[480px] mx-auto z-50 animate-in fade-in slide-in-from-bottom-4 duration-300">
+      <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 shadow-lg flex items-start gap-3">
+        <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div className="flex-1">
+          <p className="text-sm text-red-800" style={{ fontFamily: 'var(--font-dm-sans)' }}>{message}</p>
+        </div>
+        <button onClick={onDismiss} className="text-red-400 hover:text-red-600 p-1">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function WeaveChatContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -58,6 +79,7 @@ function WeaveChatContent() {
   const [extractedRecommendations, setExtractedRecommendations] = useState<Recommendation[]>([])
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const hasInitializedPattern = useRef(false)
@@ -108,6 +130,7 @@ function WeaveChatContent() {
   // Separate function to send the pattern exploration message
   const sendPatternExplorationMessage = useCallback(async (message: string) => {
     setIsLoading(true)
+    setErrorMessage(null)
     
     try {
       const response = await fetch('/api/chat', {
@@ -130,9 +153,20 @@ function WeaveChatContent() {
           timestamp: new Date()
         }
         setMessages(prev => [...prev, assistantMessage])
+      } else {
+        // Handle API error response
+        console.error('Chat API error:', data.error)
+        if (response.status === 401) {
+          setErrorMessage('Please sign in to continue the conversation.')
+        } else if (response.status === 429) {
+          setErrorMessage('Too many messages. Please wait a moment and try again.')
+        } else {
+          setErrorMessage(data.error || 'Something went wrong. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Error sending pattern exploration message:', error)
+      setErrorMessage('Unable to connect. Please check your internet connection.')
     } finally {
       setIsLoading(false)
     }
@@ -220,6 +254,7 @@ function WeaveChatContent() {
     setInputValue('')
     clearImage()
     setIsLoading(true)
+    setErrorMessage(null)
 
     try {
       const response = await fetch('/api/chat', {
@@ -243,9 +278,20 @@ function WeaveChatContent() {
           timestamp: new Date()
         }
         setMessages(prev => [...prev, assistantMessage])
+      } else {
+        // Handle API error response
+        console.error('Chat API error:', data.error, 'Status:', response.status)
+        if (response.status === 401) {
+          setErrorMessage('Please sign in to continue the conversation.')
+        } else if (response.status === 429 || data.rateLimitExceeded) {
+          setErrorMessage('Too many messages. Please wait a moment and try again.')
+        } else {
+          setErrorMessage(data.error || 'Something went wrong. Please try again.')
+        }
       }
     } catch (error) {
       console.error('Error sending message:', error)
+      setErrorMessage('Unable to connect. Please check your internet connection.')
     } finally {
       setIsLoading(false)
     }
@@ -605,6 +651,14 @@ function WeaveChatContent() {
         {isLoading && <ThinkingIndicator />}
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Error Toast */}
+      {errorMessage && (
+        <ErrorToast 
+          message={errorMessage} 
+          onDismiss={() => setErrorMessage(null)} 
+        />
+      )}
 
       {/* Input */}
       <div className="px-4 pb-6 pt-3 border-t border-[#E8E5E0] bg-[#FAF8F5]">

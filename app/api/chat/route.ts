@@ -3,11 +3,18 @@ import Anthropic from '@anthropic-ai/sdk'
 import { createRouteClient } from '@/lib/supabase/route'
 import { saveChatHistory } from '@/lib/chat-history'
 import { getUserArtifacts } from '@/lib/knowledge-graph'
-import { getEnv } from '@/lib/env'
 
-const anthropic = new Anthropic({
-  apiKey: getEnv().ANTHROPIC_API_KEY
-})
+// Initialize Anthropic client lazily to provide better error messages
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+  }
+  if (!apiKey.startsWith('sk-ant-')) {
+    throw new Error('ANTHROPIC_API_KEY does not appear to be a valid Anthropic API key')
+  }
+  return new Anthropic({ apiKey })
+}
 
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 1000 // 1 minute in milliseconds
@@ -338,6 +345,7 @@ Be conversational and insightful, like a knowledgeable friend at a museum or boo
       messageContent = prompt
     }
 
+    const anthropic = getAnthropicClient()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: maxTokens,
@@ -388,8 +396,26 @@ Be conversational and insightful, like a knowledgeable friend at a museum or boo
 
   } catch (error) {
     console.error('Error in chat API:', error)
+    
+    // Provide more specific error messages
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('ANTHROPIC_API_KEY')) {
+      return NextResponse.json(
+        { error: 'AI service not configured. Please contact support.', success: false },
+        { status: 500 }
+      )
+    }
+    
+    if (errorMessage.includes('authentication') || errorMessage.includes('401')) {
+      return NextResponse.json(
+        { error: 'AI service authentication failed. Please contact support.', success: false },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to process chat request', success: false },
+      { error: 'Failed to process chat request. Please try again.', success: false },
       { status: 500 }
     )
   }

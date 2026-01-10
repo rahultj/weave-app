@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createRouteClient } from '@/lib/supabase/route'
-import { getEnv } from '@/lib/env'
 import type {
   ConversationMessage,
   ArtifactType,
@@ -10,9 +9,17 @@ import type {
   ConversationAnalysis
 } from '@/lib/types/knowledge-graph'
 
-const anthropic = new Anthropic({
-  apiKey: getEnv().ANTHROPIC_API_KEY
-})
+// Initialize Anthropic client lazily to provide better error messages
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+  }
+  if (!apiKey.startsWith('sk-ant-')) {
+    throw new Error('ANTHROPIC_API_KEY does not appear to be a valid Anthropic API key')
+  }
+  return new Anthropic({ apiKey })
+}
 
 interface ExtractionRequest {
   messages: ConversationMessage[]
@@ -152,6 +159,7 @@ Return ONLY valid JSON:
 }`
 
     // Call Claude API for entity extraction
+    const anthropic = getAnthropicClient()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 2000,
@@ -216,11 +224,21 @@ Return ONLY valid JSON:
 
   } catch (error) {
     console.error('Error in extract-entities API:', error)
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('ANTHROPIC_API_KEY')) {
+      return NextResponse.json(
+        { error: 'AI service not configured. Please contact support.', success: false },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
       {
         error: 'Failed to extract entities from conversation',
         success: false,
-        details: error instanceof Error ? error.message : 'Unknown error'
+        details: errorMessage
       },
       { status: 500 }
     )

@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { createRouteClient } from '@/lib/supabase/route'
-import { getEnv } from '@/lib/env'
 
-const anthropic = new Anthropic({
-  apiKey: getEnv().ANTHROPIC_API_KEY
-})
+// Initialize Anthropic client lazily to provide better error messages
+function getAnthropicClient(): Anthropic {
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY environment variable is not set')
+  }
+  if (!apiKey.startsWith('sk-ant-')) {
+    throw new Error('ANTHROPIC_API_KEY does not appear to be a valid Anthropic API key')
+  }
+  return new Anthropic({ apiKey })
+}
 
 interface Message {
   role: string
@@ -71,6 +78,7 @@ Return ONLY valid JSON in this exact format:
 
 If no recommendations are found, return: {"recommendations": []}`
 
+    const anthropic = getAnthropicClient()
     const response = await anthropic.messages.create({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
@@ -105,8 +113,18 @@ If no recommendations are found, return: {"recommendations": []}`
 
   } catch (error) {
     console.error('Error extracting recommendations:', error)
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    
+    if (errorMessage.includes('ANTHROPIC_API_KEY')) {
+      return NextResponse.json(
+        { error: 'AI service not configured. Please contact support.', success: false },
+        { status: 500 }
+      )
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to extract recommendations', success: false },
+      { error: 'Failed to extract recommendations. Please try again.', success: false },
       { status: 500 }
     )
   }
