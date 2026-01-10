@@ -2,7 +2,7 @@ name: Test
 
 on:
   push:
-    branches: [staging]
+    branches: [main, staging]
   pull_request:
     branches: [main, staging]
 
@@ -49,12 +49,12 @@ jobs:
       - name: Run unit tests
         run: npm run test
 
-  # E2E tests against staging
+  # E2E tests against staging or production
   e2e-tests:
     name: E2E Tests
     runs-on: ubuntu-latest
-    # Only run E2E on staging pushes, not PRs (to avoid hitting staging too often)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/staging'
+    # Run E2E on pushes to staging or main (not PRs, to avoid hitting environments too often)
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
     steps:
       - uses: actions/checkout@v4
       
@@ -73,10 +73,19 @@ jobs:
       - name: Wait for Vercel deployment
         run: sleep 60  # Give Vercel time to deploy
       
+      - name: Set E2E URL based on branch
+        id: set-url
+        run: |
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "url=https://weave-app-rahultjs-projects.vercel.app" >> $GITHUB_OUTPUT
+          else
+            echo "url=https://weave-app-git-staging-rahultjs-projects.vercel.app" >> $GITHUB_OUTPUT
+          fi
+      
       - name: Run E2E tests
         run: npm run test:e2e
         env:
-          PLAYWRIGHT_BASE_URL: https://weave-app-git-staging-rahultjs-projects.vercel.app
+          PLAYWRIGHT_BASE_URL: ${{ steps.set-url.outputs.url }}
       
       - name: Upload test results
         uses: actions/upload-artifact@v4
