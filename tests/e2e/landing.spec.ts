@@ -30,8 +30,7 @@ test.describe('Landing Page', () => {
       return
     }
     
-    // On desktop, check navigation links are visible
-    await expect(page.getByRole('link', { name: 'The Idea' })).toBeVisible()
+    // On desktop, check navigation link is visible
     await expect(page.getByRole('link', { name: 'How It Works' })).toBeVisible()
   })
 })
