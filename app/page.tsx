@@ -168,26 +168,12 @@ function LandingPageContent() {
           
           {/* Desktop nav links */}
             <div className="hidden md:flex items-center gap-8">
-              <a 
-              href="#idea" 
-              className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
-              style={{ fontFamily: 'var(--font-dm-sans)' }}
-            >
-              The Idea
-              </a>
-              <a 
-                href="#how-it-works" 
+              <a
+              href="#features"
               className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
               style={{ fontFamily: 'var(--font-dm-sans)' }}
             >
               How It Works
-              </a>
-              <a 
-              href="#features" 
-              className="text-[#666] hover:text-[#2A2A2A] text-sm font-medium transition-colors"
-              style={{ fontFamily: 'var(--font-dm-sans)' }}
-            >
-              Features
               </a>
             </div>
 
@@ -202,9 +188,9 @@ function LandingPageContent() {
       </nav>
 
       {/* Hero */}
-      <section className="min-h-screen flex items-center justify-center text-center px-6 pt-[120px] pb-20">
-        <div className="max-w-[720px]">
-          <div 
+      <section className="pt-[140px] pb-16 px-6 text-center">
+        <div className="max-w-[720px] mx-auto">
+          <div
             className="inline-flex items-center gap-2 bg-[#C9A227]/10 border border-[#C9A227]/20 px-4 py-2 rounded-full text-[13px] text-[#A8861E] mb-8 animate-float"
           >
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -213,19 +199,18 @@ function LandingPageContent() {
             A cultural journal
             </div>
 
-          <h1 
+          <h1
             className="text-[clamp(48px,8vw,72px)] font-normal leading-[1.1] tracking-tight mb-6"
             style={{ fontFamily: 'var(--font-cormorant)' }}
           >
             A journal for everything that <em className="italic text-[#A8861E]">moves</em> you
           </h1>
-          
-          <p className="text-xl text-[#4A4A4A] max-w-[520px] mx-auto mb-10 leading-relaxed">
-            Reflect on the books, films, and music that stay with you. 
-            Learn their histories, influences, and hidden depths. Discover why certain works shape how you see the world.
+
+          <p className="text-xl text-[#4A4A4A] max-w-[600px] mx-auto mb-10 leading-relaxed">
+            Chat about cultural works. Build a personal journal. Discover patterns in what moves you.
           </p>
-          
-          <button 
+
+          <button
             onClick={() => setShowSignIn(true)}
             className="inline-flex items-center gap-2.5 bg-[#C9A227] text-white px-8 py-4 rounded-xl text-base font-medium hover:bg-[#A8861E] transition-all hover:-translate-y-0.5 shadow-[0_4px_20px_rgba(201,162,39,0.3)] hover:shadow-[0_6px_24px_rgba(201,162,39,0.35)] group"
           >
@@ -234,93 +219,33 @@ function LandingPageContent() {
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
-        </div>
-      </section>
 
-      {/* The Idea */}
-      <section id="idea" className="py-[120px] px-6 bg-gradient-to-b from-[#FAF8F5] to-[#F5F2ED] scroll-mt-20">
-        <div className="max-w-[680px] mx-auto text-center">
-          <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-6 font-medium">
-            The idea
-          </div>
-          <h2 
-            className="text-[clamp(28px,4vw,36px)] font-normal leading-[1.4] mb-8"
-            style={{ fontFamily: 'var(--font-cormorant)' }}
-          >
-            Some things don&apos;t just entertain you. They change you.
-          </h2>
-          <div className="text-[17px] text-[#4A4A4A] leading-relaxed space-y-5">
-            <p>
-              A novel that rewired how you think about love. An album that became the soundtrack to a difficult year. A film that gave you language for something you&apos;d always felt but never named.
-            </p>
-            <p>
-              Weave is a space to hold these moments, and to go deeper. Explore the influences behind a work, the historical moment that shaped it, the artistic lineage it belongs to. Understanding where something comes from often reveals why it resonates.
-            </p>
-            <p>
-              It&apos;s not about cataloging or rating. It&apos;s about tracing the thread between what moves you, what it carries, and who you&apos;re becoming.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-[120px] px-6 bg-[#F5F2ED] scroll-mt-20">
-        <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-20">
-            <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-4 font-medium">
-              How it works
-            </div>
-            <h2 
-              className="text-[clamp(32px,5vw,42px)] font-normal"
-              style={{ fontFamily: 'var(--font-cormorant)' }}
-            >
-              Three moments of discovery
-            </h2>
-          </div>
-          
-          <div className="relative max-w-[1000px] mx-auto">
-            {/* Connecting line (desktop only) */}
-            <div className="hidden md:block absolute top-9 left-[calc(16.66%+36px)] right-[calc(16.66%+36px)] h-px bg-gradient-to-r from-transparent via-[#E0DCD4] to-transparent" />
-            
-            <div className="grid md:grid-cols-3 gap-12 md:gap-12">
-              {[
-                { icon: '✦', num: 'One', title: 'Reflect & learn', desc: 'Explore a work through conversation. Bobbin helps you articulate what moved you, and illuminates the influences, history, and craft behind it.' },
-                { icon: '◇', num: 'Two', title: 'Discover patterns', desc: 'Over time, threads emerge. Themes you\'re drawn to. Ideas that keep appearing. A map of your inner landscape.' },
-                { icon: '→', num: 'Three', title: 'Find what\'s next', desc: 'New works surface from your patterns. Not from an algorithm, but from the shape of your own curiosity.' }
-              ].map((step, i) => (
-                <div key={i} className="text-center">
-                  <div className="w-[72px] h-[72px] rounded-full bg-[#FAF8F5] border border-[#E0DCD4] flex items-center justify-center mx-auto mb-6 text-[28px] text-[#C9A227] shadow-[0_4px_20px_rgba(0,0,0,0.04)]" style={{ fontFamily: 'var(--font-cormorant)' }}>
-                    {step.icon}
-                  </div>
-                  <div className="text-[11px] tracking-[0.1em] uppercase text-[#8B8578] mb-3">
-                    {step.num}
-                  </div>
-                  <h3 className="text-2xl font-medium mb-3" style={{ fontFamily: 'var(--font-cormorant)' }}>
-                    {step.title}
-                  </h3>
-                  <p className="text-[15px] text-[#4A4A4A] leading-relaxed max-w-[280px] mx-auto">
-                    {step.desc}
-                  </p>
-                </div>
-              ))}
-            </div>
+          {/* Scroll indicator */}
+          <div className="mt-16 text-[#8B8578] animate-bounce">
+            <svg className="w-6 h-6 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+            <div className="text-xs mt-2 tracking-wide">See how it works</div>
           </div>
         </div>
       </section>
 
       {/* Features + Vignettes */}
-      <section id="features" className="py-[120px] px-6 bg-[#FAF8F5] scroll-mt-20">
+      <section id="features" className="py-[100px] px-6 bg-[#FAF8F5] scroll-mt-20">
         <div className="max-w-[1200px] mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <div className="text-xs tracking-[0.15em] uppercase text-[#C9A227] mb-4 font-medium">
-              What you&apos;ll do
+              See how it works
             </div>
-            <h2 
-              className="text-[clamp(32px,5vw,42px)] font-normal"
+            <h2
+              className="text-[clamp(32px,5vw,42px)] font-normal mb-4"
               style={{ fontFamily: 'var(--font-cormorant)' }}
             >
-              Reflect. Learn. Discover.
+              From conversation to discovery
             </h2>
+            <p className="text-base text-[#666] max-w-[560px] mx-auto">
+              Follow a single thread through Weave: chat with Bobbin, build your journal, see patterns emerge, discover what&apos;s next
+            </p>
           </div>
 
           {/* Scenario Switcher */}
@@ -482,6 +407,24 @@ function LandingPageContent() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* The Why - Condensed */}
+      <section className="py-[100px] px-6 bg-gradient-to-b from-[#FAF8F5] to-[#F5F2ED]">
+        <div className="max-w-[720px] mx-auto text-center">
+          <h2
+            className="text-[clamp(28px,4vw,36px)] font-normal leading-[1.4] mb-6"
+            style={{ fontFamily: 'var(--font-cormorant)' }}
+          >
+            Some things don&apos;t just entertain you. They change you.
+          </h2>
+          <p className="text-[17px] text-[#4A4A4A] leading-relaxed max-w-[640px] mx-auto">
+            A novel that rewired how you think. A film that gave you language for something you&apos;d always felt.
+            Weave is a space to hold these moments and go deeper—exploring the influences, history, and artistic
+            lineage behind what moves you. It&apos;s not about cataloging or rating. It&apos;s about tracing the
+            thread between what you love, what it carries, and who you&apos;re becoming.
+          </p>
         </div>
       </section>
 
