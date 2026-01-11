@@ -24,8 +24,20 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: 'Weave - Your Cultural Journal',
-  description: 'A personal space to capture and explore cultural discoveries - books, films, art, and more',
+  description: 'A cultural journal for everything that moves you. Reflect on the books, films, and music that stay with you.',
   manifest: '/manifest.json',
+  openGraph: {
+    title: 'Weave - Your Cultural Journal',
+    description: 'A cultural journal for everything that moves you. Reflect on the books, films, and music that stay with you.',
+    siteName: 'Weave',
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Weave - Your Cultural Journal',
+    description: 'A cultural journal for everything that moves you.',
+  },
   icons: {
     icon: [
       { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
