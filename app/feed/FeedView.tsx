@@ -7,6 +7,8 @@ import { createClient } from '@/lib/supabase'
 import ArtifactCard from '@/components/ArtifactCard'
 import BottomNav from '@/components/BottomNav'
 import BobbinEarsIcon from '@/components/BobbinEarsIcon'
+import FeedbackModal, { FeedbackData } from '@/components/FeedbackModal'
+import { MessageSquare } from 'lucide-react'
 import { deleteArtifact } from '@/lib/knowledge-graph'
 import type { Artifact } from '@/lib/types/knowledge-graph'
 import type { User } from '@supabase/supabase-js'
@@ -23,6 +25,41 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
   const [artifacts, setArtifacts] = useState<Artifact[]>(initialArtifacts)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [toExplore, setToExplore] = useState<any[]>([])
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
+
+  // Check if feedback was already submitted
+  useEffect(() => {
+    const submitted = localStorage.getItem('weave-feedback-submitted')
+    if (submitted) {
+      setFeedbackSubmitted(true)
+    }
+  }, [])
+
+  // Handle feedback submission
+  const handleFeedbackSubmit = async (feedback: FeedbackData) => {
+    try {
+      const { error } = await supabase.from('user_feedback').insert({
+        user_id: user.id,
+        usage_reason: feedback.usage_reason,
+        would_recommend: feedback.would_recommend,
+        missing_feature: feedback.missing_feature,
+        open_feedback: feedback.open_feedback,
+        submitted_at: new Date().toISOString()
+      })
+
+      if (error) {
+        console.error('Error saving feedback to Supabase:', error)
+      }
+
+      localStorage.setItem('weave-feedback-submitted', 'true')
+      setFeedbackSubmitted(true)
+      setShowFeedbackModal(false)
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      throw error
+    }
+  }
 
   // Handle image selection from feed
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -262,6 +299,26 @@ export default function FeedView({ artifacts: initialArtifacts, user }: FeedView
 
       {/* Bottom Navigation */}
       <BottomNav exploreBadge={toExplore.length} />
+
+      {/* Floating Feedback Button - Always visible for testing */}
+      <motion.button
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5, duration: 0.3 }}
+        onClick={() => setShowFeedbackModal(true)}
+        className="fixed bottom-24 right-4 w-12 h-12 bg-[#C9A227] text-white rounded-full shadow-lg flex items-center justify-center hover:bg-[#A8861E] transition-colors z-40"
+        style={{ boxShadow: '0 4px 16px rgba(201, 162, 39, 0.3)' }}
+        title="Share feedback"
+      >
+        <MessageSquare size={20} />
+      </motion.button>
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        onSubmit={handleFeedbackSubmit}
+      />
     </motion.div>
   )
 }

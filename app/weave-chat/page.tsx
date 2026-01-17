@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase'
 import SaveArtifactModal from '@/components/SaveArtifactModal'
 import SaveBeforeLeavingModal from '@/components/SaveBeforeLeavingModal'
 import SaveRecommendationsModal from '@/components/SaveRecommendationsModal'
+import FeedbackModal, { FeedbackData } from '@/components/FeedbackModal'
 import ThinkingIndicator from '@/components/ThinkingIndicator'
 import FormattedMessage from '@/components/FormattedMessage'
 import BobbinIcon from '@/components/BobbinIcon'
@@ -80,9 +81,12 @@ function WeaveChatContent() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [feedbackSubmitted, setFeedbackSubmitted] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const hasInitializedPattern = useRef(false)
+  const feedbackTriggeredRef = useRef(false)
 
   // Handle image selection
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -236,6 +240,67 @@ function WeaveChatContent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+
+  // Check if feedback was already submitted on mount
+  useEffect(() => {
+    const submitted = localStorage.getItem('weave-feedback-submitted')
+    if (submitted) {
+      setFeedbackSubmitted(true)
+    }
+  }, [])
+
+  // Trigger feedback modal after ~3 conversations (12 messages)
+  // NOTE: Temporarily lowered to 2 for testing - change back to 12 for production
+  useEffect(() => {
+    if (
+      messages.length >= 2 &&
+      !feedbackSubmitted &&
+      !feedbackTriggeredRef.current &&
+      !showFeedbackModal
+    ) {
+      feedbackTriggeredRef.current = true
+      // Delay modal by 2 seconds after threshold
+      const timer = setTimeout(() => {
+        const submitted = localStorage.getItem('weave-feedback-submitted')
+        if (!submitted) {
+          setShowFeedbackModal(true)
+        }
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [messages.length, feedbackSubmitted, showFeedbackModal])
+
+  // Handle feedback submission
+  const handleFeedbackSubmit = async (feedback: FeedbackData) => {
+    if (!user) {
+      console.error('No user found for feedback submission')
+      return
+    }
+
+    try {
+      const { error } = await supabase.from('user_feedback').insert({
+        user_id: user.id,
+        usage_reason: feedback.usage_reason,
+        would_recommend: feedback.would_recommend,
+        missing_feature: feedback.missing_feature,
+        open_feedback: feedback.open_feedback,
+        submitted_at: new Date().toISOString()
+      })
+
+      if (error) {
+        console.error('Error saving feedback to Supabase:', error)
+        // Still mark as submitted locally to avoid pestering user
+      }
+
+      // Mark as submitted in localStorage
+      localStorage.setItem('weave-feedback-submitted', 'true')
+      setFeedbackSubmitted(true)
+      setShowFeedbackModal(false)
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      throw error
+    }
+  }
 
   const sendMessage = async () => {
     if ((!inputValue.trim() && !selectedImage) || isLoading) return
@@ -774,6 +839,13 @@ function WeaveChatContent() {
         recommendations={extractedRecommendations}
         patternContext={patternContext || ''}
         isSaving={false}
+      />
+
+      {/* Feedback Modal */}
+      <FeedbackModal
+        isOpen={showFeedbackModal}
+        onClose={() => setShowFeedbackModal(false)}
+        onSubmit={handleFeedbackSubmit}
       />
     </div>
   )

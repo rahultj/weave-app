@@ -129,19 +129,19 @@ export async function POST(request: NextRequest) {
             })
             .join('\n')
           
-          userCollectionContext = `\n\nUSER'S CULTURAL COLLECTION:
-The user has saved ${artifacts.length} cultural works in their collection. Here are their most recent entries:
+          userCollectionContext = `\n\nUSER'S CULTURAL COLLECTION (for background context only):
+The user has saved ${artifacts.length} cultural works. Here are their most recent entries:
 
 ${collectionSummary}
 
-Use this context to:
-- Understand their taste and preferences
-- Make personalized recommendations based on what they've already explored
-- Draw connections between works they're asking about and works in their collection
-- Reference their previous interests when relevant
-- If they ask "would I like X?", compare it to their collection and give an informed opinion
+HOW TO USE THIS CONTEXT:
+- This is BACKGROUND information to understand their taste - NOT something to reference in every response
+- ONLY mention their collection if they explicitly ask about recommendations or preferences (e.g., "would I like X?", "what should I read next?")
+- Do NOT force connections to their collection in every answer
+- When they ask a direct question about a work, ANSWER THAT QUESTION FIRST without referencing their collection
+- Connections and patterns should emerge naturally over time, not be shoehorned into every response
 
-IMPORTANT: You have access to this information - use it! Don't say you don't have access to their preferences.`
+IMPORTANT: You have access to this information, but use it SPARINGLY and only when genuinely relevant.`
         }
       } catch (error) {
         console.error('Error fetching user artifacts for context:', error)
@@ -151,7 +151,7 @@ IMPORTANT: You have access to this information - use it! Don't say you don't hav
 
     // Build conversation history for Claude
     const conversationHistory = chatHistory.map((msg: { sender: string; content: string }) => {
-      return `${msg.sender === 'user' ? 'Human' : 'Assistant'}: ${msg.content}\n\n`
+      return `[${msg.sender === 'user' ? 'User' : 'Bobbin'}]: ${msg.content}\n`
     }).join('')
 
     let prompt: string
@@ -187,29 +187,33 @@ TONE:
 
 ${conversationHistory ? `Previous conversation:\n${conversationHistory}` : ''}
 
-H: ${message}
+User's current message: ${message}
 
-A:`
+Respond naturally as Bobbin. Do NOT generate fake user messages or continue the conversation beyond your single response.`
     } else if (isDiscoveryMode) {
       // DISCOVERY MODE: Help user discover and learn about cultural works
       prompt = `You are Bobbin, a friendly cultural AI companion and encyclopedia. You help users discover and understand cultural works like books, albums, films, essays, artworks, and podcasts.
 
-Your role:
-- Answer questions about cultural artifacts (artists, books, albums, films, essays, etc.)
-- Provide helpful context and background information
-- Suggest connections between different works when relevant
-- Help users understand WHY they might be interested in something
+YOUR PRIMARY ROLE:
+- ANSWER THE USER'S QUESTION DIRECTLY AND FULLY FIRST
+- Be a knowledgeable cultural guide who provides real information
+- Share your genuine knowledge about the work they're asking about
 - Be enthusiastic and curious about culture
-- Use the user's collection context to give personalized recommendations
+
+CRITICAL RULES:
+1. ALWAYS answer the actual question first before anything else
+2. Do NOT force connections to the user's collection in every response
+3. Only reference their collection when they EXPLICITLY ask for recommendations or ask "would I like this?"
+4. Let patterns and connections emerge naturally over multiple conversations - don't manufacture them
+5. Be a real conversation partner, not a recommendation engine
 
 When responding:
 - Keep explanations concise and engaging (2-3 short paragraphs max)
 - Use simple, accessible language
 - Focus on what makes the work interesting or significant
 - Mention key themes, style, or notable aspects
-- If relevant, suggest 1-2 related works they might enjoy based on their collection
-- Reference works from their collection when making comparisons or recommendations
 - Be conversational and warm, like a knowledgeable friend
+- Only suggest related works if the user asks for recommendations
 
 ${userCollectionContext}
 
@@ -229,9 +233,9 @@ Example responses for unknown works:
 
 ${conversationHistory ? `Previous conversation:\n${conversationHistory}` : ''}
 
-H: ${message}
+User's current message: ${message}
 
-A:`
+Respond naturally as Bobbin. Do NOT generate fake user messages or continue the conversation beyond your single response.`
     } else {
       // REFLECTION MODE: Deep dive into a specific saved artifact
       const buildArtifactContext = (scrap: {
@@ -280,9 +284,9 @@ When they ask questions like "what is this about?", "tell me more about this", o
 
 ${conversationHistory ? `Previous conversation:\n${conversationHistory}` : ''}
 
-H: ${message}
+User's current message: ${message}
 
-A:`
+Respond naturally as Bobbin. Do NOT generate fake user messages or continue the conversation beyond your single response.`
     }
 
     // Send the prompt to Claude
